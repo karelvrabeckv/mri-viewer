@@ -1,7 +1,7 @@
-from .core import MyTrameApp
+from .core import MRIViewerApp
 
 def main(server=None, **kwargs):
-    app = MyTrameApp(server)
+    app = MRIViewerApp(server)
     app.server.start(**kwargs)
 
 if __name__ == "__main__":
