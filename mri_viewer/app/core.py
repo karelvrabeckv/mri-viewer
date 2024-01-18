@@ -4,7 +4,11 @@ from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import vuetify3, vtk
 
 from .callbacks import set_representation
-from .constants import Representation, DEFAULT_REPRESENTATION
+from .constants import (
+    APPLICATION_NAME,
+    Representation,
+    DEFAULT_REPRESENTATION,
+)
 from .pipelines import VTIPipeline
 
 # ---------------------------------------------------------
@@ -15,8 +19,9 @@ from .pipelines import VTIPipeline
 class MRIViewerApp:
     def __init__(self, server=None):
         self.server = get_server(server, client_type="vue3")
+        self.state.trame__title = APPLICATION_NAME
         self.pipeline = VTIPipeline(DEFAULT_REPRESENTATION)
-        self.ui = self._build_ui()
+        self.ui = self._build_ui()        
 
     @property
     def state(self):
@@ -39,7 +44,7 @@ class MRIViewerApp:
     def _build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self.server) as layout:
             # Toolbar
-            layout.title.set_text("MRI Viewer")
+            layout.title.set_text(APPLICATION_NAME)
             with layout.toolbar:
                 pass
 
