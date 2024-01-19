@@ -3,13 +3,12 @@ from trame.decorators import TrameApp, change, controller, life_cycle
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import vuetify3, vtk
 
-from .callbacks import set_representation
 from .constants import (
     APPLICATION_NAME,
     Representation,
     DEFAULT_REPRESENTATION,
 )
-from .pipelines import VTIPipeline
+from .pipeline import VTIPipeline
 
 # ---------------------------------------------------------
 # Engine class
@@ -37,7 +36,12 @@ class MRIViewerApp:
 
     @change("representation")
     def on_representation_change(self, representation, **kwargs):
-        set_representation(self.pipeline.actor, representation)
+        self.pipeline.set_representation(representation)
+        self.ctrl.view_update()
+
+    @change("data_array")
+    def on_data_array_change(self, data_array, **kwargs):
+        self.pipeline.set_data_array(data_array)
         self.ctrl.view_update()
 
     @life_cycle.server_reload
@@ -50,6 +54,23 @@ class MRIViewerApp:
 
             # Sidebar
             with layout.drawer:
+                # Data arrays
+                vuetify3.VSelect(
+                    v_model=("data_array", self.pipeline.activeArray),
+                    label="Data Array",
+                    items=(
+                        [
+                            {"title": x, "value": x} for x in self.pipeline.dataArrays
+                        ],
+                    ),
+                    variant="outlined",
+                    density="compact",
+                    hide_details=True,
+                    classes="ma-4",
+                )
+                                
+                vuetify3.VDivider()
+                
                 # Representation
                 vuetify3.VSelect(
                     v_model=("representation", DEFAULT_REPRESENTATION),
@@ -67,7 +88,6 @@ class MRIViewerApp:
                     hide_details=True,
                     classes="ma-4",
                 )
-                vuetify3.VDivider()
 
             # Content
             with layout.content:

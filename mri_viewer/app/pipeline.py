@@ -10,8 +10,8 @@ from vtkmodules.vtkRenderingCore import (
     vtkRenderWindowInteractor,
 )
 
-from .callbacks import set_representation
 from .constants import (
+    Representation,
     COLD_TEMPERATURE_COLOR,
     LUKEWARM_TEMPERATURE_COLOR,
     HOT_TEMPERATURE_COLOR
@@ -24,6 +24,18 @@ class VTIPipeline:
     @property
     def reader(self):
         return self._reader
+
+    @property
+    def data(self):
+        return self._data
+    
+    @property
+    def activeArray(self):
+        return self._activeArray
+
+    @property
+    def dataArrays(self):
+        return self._dataArrays
 
     @property
     def mapper(self):
@@ -79,16 +91,20 @@ class VTIPipeline:
         num_of_cell_arrays = cell_data.GetNumberOfArrays()
         
         if num_of_point_arrays:
-            active_array = point_data.GetScalars()
+            self._data = point_data
+            self._activeArray = point_data.GetScalars().GetName()
+            self._dataArrays = [point_data.GetArray(x).GetName() for x in range(num_of_point_arrays)]
         elif num_of_cell_arrays:
-            active_array = cell_data.GetScalars()
+            self._data = cell_data
+            self._activeArray = cell_data.GetScalars().GetName()
+            self._dataArrays = [cell_data.GetArray(x).GetName() for x in range(num_of_cell_arrays)]
         else:
             return
 
         # Create the mapper
         self._mapper = vtkDataSetMapper()
         self._mapper.SetInputConnection(self._reader.GetOutputPort())
-        self._mapper.SetScalarRange(active_array.GetRange())
+        self._mapper.SetScalarRange(self._data.GetArray(self._activeArray).GetRange())
         self._mapper.SetLookupTable(lut)
         
         # Create the actor
@@ -96,7 +112,7 @@ class VTIPipeline:
         self._actor.SetMapper(self._mapper)
 
         # Set the default representation
-        set_representation(self._actor, representation)
+        self.set_representation(representation)
 
         # Create the renderer
         self._renderer = vtkRenderer()
@@ -111,5 +127,28 @@ class VTIPipeline:
         # Create the interactor
         self._renderWindowInteractor = vtkRenderWindowInteractor()
         self._renderWindowInteractor.SetRenderWindow(self._renderWindow)
-        self._renderWindowInteractor.Initialize()
-        self._renderWindowInteractor.Start()
+
+    def set_representation(self, representation):
+        property = self._actor.GetProperty()
+        
+        if representation == Representation.Points:
+            property.SetRepresentationToPoints()
+            property.SetPointSize(2)
+            property.EdgeVisibilityOff()
+        elif representation == Representation.Surface:
+            property.SetRepresentationToSurface()
+            property.SetPointSize(1)
+            property.EdgeVisibilityOff()
+        elif representation == Representation.SurfaceWithEdges:
+            property.SetRepresentationToSurface()
+            property.SetPointSize(1)
+            property.EdgeVisibilityOn()
+        elif representation == Representation.Wireframe:
+            property.SetRepresentationToWireframe()
+            property.SetPointSize(1)
+            property.EdgeVisibilityOff()
+
+    def set_data_array(self, data_array):
+        self._data.SetActiveScalars(data_array)
+        self._activeArray = data_array
+        self._mapper.SetScalarRange(self._data.GetArray(data_array).GetRange())
