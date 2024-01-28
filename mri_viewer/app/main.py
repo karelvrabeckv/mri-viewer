@@ -1,4 +1,4 @@
-from .core import MRIViewerApp
+from .engine import MRIViewerApp
 
 def main(server=None, **kwargs):
     app = MRIViewerApp(server)

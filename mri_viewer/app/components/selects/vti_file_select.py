@@ -5,7 +5,7 @@ def vti_file_select():
         v_model=("current_vti_file", None),
         label="File",
         items=("current_vti_file_items", []),
-        disabled=("selectors_disabled", True),
+        disabled=("ui_disabled", True),
         variant="outlined",
         hide_details=True,
         classes="ma-4",

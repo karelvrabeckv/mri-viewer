@@ -5,7 +5,7 @@ def data_array_select():
         v_model=("current_data_array", None),
         label="Data Array",
         items=("current_data_array_items", []),
-        disabled=("selectors_disabled", True),
+        disabled=("ui_disabled", True),
         variant="outlined",
         hide_details=True,
         classes="ma-4",

@@ -5,6 +5,7 @@ def axes_icon():
         v_model=("axes_visibility", True),
         true_icon="mdi-cube-outline",
         false_icon="mdi-cube-off-outline",
+        disabled=("ui_disabled", True),
         hide_details=True,
         classes="ma-4",
     )

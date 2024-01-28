@@ -1,10 +1,10 @@
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 from functools import reduce
 
-from .constants import DEFAULT_REPRESENTATION
+from ..constants import DEFAULT_REPRESENTATION
 from .vti_file import VTIFile
 
-class VTIFileManager:
+class FileManager:
     def __init__(self):
         self._files = dict()
         self._group_active_array = ""
