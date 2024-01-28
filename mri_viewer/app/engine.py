@@ -170,6 +170,9 @@ class MRIViewerApp:
         
         self.ctrl.update()
 
+    def on_push_camera_icon_click(self, **kwargs):
+        self.ctrl.push_camera()
+
     @life_cycle.server_reload
     def _build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self._server) as layout:
@@ -180,6 +183,8 @@ class MRIViewerApp:
                 vuetify3.VSpacer()
                 vuetify3.VDivider(vertical=True, classes="mx-1")
                 axes_icon()
+                with vuetify3.VBtn(icon=True, click=self.on_push_camera_icon_click):
+                    vuetify3.VIcon("mdi-crop-free")
                 progress_bar()
 
             # Sidebar
