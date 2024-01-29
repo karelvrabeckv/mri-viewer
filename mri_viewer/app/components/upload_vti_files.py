@@ -2,8 +2,8 @@ from trame.widgets import vuetify3
 
 def upload_vti_files():
     vuetify3.VFileInput(
-        v_model=("current_vti_files", None),
         label="Upload VTI Files",
+        v_model=("current_vti_files", None),
         multiple=True,
         accept=".vti",
         __properties=["accept"],

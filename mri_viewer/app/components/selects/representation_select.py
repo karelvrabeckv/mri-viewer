@@ -4,8 +4,8 @@ from ...constants import Representation
 
 def representation_select():
     vuetify3.VSelect(
-        v_model=("current_representation", None),
         label="Representation",
+        v_model=("current_representation", None),
         items=(
             [
                 {"title": "Points", "value": Representation.Points},

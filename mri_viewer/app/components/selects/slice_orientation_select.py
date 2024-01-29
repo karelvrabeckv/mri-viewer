@@ -4,8 +4,8 @@ from ...constants import Planes
 
 def slice_orientation_select():
     vuetify3.VSelect(
-        v_model=("current_slice_orientation", None),
         label="Slice Orientation",
+        v_model=("current_slice_orientation", None),
         items=(
             [
                 {"title": "XY", "value": Planes.XY},

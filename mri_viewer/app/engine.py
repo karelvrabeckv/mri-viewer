@@ -19,7 +19,7 @@ from .constants import (
     Planes,
 ) 
 
-from .file_management.file_manager import FileManager
+from .files.file_manager import FileManager
 from .pipelines.vti_pipeline import VTIPipeline
 
 @TrameApp()
@@ -50,7 +50,7 @@ class MRIViewerApp:
             return
         
         # Load VTI files selected by a user
-        self._file_manager.load_input_files(current_vti_files)
+        self._file_manager.load_new_files(current_vti_files)
         
         # Show disabled components in the UI
         self.state.ui_disabled = False
@@ -58,61 +58,50 @@ class MRIViewerApp:
         # Clear selected VTI files from input
         self.state.current_vti_files = None
         
-        # Set the first VTI file as picked and rendered
         self.state.current_vti_file = self._file_manager.get_first_file_name()
-        
-        # Load all VTI files to a select
         self.state.current_vti_file_items = self._file_manager.get_all_file_names()
         
     @change("current_vti_file")
-    def on_current_vti_file_change(self, current_vti_file, **kwargs):
+    def on_current_vti_file_change(self, current_vti_file: str, **kwargs):
         if current_vti_file is None:
             return
         
         # Render the particular VTI file
-        file = self._file_manager.get_file(current_vti_file)
-        data_array = self._file_manager.group_active_array
-        self._pipeline.set_file(file, data_array)
+        file, group = self._file_manager.get_file(current_vti_file)
+        self._pipeline.set_file(file, group.active_array)
         
-        # Update the camera
+        self.state.current_data_array = group.active_array
+        self.state.current_data_array_items = group.data_arrays
+        self.state.current_representation = group.active_representation
+        
         self.ctrl.push_camera()
-        
-        if data_array not in file.data_arrays:
-            # The VTI file has different data arrays
-            self.state.current_data_array = file.active_array
-            self.state.current_data_array_items = file.data_arrays
-        else:
-            # The VTI file has the same arrays as its group
-            self.state.current_data_array = self._file_manager.group_active_array
-            self.state.current_data_array_items = self._file_manager.group_data_arrays
-        
         self.ctrl.update()
 
     @change("current_data_array")
-    def on_current_data_array_change(self, current_data_array, **kwargs):
+    def on_current_data_array_change(self, current_data_array: str, **kwargs):
         if current_data_array is None:
             return
         
         # Render the particular data array of the VTI file
-        file = self._file_manager.get_file(self.state.current_vti_file)
+        file, group = self._file_manager.get_file(self.state.current_vti_file)
         self._pipeline.set_data_array(file, current_data_array)
         
         # Set the data array as the default of the group
-        self._file_manager.group_active_array = current_data_array
-        self.state.current_representation = self._file_manager.group_active_representation
+        group.active_array = current_data_array
         
         self.ctrl.update()
 
     @change("current_representation")
-    def on_current_representation_change(self, current_representation, **kwargs):
+    def on_current_representation_change(self, current_representation: int, **kwargs):
         if current_representation is None:
             return
         
         # Render the particular representation of the VTI file
+        _, group = self._file_manager.get_file(self.state.current_vti_file)
         self._pipeline.set_representation(current_representation)
         
         # Set the representation as the default of the group
-        self._file_manager.group_active_representation = current_representation
+        group.active_representation = current_representation
         
         if current_representation == Representation.Slice:
             self.state.current_slice_orientation = DEFAULT_PLANE

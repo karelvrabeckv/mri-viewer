@@ -1,4 +1,4 @@
-class VTIFile:
+class File:
     @property
     def name(self):
         return self._name
@@ -24,12 +24,12 @@ class VTIFile:
         self._data = data
 
     @property
-    def active_array(self):
-        return self._active_array
+    def default_array(self):
+        return self._default_array 
 
-    @active_array.setter 
-    def active_array(self, active_array): 
-        self._active_array = active_array
+    @default_array.setter 
+    def default_array(self, default_array): 
+        self._default_array = default_array
 
     @property
     def data_arrays(self):

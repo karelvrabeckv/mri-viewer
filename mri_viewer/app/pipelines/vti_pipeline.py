@@ -9,7 +9,7 @@ from vtkmodules.vtkRenderingCore import (
 )
 
 from .pipeline_builder import PipelineBuilder
-from ..file_management.file import VTIFile
+from ..files.file import File
 from ..constants import (
     AXES_COLOR,
     DEFAULT_PLANE_NORMAL,
@@ -67,19 +67,19 @@ class VTIPipeline(PipelineBuilder):
         self._renderer.AddActor(self._initial_actor)
         self._renderer.ResetCamera()
 
-    def run_vti_pipeline(self, file: VTIFile, data_array_name: str):
-        self.build_data_set_mapper(file, data_array_name)
+    def run_vti_pipeline(self, file: File, group_active_array: str):
+        self.build_data_set_mapper(file, group_active_array)
         self.build_actor()
         self.build_cube_axes_actor()
         
         self.build_slicing_plane()
         self.build_slicer(file)
-        self.build_sliced_data_set_mapper(file)
+        self.build_sliced_data_set_mapper(file, group_active_array)
         self.build_sliced_actor()
 
-    def build_data_set_mapper(self, file: VTIFile, data_array_name: str):
+    def build_data_set_mapper(self, file: File, group_active_array: str):
         self._data_set_mapper.SetInputConnection(file.reader.GetOutputPort())
-        self._data_set_mapper.SetScalarRange(file.data.GetArray(data_array_name).GetRange())
+        self._data_set_mapper.SetScalarRange(file.data.GetArray(group_active_array).GetRange())
         self._data_set_mapper.SetLookupTable(self._lookup_table)
 
     def build_actor(self):
@@ -112,9 +112,9 @@ class VTIPipeline(PipelineBuilder):
         self._slicer.SetClipFunction(self._slicing_plane)
         self._slicer.GenerateClippedOutputOn()
         
-    def build_sliced_data_set_mapper(self, file: VTIFile):
+    def build_sliced_data_set_mapper(self, file: File, group_active_array: str):
         self._sliced_data_set_mapper.SetInputConnection(self._slicer.GetOutputPort())
-        self._sliced_data_set_mapper.SetScalarRange(file.data.GetArray(file.active_array).GetRange())
+        self._sliced_data_set_mapper.SetScalarRange(file.data.GetArray(group_active_array).GetRange())
         self._sliced_data_set_mapper.SetLookupTable(self._lookup_table)     
 
     def build_sliced_actor(self):
@@ -124,36 +124,29 @@ class VTIPipeline(PipelineBuilder):
         self._renderer.AddActor(self._sliced_actor)
         self._renderer.ResetCamera()
         
-    def set_file(self, file: VTIFile, group_data_array_name: str):
-        data_array_name = group_data_array_name
-        if data_array_name not in file.data_arrays:
-            data_array_name = file.active_array
+    def set_file(self, file: File, group_active_array: str):
+        file.data.SetActiveScalars(group_active_array)
+        self.run_vti_pipeline(file, group_active_array)
         
-        file.data.SetActiveScalars(data_array_name)
-        file.active_array = data_array_name
+    def set_data_array(self, file: File, new_active_array: str):
+        file.data.SetActiveScalars(new_active_array)
         
-        self.run_vti_pipeline(file, data_array_name)
-        
-    def set_data_array(self, file: VTIFile, data_array_name: str):
-        file.data.SetActiveScalars(data_array_name)
-        file.active_array = data_array_name
-        
-        self._data_set_mapper.SetScalarRange(file.data.GetArray(data_array_name).GetRange())
-        self._sliced_data_set_mapper.SetScalarRange(file.data.GetArray(data_array_name).GetRange())
+        self._data_set_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
+        self._sliced_data_set_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
 
-    def set_representation(self, representation):
+    def set_representation(self, new_active_representation):
         actor_property = self._actor.GetProperty()
         
         self._actor.VisibilityOn()
         self._sliced_actor.VisibilityOff()
 
-        if representation == Representation.Points:
+        if new_active_representation == Representation.Points:
             self.set_representation_to_points(actor_property)
-        elif representation == Representation.Surface:
+        elif new_active_representation == Representation.Surface:
             self.set_representation_to_surface(actor_property)
-        elif representation == Representation.SurfaceWithEdges:
+        elif new_active_representation == Representation.SurfaceWithEdges:
             self.set_representation_to_surface_with_edges(actor_property)
-        elif representation == Representation.Wireframe:
+        elif new_active_representation == Representation.Wireframe:
             self.set_representation_to_wireframe(actor_property)
 
     def set_representation_to_points(self, actor_property):
