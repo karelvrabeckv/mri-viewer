@@ -52,12 +52,7 @@ class MRIViewerApp:
         # Load VTI files selected by a user
         self._file_manager.load_new_files(current_vti_files)
         
-        # Show disabled components in the UI
-        self.state.ui_disabled = False
-        
-        # Clear selected VTI files from input
         self.state.current_vti_files = None
-        
         self.state.current_vti_file = self._file_manager.get_first_file_name()
         self.state.current_vti_file_items = self._file_manager.get_all_file_names()
         
@@ -74,7 +69,10 @@ class MRIViewerApp:
         self.state.current_data_array_items = group.data_arrays
         self.state.current_representation = group.active_representation
         
-        self.ctrl.push_camera()
+        if self.state.ui_disabled == True:
+            self.ctrl.push_camera()
+        self.state.ui_disabled = False
+        
         self.ctrl.update()
 
     @change("current_data_array")
