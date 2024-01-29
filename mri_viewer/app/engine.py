@@ -183,7 +183,7 @@ class MRIViewerApp:
                 vuetify3.VSpacer()
                 vuetify3.VDivider(vertical=True, classes="mx-1")
                 axes_icon()
-                with vuetify3.VBtn(icon=True, click=self.on_push_camera_icon_click):
+                with vuetify3.VBtn(icon=True, disabled=("ui_disabled", True), click=self.on_push_camera_icon_click):
                     vuetify3.VIcon("mdi-crop-free")
                 progress_bar()
 

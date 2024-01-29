@@ -1,26 +1,43 @@
 from vtkmodules.vtkFiltersSources import vtkConeSource
+from vtkmodules.vtkCommonDataModel import vtkPlane
+from vtkmodules.vtkFiltersGeneral import vtkClipDataSet
+from vtkmodules.vtkRenderingAnnotation import vtkCubeAxesActor
+from vtkmodules.vtkRenderingCore import (
+    vtkPolyDataMapper,
+    vtkDataSetMapper,
+    vtkActor,
+)
 
 from .pipeline_builder import PipelineBuilder
-from ..file_management.vti_file import VTIFile
-from ..constants import DEFAULT_PLANE_NORMAL, Planes, Representation
+from ..file_management.file import VTIFile
+from ..constants import (
+    AXES_COLOR,
+    DEFAULT_PLANE_NORMAL,
+    Planes,
+    Representation,
+)
 
 class VTIPipeline(PipelineBuilder):
     def __init__(self):
-        self._renderer = self.build_renderer()
-        self._render_window = self.build_render_window(self._renderer)
-        self._render_window_interactor = self.build_render_window_interactor(self._render_window)
-        self._color_transfer_function = self.build_color_transfer_function()
-        self._lookup_table = self.build_lookup_table(self._color_transfer_function)
+        self._renderer = self.create_renderer()
+        self._render_window = self.create_render_window(self._renderer)
+        self._render_window_interactor = self.create_render_window_interactor(self._render_window)
+        self._color_transfer_function = self.create_color_transfer_function()
+        self._lookup_table = self.create_lookup_table(self._color_transfer_function)
         
-        self._data_set_mapper = None
-        self._actor = None
-        self._cube_axes_actor = None
+        self._initial_cone = vtkConeSource()
+        self._initial_mapper = vtkPolyDataMapper()
+        self._initial_actor = vtkActor()
         
-        self._plane = None
-        self._slicer = None
+        self._data_set_mapper = vtkDataSetMapper()
+        self._actor = vtkActor()
+        self._cube_axes_actor = vtkCubeAxesActor()
         
-        self._sliced_data_set_mapper = None
-        self._sliced_actor = None
+        self._slicing_plane = vtkPlane()
+        self._slicer = vtkClipDataSet()
+        
+        self._sliced_data_set_mapper = vtkDataSetMapper()
+        self._sliced_actor = vtkActor()
         
         self.create_blank_scene()
         
@@ -37,20 +54,75 @@ class VTIPipeline(PipelineBuilder):
         return self._sliced_actor
         
     def create_blank_scene(self):
-        mapper = self.build_poly_data_mapper(vtkConeSource())
-        actor = self.build_actor(mapper, self._renderer)
-        actor.VisibilityOff()
-    
-    def run_vti_pipeline(self, file: VTIFile, data_array_name: str):
-        self._data_set_mapper = self.build_data_set_mapper(file.reader, file.data, data_array_name, self._lookup_table)
-        self._actor = self.build_actor(self._data_set_mapper, self._renderer)
-        self._cube_axes_actor = self.build_cube_axes_actor(self._actor, self._renderer)
+        self.build_initial_mapper()
+        self.build_initial_actor()
         
-        self._slicing_plane = self.build_slicing_plane(DEFAULT_PLANE_NORMAL, (0, 0, 0))
-        self._slicer = self.build_slicer(file.reader, self._slicing_plane)
-        self._sliced_data_set_mapper = self.build_data_set_mapper(self._slicer, file.data, file.active_array, self._lookup_table)
-        self._sliced_actor = self.build_actor(self._sliced_data_set_mapper, self._renderer)
+    def build_initial_mapper(self):
+        self._initial_mapper.SetInputConnection(self._initial_cone.GetOutputPort())
+
+    def build_initial_actor(self):
+        self._initial_actor.SetMapper(self._initial_mapper)
+        self._initial_actor.VisibilityOff()
+        
+        self._renderer.AddActor(self._initial_actor)
+        self._renderer.ResetCamera()
+
+    def run_vti_pipeline(self, file: VTIFile, data_array_name: str):
+        self.build_data_set_mapper(file, data_array_name)
+        self.build_actor()
+        self.build_cube_axes_actor()
+        
+        self.build_slicing_plane()
+        self.build_slicer(file)
+        self.build_sliced_data_set_mapper(file)
+        self.build_sliced_actor()
+
+    def build_data_set_mapper(self, file: VTIFile, data_array_name: str):
+        self._data_set_mapper.SetInputConnection(file.reader.GetOutputPort())
+        self._data_set_mapper.SetScalarRange(file.data.GetArray(data_array_name).GetRange())
+        self._data_set_mapper.SetLookupTable(self._lookup_table)
+
+    def build_actor(self):
+        self._actor.SetMapper(self._data_set_mapper)
+
+        self._renderer.AddActor(self._actor)
+        self._renderer.ResetCamera()
+
+    def build_cube_axes_actor(self):
+        self._cube_axes_actor.SetXTitle("X-Axis")
+        self._cube_axes_actor.SetYTitle("Y-Axis")
+        self._cube_axes_actor.SetZTitle("Z-Axis")
+        
+        self._cube_axes_actor.GetXAxesLinesProperty().SetColor(*AXES_COLOR)
+        self._cube_axes_actor.GetYAxesLinesProperty().SetColor(*AXES_COLOR)
+        self._cube_axes_actor.GetZAxesLinesProperty().SetColor(*AXES_COLOR)
+        
+        self._cube_axes_actor.SetBounds(self._actor.GetBounds())
+        self._cube_axes_actor.SetCamera(self._renderer.GetActiveCamera())
+        
+        self._renderer.AddActor(self._cube_axes_actor)
+        self._renderer.ResetCamera()
+        
+    def build_slicing_plane(self):
+        self._slicing_plane.SetNormal(*DEFAULT_PLANE_NORMAL)
+        self._slicing_plane.SetOrigin(0, 0, 0)
+
+    def build_slicer(self, file):
+        self._slicer.SetInputConnection(file.reader.GetOutputPort())
+        self._slicer.SetClipFunction(self._slicing_plane)
+        self._slicer.GenerateClippedOutputOn()
+        
+    def build_sliced_data_set_mapper(self, file: VTIFile):
+        self._sliced_data_set_mapper.SetInputConnection(self._slicer.GetOutputPort())
+        self._sliced_data_set_mapper.SetScalarRange(file.data.GetArray(file.active_array).GetRange())
+        self._sliced_data_set_mapper.SetLookupTable(self._lookup_table)     
+
+    def build_sliced_actor(self):
+        self._sliced_actor.SetMapper(self._sliced_data_set_mapper)
         self._sliced_actor.GetProperty().LightingOff()
+
+        self._renderer.AddActor(self._sliced_actor)
+        self._renderer.ResetCamera()
         
     def set_file(self, file: VTIFile, group_data_array_name: str):
         data_array_name = group_data_array_name
