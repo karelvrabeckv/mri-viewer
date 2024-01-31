@@ -1,12 +1,15 @@
-from trame.app import get_server
+from trame.app import get_server, asynchronous
 from trame.decorators import TrameApp, change, life_cycle
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import vuetify3, vtk
 
-from .components.axes_icon import axes_icon
+from asyncio import sleep
+
 from .components.progress_bar import progress_bar
 from .components.upload_vti_files import upload_vti_files
 from .components.slice_position_slider import slice_position_slider
+from .components.icons.animation_icons import animation_icons
+from .components.icons.toolbar_icons import toolbar_icons
 from .components.selects.vti_file_select import vti_file_select
 from .components.selects.data_array_select import data_array_select
 from .components.selects.representation_select import representation_select
@@ -31,6 +34,9 @@ class MRIViewerApp:
         self._ui = self._build_ui()
         
         self.state.trame__title = APPLICATION_NAME
+        self.state.is_playing = False
+        self.state.player_loop = False
+        self.state.axes = True
 
     @property
     def server(self):
@@ -62,7 +68,7 @@ class MRIViewerApp:
             return
         
         # Render the particular VTI file
-        file, group = self._file_manager.get_file(current_vti_file)
+        file, _, group, _ = self._file_manager.get_file(current_vti_file)
         self._pipeline.set_file(file, group.active_array)
         
         self.state.current_data_array = group.active_array
@@ -81,7 +87,7 @@ class MRIViewerApp:
             return
         
         # Render the particular data array of the VTI file
-        file, group = self._file_manager.get_file(self.state.current_vti_file)
+        file, _, group, _ = self._file_manager.get_file(self.state.current_vti_file)
         self._pipeline.set_data_array(file, current_data_array)
         
         # Set the data array as the default of the group
@@ -95,7 +101,7 @@ class MRIViewerApp:
             return
         
         # Render the particular representation of the VTI file
-        _, group = self._file_manager.get_file(self.state.current_vti_file)
+        _, _, group, _ = self._file_manager.get_file(self.state.current_vti_file)
         self._pipeline.set_representation(current_representation)
         
         # Set the representation as the default of the group
@@ -150,14 +156,55 @@ class MRIViewerApp:
         
         self.ctrl.update()        
 
-    @change("axes_visibility")
-    def on_axes_visibility_change(self, axes_visibility, **kwargs):
-        # Set the visibility of the coordinate axes
-        self._pipeline.set_axes_visibility(axes_visibility)
+    @change("is_playing")
+    @asynchronous.task
+    async def on_is_playing_change(self, is_playing, **kwargs):
+        if not self.state.player_loop:
+            while is_playing:
+                self.state.player_loop = True
+                if not self.state.is_playing:
+                    self.state.player_loop = False
+                    break
+                
+                self.on_next_file()
+                
+                file, _, group, _ = self._file_manager.get_file(self.state.current_vti_file)
+                self._pipeline.set_file(file, group.active_array)
+                
+                self.ctrl.update()
+                
+                await sleep(1)
+
+    def on_previous_file(self, **kwargs):
+        _, file_index, group, _ = self._file_manager.get_file(self.state.current_vti_file)
+        
+        previous_file_index = file_index - 1
+        if previous_file_index < 0:
+            previous_file_index = group.get_num_of_files() - 1
+        
+        group_file_names = group.get_all_file_names() 
+        self.state.current_vti_file = group_file_names[previous_file_index]
+
+    def on_toggle_player(self, **kwargs):
+        self.state.is_playing = not self.state.is_playing
+
+    def on_next_file(self, **kwargs):
+        _, file_index, group, _ = self._file_manager.get_file(self.state.current_vti_file)
+        
+        next_file_index = file_index + 1
+        if next_file_index >= group.get_num_of_files():
+            next_file_index = 0
+        
+        group_file_names = group.get_all_file_names() 
+        self.state.current_vti_file = group_file_names[next_file_index]
+        
+    def on_axes_visibility(self, **kwargs):
+        self.state.axes = not self.state.axes
+        self._pipeline.set_axes_visibility(self.state.axes)
         
         self.ctrl.update()
 
-    def on_push_camera_icon_click(self, **kwargs):
+    def on_push_camera(self, **kwargs):
         self.ctrl.push_camera()
 
     @life_cycle.server_reload
@@ -167,11 +214,10 @@ class MRIViewerApp:
             
             # Toolbar
             with layout.toolbar:
-                vuetify3.VSpacer()
-                vuetify3.VDivider(vertical=True, classes="mx-1")
-                axes_icon()
-                with vuetify3.VBtn(icon=True, disabled=("ui_disabled", True), click=self.on_push_camera_icon_click):
-                    vuetify3.VIcon("mdi-crop-free")
+                vuetify3.VDivider(vertical=True, classes="mx-2")
+                animation_icons(self)
+                vuetify3.VDivider(vertical=True, classes="mx-2")
+                toolbar_icons(self)
                 progress_bar()
 
             # Sidebar
@@ -179,9 +225,7 @@ class MRIViewerApp:
                 upload_vti_files()
                 vuetify3.VDivider()
                 vti_file_select()
-                vuetify3.VDivider()
                 data_array_select()
-                vuetify3.VDivider()
                 representation_select()
                 vuetify3.VDivider()
                 slice_orientation_select()

@@ -89,14 +89,15 @@ class FileManager:
         if self.any_group():
             file_names = []
             for group in self._groups:
-                file_names += list(group.files.keys())
-            return file_names        
+                file_names += group.get_all_file_names()
+            return file_names
         return []
 
-    def get_file(self, file_name):
+    def get_file(self, file_name) -> tuple[File, int, FileGroup, int]:
         if self.any_group():
             group_index = self._file_to_group_mapping[file_name]
-            file = self._groups[group_index].files[file_name]
             group = self._groups[group_index]
-            return file, group
+            file_index = group.get_all_file_names().index(file_name)
+            file = group.files[file_name]
+            return file, file_index, group, group_index
         return None

@@ -72,10 +72,10 @@ class VTIPipeline(PipelineBuilder):
         self.build_actor()
         self.build_cube_axes_actor()
         
-        self.build_slicing_plane()
-        self.build_slicer(file)
-        self.build_sliced_data_set_mapper(file, group_active_array)
-        self.build_sliced_actor()
+        # self.build_slicing_plane()
+        # self.build_slicer(file)
+        # self.build_sliced_data_set_mapper(file, group_active_array)
+        # self.build_sliced_actor()
 
     def build_data_set_mapper(self, file: File, group_active_array: str):
         self._data_set_mapper.SetInputConnection(file.reader.GetOutputPort())

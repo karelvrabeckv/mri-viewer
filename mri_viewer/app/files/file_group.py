@@ -37,5 +37,11 @@ class FileGroup:
     def active_representation(self, active_representation): 
         self._active_representation = active_representation
 
+    def get_num_of_files(self):
+        return len(self._files)
+    
+    def get_all_file_names(self):
+        return list(self._files.keys())
+
     def add_file(self, file: File):
         self._files[file.name] = file
