@@ -1,7 +1,7 @@
 from trame.app import get_server, asynchronous
 from trame.decorators import TrameApp, change, life_cycle
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout
-from trame.widgets import vuetify3, vtk
+from trame.widgets import vuetify3, vtk, trame
 
 from asyncio import sleep
 
@@ -9,6 +9,7 @@ from .components.progress_bar import progress_bar
 from .components.upload_vti_files import upload_vti_files
 from .components.slice_position_slider import slice_position_slider
 from .components.icons.animation_icons import animation_icons
+from .components.icons.picker_modes_icons import picker_modes_icons
 from .components.icons.toolbar_icons import toolbar_icons
 from .components.selects.vti_file_select import vti_file_select
 from .components.selects.data_array_select import data_array_select
@@ -20,10 +21,19 @@ from .constants import (
     DEFAULT_PLANE,
     Representation,
     Planes,
-) 
+    PickerModes,
+)
+from .styles import (
+    TOOLTIP_STYLE,
+    HIDDEN_STYLE,
+)
 
 from .files.file_manager import FileManager
 from .pipelines.vti_pipeline import VTIPipeline
+
+from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch  # noqa
+
+import vtkmodules.vtkRenderingOpenGL2  # noqa
 
 @TrameApp()
 class MRIViewerApp:
@@ -34,9 +44,15 @@ class MRIViewerApp:
         self._ui = self._build_ui()
         
         self.state.trame__title = APPLICATION_NAME
+        
         self.state.is_playing = False
         self.state.player_loop = False
+        
         self.state.axes = True
+
+        self.state.tooltip_title = None
+        self.state.tooltip_message = None
+        self.state.tooltip_style = None
 
     @property
     def server(self):
@@ -75,10 +91,10 @@ class MRIViewerApp:
         self.state.current_data_array_items = group.data_arrays
         self.state.current_representation = group.active_representation
         
-        if self.state.ui_disabled == True:
-            self.ctrl.push_camera()
         self.state.ui_disabled = False
+        self.state.tooltip_style = HIDDEN_STYLE
         
+        self.ctrl.push_camera()
         self.ctrl.update()
 
     @change("current_data_array")
@@ -154,7 +170,27 @@ class MRIViewerApp:
         current_slice_orientation = self.state.current_slice_orientation
         self._pipeline.set_slice_position(current_slice_orientation, current_slice_position)
         
-        self.ctrl.update()        
+        self.ctrl.update()
+
+    @change("content_size")
+    def on_content_size_change(self, content_size, **kwargs):
+        if content_size is None:
+            return
+        
+        size = content_size.get("size")
+        pixel_ratio = content_size.get("pixelRatio")
+        
+        width = int(size["width"] * pixel_ratio)
+        height = int(size["height"] * pixel_ratio)
+
+        self._pipeline.render_window.SetSize(width, height)
+        self._pipeline.render_window.Render()
+
+    @change("picker_mode")
+    def on_picker_mode_change(self, picker_mode, **kwargs):
+        self.state.tooltip_title = ""
+        self.state.tooltip_message = ""
+        self.state.tooltip_style = HIDDEN_STYLE
 
     @change("is_playing")
     @asynchronous.task
@@ -206,16 +242,55 @@ class MRIViewerApp:
 
     def on_push_camera(self, **kwargs):
         self.ctrl.push_camera()
+        self.ctrl.update()
+
+    def on_picker(self, event, **kwargs):
+        if self.state.picker_mode == PickerModes.Off:
+            return
+
+        file, _, _, _ = self._file_manager.get_file(self.state.current_vti_file)
+        image_data = file.reader.GetOutput()
+
+        position = event["position"]
+        x, y = position["x"], position["y"]
+        
+        if self.state.picker_mode == PickerModes.Points:
+            self.state.tooltip_title = "Point Information"
+            message = self._pipeline.get_point_information(image_data, x, y)
+        elif self.state.picker_mode == PickerModes.Cells:
+            self.state.tooltip_title = "Cell Information"
+            message = self._pipeline.get_cell_information(image_data, x, y)
+        
+        self.state.tooltip_message = message
+        self.state.tooltip_style = TOOLTIP_STYLE if message else HIDDEN_STYLE
+  
+    def on_interaction(self, client_camera, **kwargs):
+        server_camera = self._pipeline.renderer.GetActiveCamera()
+        
+        server_camera.SetPosition(client_camera.get("position"))
+        server_camera.SetFocalPoint(client_camera.get("focalPoint"))
+        server_camera.SetViewUp(client_camera.get("viewUp"))
+        server_camera.SetViewAngle(client_camera.get("viewAngle"))
+        
+        self._pipeline.renderer.ResetCameraClippingRange()
+        self._pipeline.render_window.Render()
 
     @life_cycle.server_reload
     def _build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self._server) as layout:
+            # Icon
+            with layout.icon:
+                vuetify3.VIcon("mdi-hospital-box-outline")
+
+            # Title
             layout.title.set_text(APPLICATION_NAME)
             
             # Toolbar
             with layout.toolbar:
                 vuetify3.VDivider(vertical=True, classes="mx-2")
                 animation_icons(self)
+                vuetify3.VDivider(vertical=True, classes="mx-2")
+                picker_modes_icons()
                 vuetify3.VDivider(vertical=True, classes="mx-2")
                 toolbar_icons(self)
                 progress_bar()
@@ -233,10 +308,21 @@ class MRIViewerApp:
 
             # Content
             with layout.content:
-                with vuetify3.VContainer(fluid=True, classes="pa-0 fill-height"):
-                    view = vtk.VtkLocalView(self._pipeline.render_window)
-                    self.ctrl.update = view.update
-                    self.ctrl.push_camera = view.push_camera
+                with trame.SizeObserver("content_size"):
+                    # Local view
+                    with vuetify3.VContainer(fluid=True, classes="pa-0 fill-height"):
+                        view = vtk.VtkLocalView(
+                            self._pipeline.render_window,
+                            interactor_events=("events", ["LeftButtonPress", "EndAnimation"]),
+                            LeftButtonPress=(self.on_picker, "[utils.vtk.event($event)]"),
+                            EndAnimation=(self.on_interaction, "[$event.pokedRenderer.getActiveCamera().get()]")
+                        )
+                        self.ctrl.update = view.update
+                        self.ctrl.push_camera = view.push_camera
+
+                    # Tooltip
+                    with vuetify3.VCard(title=("tooltip_title",), style=("tooltip_style", HIDDEN_STYLE)):
+                        vuetify3.VCardText("<pre>{{ tooltip_message }}</pre>")
 
             # Footer
             layout.footer.hide()

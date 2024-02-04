@@ -26,3 +26,10 @@ class Planes:
 
 DEFAULT_PLANE = Planes.XY
 DEFAULT_PLANE_NORMAL = Planes.XYNormal
+
+class PickerModes:
+    Off = "Off"
+    Points = "Points"
+    Cells = "Cells"
+
+DEFAULT_PICKER_MODE = PickerModes.Off

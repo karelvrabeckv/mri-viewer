@@ -1,9 +1,9 @@
-from vtkmodules.vtkFiltersSources import vtkConeSource
 from vtkmodules.vtkCommonDataModel import vtkPlane
 from vtkmodules.vtkFiltersGeneral import vtkClipDataSet
 from vtkmodules.vtkRenderingAnnotation import vtkCubeAxesActor
+from vtkmodules.vtkCommonDataModel import vtkImageData
 from vtkmodules.vtkRenderingCore import (
-    vtkPolyDataMapper,
+    vtkCellPicker,
     vtkDataSetMapper,
     vtkActor,
 )
@@ -25,10 +25,6 @@ class VTIPipeline(PipelineBuilder):
         self._color_transfer_function = self.create_color_transfer_function()
         self._lookup_table = self.create_lookup_table(self._color_transfer_function)
         
-        self._initial_cone = vtkConeSource()
-        self._initial_mapper = vtkPolyDataMapper()
-        self._initial_actor = vtkActor()
-        
         self._data_set_mapper = vtkDataSetMapper()
         self._actor = vtkActor()
         self._cube_axes_actor = vtkCubeAxesActor()
@@ -39,11 +35,17 @@ class VTIPipeline(PipelineBuilder):
         self._sliced_data_set_mapper = vtkDataSetMapper()
         self._sliced_actor = vtkActor()
         
-        self.create_blank_scene()
+        self._picker = vtkCellPicker()
         
+        self._render_window.Render()
+
     @property
     def render_window(self):
-        return self._render_window        
+        return self._render_window
+        
+    @property
+    def renderer(self):
+        return self._renderer
         
     @property
     def actor(self):
@@ -52,20 +54,6 @@ class VTIPipeline(PipelineBuilder):
     @property
     def sliced_actor(self):
         return self._sliced_actor
-        
-    def create_blank_scene(self):
-        self.build_initial_mapper()
-        self.build_initial_actor()
-        
-    def build_initial_mapper(self):
-        self._initial_mapper.SetInputConnection(self._initial_cone.GetOutputPort())
-
-    def build_initial_actor(self):
-        self._initial_actor.SetMapper(self._initial_mapper)
-        self._initial_actor.VisibilityOff()
-        
-        self._renderer.AddActor(self._initial_actor)
-        self._renderer.ResetCamera()
 
     def run_vti_pipeline(self, file: File, group_active_array: str):
         self.build_data_set_mapper(file, group_active_array)
@@ -76,6 +64,8 @@ class VTIPipeline(PipelineBuilder):
         # self.build_slicer(file)
         # self.build_sliced_data_set_mapper(file, group_active_array)
         # self.build_sliced_actor()
+        
+        self._render_window.Render()
 
     def build_data_set_mapper(self, file: File, group_active_array: str):
         self._data_set_mapper.SetInputConnection(file.reader.GetOutputPort())
@@ -84,7 +74,7 @@ class VTIPipeline(PipelineBuilder):
 
     def build_actor(self):
         self._actor.SetMapper(self._data_set_mapper)
-
+                
         self._renderer.AddActor(self._actor)
         self._renderer.ResetCamera()
 
@@ -123,7 +113,36 @@ class VTIPipeline(PipelineBuilder):
 
         self._renderer.AddActor(self._sliced_actor)
         self._renderer.ResetCamera()
+    
+    def get_point_information(self, data: vtkImageData, x: float, y: float):
+        self._picker.Pick(x, y, 0.0, self._renderer)
+
+        message = ""
+        point_id = self._picker.GetPointId()
         
+        if point_id != -1:
+            point = data.GetPoint(point_id)
+            message = f"Id: {point_id}\nCoords: {point}\n"
+        
+        return message
+    
+    def get_cell_information(self, data: vtkImageData, x: float, y: float):
+        self._picker.Pick(x, y, 0.0, self._renderer)
+        
+        message = ""
+        cell_id = self._picker.GetCellId()
+        
+        if cell_id != -1:
+            cell_data = data.GetCellData()
+            num_of_data_arrays = cell_data.GetNumberOfArrays()
+            
+            message = f"Id: {cell_id}\n"
+            for i in range(num_of_data_arrays):
+                data_array = cell_data.GetArray(i)
+                message += f"{data_array.GetName()}: {data_array.GetValue(cell_id)}\n"
+        
+        return message
+    
     def set_file(self, file: File, group_active_array: str):
         file.data.SetActiveScalars(group_active_array)
         self.run_vti_pipeline(file, group_active_array)
