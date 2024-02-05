@@ -2,7 +2,7 @@ from trame.widgets import vuetify3
 
 def upload_vti_files():
     vuetify3.VFileInput(
-        label="Upload VTI Files",
+        label=("language.upload_vti_files_title",),
         v_model=("current_vti_files", None),
         multiple=True,
         accept=".vti",

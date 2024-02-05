@@ -11,6 +11,7 @@ from .components.slice_position_slider import slice_position_slider
 from .components.icons.animation_icons import animation_icons
 from .components.icons.picker_modes_icons import picker_modes_icons
 from .components.icons.toolbar_icons import toolbar_icons
+from .components.language_buttons import language_buttons
 from .components.selects.vti_file_select import vti_file_select
 from .components.selects.data_array_select import data_array_select
 from .components.selects.representation_select import representation_select
@@ -29,6 +30,7 @@ from .styles import (
 )
 
 from .files.file_manager import FileManager
+from .localization.language_manager import LanguageManager
 from .pipelines.vti_pipeline import VTIPipeline
 
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch  # noqa
@@ -40,10 +42,12 @@ class MRIViewerApp:
     def __init__(self, server=None):
         self._server = get_server(server, client_type="vue3")
         self._file_manager = FileManager()
+        self._language_manager = LanguageManager()
         self._pipeline = VTIPipeline()
         self._ui = self._build_ui()
         
         self.state.trame__title = APPLICATION_NAME
+        self.state.language = self._language_manager.get_language()
         
         self.state.is_playing = False
         self.state.player_loop = False
@@ -172,6 +176,23 @@ class MRIViewerApp:
         
         self.ctrl.update()
 
+    @change("current_language")
+    def on_current_language_change(self, current_language, **kwargs):
+        self._language_manager.language = current_language
+        self.state.language = self._language_manager.get_language()
+        
+        self._pipeline.cube_axes_actor.SetXTitle(self.state.language["x_axis_title"])
+        self._pipeline.cube_axes_actor.SetYTitle(self.state.language["y_axis_title"])
+        self._pipeline.cube_axes_actor.SetZTitle(self.state.language["z_axis_title"])
+
+        if self.state.picker_mode == PickerModes.Points:
+            self.state.tooltip_title = self.state.language["point_information_title"]
+        elif self.state.picker_mode == PickerModes.Cells:
+            self.state.tooltip_title = self.state.language["cell_information_title"]
+
+        self._pipeline.render_window.Render()
+        self.ctrl.update()
+
     @change("content_size")
     def on_content_size_change(self, content_size, **kwargs):
         if content_size is None:
@@ -255,10 +276,10 @@ class MRIViewerApp:
         x, y = position["x"], position["y"]
         
         if self.state.picker_mode == PickerModes.Points:
-            self.state.tooltip_title = "Point Information"
+            self.state.tooltip_title = self.state.language["point_information_title"]
             message = self._pipeline.get_point_information(image_data, x, y)
         elif self.state.picker_mode == PickerModes.Cells:
-            self.state.tooltip_title = "Cell Information"
+            self.state.tooltip_title = self.state.language["cell_information_title"]
             message = self._pipeline.get_cell_information(image_data, x, y)
         
         self.state.tooltip_message = message
@@ -287,12 +308,19 @@ class MRIViewerApp:
             
             # Toolbar
             with layout.toolbar:
+                vuetify3.VSpacer()
                 vuetify3.VDivider(vertical=True, classes="mx-2")
                 animation_icons(self)
+                vuetify3.VDivider(vertical=True, classes="mx-2")
+                vuetify3.VSpacer()
+                
                 vuetify3.VDivider(vertical=True, classes="mx-2")
                 picker_modes_icons()
                 vuetify3.VDivider(vertical=True, classes="mx-2")
                 toolbar_icons(self)
+                vuetify3.VDivider(vertical=True)
+                language_buttons()
+                
                 progress_bar()
 
             # Sidebar

@@ -7,6 +7,12 @@ COLD_TEMPERATURE_COLOR = (0.230, 0.299, 0.754)
 LUKEWARM_TEMPERATURE_COLOR = (0.865, 0.865, 0.865)
 HOT_TEMPERATURE_COLOR = (0.706, 0.016, 0.15)
 
+class Languages:
+    Czech = "CZ"
+    English = "EN"
+    
+DEFAULT_LANGUAGE = Languages.English
+
 class Representation:
     Points = 0
     Slice = 1
@@ -28,8 +34,8 @@ DEFAULT_PLANE = Planes.XY
 DEFAULT_PLANE_NORMAL = Planes.XYNormal
 
 class PickerModes:
-    Off = "Off"
-    Points = "Points"
-    Cells = "Cells"
+    Off = "0"
+    Points = "1"
+    Cells = "2"
 
 DEFAULT_PICKER_MODE = PickerModes.Off

@@ -52,6 +52,10 @@ class VTIPipeline(PipelineBuilder):
         return self._actor
         
     @property
+    def cube_axes_actor(self):
+        return self._cube_axes_actor
+        
+    @property
     def sliced_actor(self):
         return self._sliced_actor
 
@@ -78,11 +82,7 @@ class VTIPipeline(PipelineBuilder):
         self._renderer.AddActor(self._actor)
         self._renderer.ResetCamera()
 
-    def build_cube_axes_actor(self):
-        self._cube_axes_actor.SetXTitle("X-Axis")
-        self._cube_axes_actor.SetYTitle("Y-Axis")
-        self._cube_axes_actor.SetZTitle("Z-Axis")
-        
+    def build_cube_axes_actor(self):        
         self._cube_axes_actor.GetXAxesLinesProperty().SetColor(*AXES_COLOR)
         self._cube_axes_actor.GetYAxesLinesProperty().SetColor(*AXES_COLOR)
         self._cube_axes_actor.GetZAxesLinesProperty().SetColor(*AXES_COLOR)
@@ -122,7 +122,7 @@ class VTIPipeline(PipelineBuilder):
         
         if point_id != -1:
             point = data.GetPoint(point_id)
-            message = f"Id: {point_id}\nCoords: {point}\n"
+            message = f"Id: {point_id}\nX: {point[0]}\nY: {point[1]}\nZ: {point[2]}\n"
         
         return message
     
