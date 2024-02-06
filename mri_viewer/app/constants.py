@@ -13,6 +13,16 @@ class Zoom:
 
 ZOOM_FACTOR = 0.1
 
+class Translation:
+    XAxisPlus = "0"
+    XAxisMinus = "1"
+    YAxisPlus = "2"
+    YAxisMinus = "3"
+    ZAxisPlus = "4"
+    ZAxisMinus = "5"
+
+TRANSLATION_FACTOR = 10.0
+
 class Languages:
     Czech = "CZ"
     English = "EN"

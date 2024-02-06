@@ -22,6 +22,13 @@ class Language:
         section_zoom_title,
         zoom_in_tooltip,
         zoom_out_tooltip,
+        section_translation_title,
+        translate_x_axis_plus_tooltip,
+        translate_x_axis_minus_tooltip,
+        translate_y_axis_plus_tooltip,
+        translate_y_axis_minus_tooltip,
+        translate_z_axis_plus_tooltip,
+        translate_z_axis_minus_tooltip,
     ):
         self._words = {
             "upload_vti_files_title": upload_vti_files_title,
@@ -60,6 +67,13 @@ class Language:
             "section_zoom_title": section_zoom_title,
             "zoom_in_tooltip": zoom_in_tooltip,
             "zoom_out_tooltip": zoom_out_tooltip,
+            "section_translation_title": section_translation_title,
+            "translate_x_axis_plus_tooltip": translate_x_axis_plus_tooltip,
+            "translate_x_axis_minus_tooltip": translate_x_axis_minus_tooltip,
+            "translate_y_axis_plus_tooltip": translate_y_axis_plus_tooltip,
+            "translate_y_axis_minus_tooltip": translate_y_axis_minus_tooltip,
+            "translate_z_axis_plus_tooltip": translate_z_axis_plus_tooltip,
+            "translate_z_axis_minus_tooltip": translate_z_axis_minus_tooltip,
         }
 
     @property

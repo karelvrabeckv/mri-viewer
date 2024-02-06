@@ -21,6 +21,13 @@ class English(Language):
         section_zoom_title = "Zoom"
         zoom_in_tooltip = "Click to zoom in"
         zoom_out_tooltip = "Click to zoom out"
+        section_translation_title = "Translation"
+        translate_x_axis_plus_tooltip = "Click to move forward along the X-Axis"
+        translate_x_axis_minus_tooltip = "Click to move backward along the X-Axis"
+        translate_y_axis_plus_tooltip = "Click to move forward along the Y-Axis"
+        translate_y_axis_minus_tooltip = "Click to move backward along the Y-Axis"
+        translate_z_axis_plus_tooltip = "Click to move forward along the Z-Axis"
+        translate_z_axis_minus_tooltip = "Click to move backward along the Z-Axis"
         
         super().__init__(
             upload_vti_files_title,
@@ -42,4 +49,11 @@ class English(Language):
             section_zoom_title,
             zoom_in_tooltip,
             zoom_out_tooltip,
+            section_translation_title,
+            translate_x_axis_plus_tooltip,
+            translate_x_axis_minus_tooltip,
+            translate_y_axis_plus_tooltip,
+            translate_y_axis_minus_tooltip,
+            translate_z_axis_plus_tooltip,
+            translate_z_axis_minus_tooltip,
         )

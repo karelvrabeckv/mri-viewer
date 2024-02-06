@@ -21,6 +21,13 @@ class Czech(Language):
         section_zoom_title = "Přiblížení/oddálení"
         zoom_in_tooltip = "Klikněte pro přiblížení"
         zoom_out_tooltip = "Klikněte pro oddálení"
+        section_translation_title = "Posun"
+        translate_x_axis_plus_tooltip = "Klikněte pro posun vpřed po ose X"
+        translate_x_axis_minus_tooltip = "Klikněte pro posun vzad po ose X"
+        translate_y_axis_plus_tooltip = "Klikněte pro posun vpřed po ose Y"
+        translate_y_axis_minus_tooltip = "Klikněte pro posun vzad po ose Y"
+        translate_z_axis_plus_tooltip = "Klikněte pro posun vpřed po ose Z"
+        translate_z_axis_minus_tooltip = "Klikněte pro posun vzad po ose Z"
         
         super().__init__(
             upload_vti_files_title,
@@ -42,4 +49,11 @@ class Czech(Language):
             section_zoom_title,
             zoom_in_tooltip,
             zoom_out_tooltip,
+            section_translation_title,
+            translate_x_axis_plus_tooltip,
+            translate_x_axis_minus_tooltip,
+            translate_y_axis_plus_tooltip,
+            translate_y_axis_minus_tooltip,
+            translate_z_axis_plus_tooltip,
+            translate_z_axis_minus_tooltip,
         )

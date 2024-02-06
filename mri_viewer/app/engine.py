@@ -24,7 +24,9 @@ from .constants import (
     APPLICATION_NAME,
     DEFAULT_PLANE,
     ZOOM_FACTOR,
+    TRANSLATION_FACTOR,
     Zoom,
+    Translation,
     Representation,
     Planes,
     PickerModes,
@@ -311,6 +313,37 @@ class MRIViewerApp:
         self._pipeline.render_window.Render()
         self.ctrl.push_camera()
 
+    def translate(self, variant, **kwargs):
+        camera = self._pipeline.renderer.GetActiveCamera()
+        camera_position = camera.GetPosition()
+        focal_point_position = camera.GetFocalPoint()
+        offset_x, offset_y, offset_z = 0.0, 0.0, 0.0
+        
+        if variant == Translation.XAxisPlus:
+            offset_x -= TRANSLATION_FACTOR
+        elif variant == Translation.XAxisMinus:
+            offset_x += TRANSLATION_FACTOR
+        elif variant == Translation.YAxisPlus:
+            offset_y -= TRANSLATION_FACTOR
+        elif variant == Translation.YAxisMinus:
+            offset_y += TRANSLATION_FACTOR
+        elif variant == Translation.ZAxisPlus:
+            offset_z -= TRANSLATION_FACTOR
+        elif variant == Translation.ZAxisMinus:
+            offset_z += TRANSLATION_FACTOR
+        
+        offset = (offset_x, offset_y, offset_z)
+        
+        new_camera_position = list(map(lambda i, j: i + j, camera_position, offset))
+        new_focal_point_position = list(map(lambda i, j: i + j, focal_point_position, offset))
+        
+        camera.SetPosition(*new_camera_position)
+        camera.SetFocalPoint(*new_focal_point_position)
+        
+        self._pipeline.renderer.SetActiveCamera(camera)
+        self._pipeline.render_window.Render()
+        self.ctrl.push_camera()  
+        
     @life_cycle.server_reload
     def _build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self._server) as layout:
@@ -354,8 +387,8 @@ class MRIViewerApp:
                 
                 # Interaction
                 zoom_interaction(self)
-                rotation_interaction()
-                translation_interaction()
+                translation_interaction(self)
+                rotation_interaction(self)
 
             # Content
             with layout.content:
