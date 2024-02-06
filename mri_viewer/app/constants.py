@@ -7,6 +7,12 @@ COLD_TEMPERATURE_COLOR = (0.230, 0.299, 0.754)
 LUKEWARM_TEMPERATURE_COLOR = (0.865, 0.865, 0.865)
 HOT_TEMPERATURE_COLOR = (0.706, 0.016, 0.15)
 
+class Zoom:
+    In = "0"
+    Out = "1"
+
+ZOOM_FACTOR = 0.1
+
 class Languages:
     Czech = "CZ"
     English = "EN"

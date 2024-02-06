@@ -16,10 +16,15 @@ from .components.selects.vti_file_select import vti_file_select
 from .components.selects.data_array_select import data_array_select
 from .components.selects.representation_select import representation_select
 from .components.selects.slice_orientation_select import slice_orientation_select
+from .components.interaction.zoom_interaction import zoom_interaction
+from .components.interaction.rotation_interaction import rotation_interaction
+from .components.interaction.translation_interaction import translation_interaction
 
 from .constants import (
     APPLICATION_NAME,
     DEFAULT_PLANE,
+    ZOOM_FACTOR,
+    Zoom,
     Representation,
     Planes,
     PickerModes,
@@ -129,13 +134,11 @@ class MRIViewerApp:
         
         if current_representation == Representation.Slice:
             self.state.current_slice_orientation = DEFAULT_PLANE
-            self.state.ui_slice_classes = "ma-4"
             
             self._pipeline.actor.VisibilityOff()
             self._pipeline.sliced_actor.VisibilityOn()
         else:
             self.state.current_slice_orientation = None
-            self.state.ui_slice_classes = "ma-4 d-none"
         
         self.ctrl.update()
         
@@ -296,6 +299,18 @@ class MRIViewerApp:
         self._pipeline.renderer.ResetCameraClippingRange()
         self._pipeline.render_window.Render()
 
+    def zoom(self, variant, **kwargs):
+        camera = self._pipeline.renderer.GetActiveCamera()
+        
+        if variant == Zoom.In:
+            camera.Zoom(1 + ZOOM_FACTOR)
+        elif variant == Zoom.Out:
+            camera.Zoom(1 - ZOOM_FACTOR)
+        
+        self._pipeline.renderer.SetActiveCamera(camera)
+        self._pipeline.render_window.Render()
+        self.ctrl.push_camera()
+
     @life_cycle.server_reload
     def _build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self._server) as layout:
@@ -325,14 +340,22 @@ class MRIViewerApp:
 
             # Sidebar
             with layout.drawer:
+                # Upload
                 upload_vti_files()
-                vuetify3.VDivider()
+                
+                # Selects
                 vti_file_select()
                 data_array_select()
                 representation_select()
-                vuetify3.VDivider()
+                
+                # Slice
                 slice_orientation_select()
                 slice_position_slider()
+                
+                # Interaction
+                zoom_interaction(self)
+                rotation_interaction()
+                translation_interaction()
 
             # Content
             with layout.content:

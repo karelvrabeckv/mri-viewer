@@ -10,3 +10,4 @@ def representation_select():
         hide_details=True,
         classes="ma-4",
     )
+    vuetify3.VDivider()

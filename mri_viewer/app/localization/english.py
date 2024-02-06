@@ -18,6 +18,9 @@ class English(Language):
         x_axis_title = "X-Axis"
         y_axis_title = "Y-Axis"
         z_axis_title = "Z-Axis"
+        section_zoom_title = "Zoom"
+        zoom_in_tooltip = "Click to zoom in"
+        zoom_out_tooltip = "Click to zoom out"
         
         super().__init__(
             upload_vti_files_title,
@@ -36,4 +39,7 @@ class English(Language):
             x_axis_title,
             y_axis_title,
             z_axis_title,
+            section_zoom_title,
+            zoom_in_tooltip,
+            zoom_out_tooltip,
         )

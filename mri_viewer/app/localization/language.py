@@ -19,6 +19,9 @@ class Language:
         x_axis_title,
         y_axis_title,
         z_axis_title,
+        section_zoom_title,
+        zoom_in_tooltip,
+        zoom_out_tooltip,
     ):
         self._words = {
             "upload_vti_files_title": upload_vti_files_title,
@@ -54,6 +57,9 @@ class Language:
             "x_axis_title": x_axis_title,
             "y_axis_title": y_axis_title,
             "z_axis_title": z_axis_title,
+            "section_zoom_title": section_zoom_title,
+            "zoom_in_tooltip": zoom_in_tooltip,
+            "zoom_out_tooltip": zoom_out_tooltip,
         }
 
     @property

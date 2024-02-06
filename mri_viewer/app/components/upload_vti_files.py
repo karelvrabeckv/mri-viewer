@@ -11,3 +11,4 @@ def upload_vti_files():
         hide_details=True,
         classes="ma-4",
     )
+    vuetify3.VDivider()

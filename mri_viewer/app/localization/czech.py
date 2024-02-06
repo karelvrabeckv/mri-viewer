@@ -18,6 +18,9 @@ class Czech(Language):
         x_axis_title = "Osa X"
         y_axis_title = "Osa Y"
         z_axis_title = "Osa Z"
+        section_zoom_title = "Přiblížení/oddálení"
+        zoom_in_tooltip = "Klikněte pro přiblížení"
+        zoom_out_tooltip = "Klikněte pro oddálení"
         
         super().__init__(
             upload_vti_files_title,
@@ -36,4 +39,7 @@ class Czech(Language):
             x_axis_title,
             y_axis_title,
             z_axis_title,
+            section_zoom_title,
+            zoom_in_tooltip,
+            zoom_out_tooltip,
         )
