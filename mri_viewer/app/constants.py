@@ -13,7 +13,7 @@ class Zoom:
 
 ZOOM_FACTOR = 0.1
 
-class Translation:
+class Directions:
     XAxisPlus = "0"
     XAxisMinus = "1"
     YAxisPlus = "2"

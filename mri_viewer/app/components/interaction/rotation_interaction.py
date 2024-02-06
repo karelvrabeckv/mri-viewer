@@ -2,11 +2,11 @@ from trame.widgets import vuetify3
 
 from ...constants import Directions
 
-def translation_interaction(self):
-    with vuetify3.VCard(v_show=f"current_vti_file != None", classes="ma-4"): 
+def rotation_interaction(self):
+    with vuetify3.VCard(v_show=f"current_vti_file != None", classes="ma-4"):
         # Title
         vuetify3.VCardTitle(
-            "{{ language.section_translation_title }}",
+            "{{ language.section_rotation_title }}",
             classes="text-white bg-grey-darken-1 py-1"
         )
         
@@ -19,7 +19,7 @@ def translation_interaction(self):
                 
                 # Plus button (X-Axis)
                 with vuetify3.VTooltip(
-                    text=("language.translate_x_axis_plus_tooltip",),
+                    text=("language.rotate_x_axis_plus_tooltip",),
                     location="bottom"
                 ):
                     with vuetify3.Template(v_slot_activator="{ props }"):
@@ -29,13 +29,13 @@ def translation_interaction(self):
                             icon=True,
                             border=True,
                             classes="mx-1",
-                            click=(self.translate, f"['{Directions.XAxisPlus}']"),
+                            click=(self.rotate, f"['{Directions.XAxisPlus}']"),
                         ):
                             vuetify3.VIcon(icon="mdi-plus")
                 
                 # Minus button (X-Axis)
                 with vuetify3.VTooltip(
-                    text=("language.translate_x_axis_minus_tooltip",),
+                    text=("language.rotate_x_axis_minus_tooltip",),
                     location="bottom"
                 ):
                     with vuetify3.Template(v_slot_activator="{ props }"):
@@ -45,7 +45,7 @@ def translation_interaction(self):
                             icon=True,
                             border=True,
                             classes="mx-1",
-                            click=(self.translate, f"['{Directions.XAxisMinus}']"),
+                            click=(self.rotate, f"['{Directions.XAxisMinus}']"),
                         ):
                             vuetify3.VIcon(icon="mdi-minus")
 
@@ -56,7 +56,7 @@ def translation_interaction(self):
                 
                 # Plus button (Y-Axis)
                 with vuetify3.VTooltip(
-                    text=("language.translate_y_axis_plus_tooltip",),
+                    text=("language.rotate_y_axis_plus_tooltip",),
                     location="bottom"
                 ):
                     with vuetify3.Template(v_slot_activator="{ props }"):
@@ -66,13 +66,13 @@ def translation_interaction(self):
                             icon=True,
                             border=True,
                             classes="mx-1",
-                            click=(self.translate, f"['{Directions.YAxisPlus}']"),
+                            click=(self.rotate, f"['{Directions.YAxisPlus}']"),
                         ):
                             vuetify3.VIcon(icon="mdi-plus")
                 
                 # Minus button (Y-Axis)
                 with vuetify3.VTooltip(
-                    text=("language.translate_y_axis_minus_tooltip",),
+                    text=("language.rotate_y_axis_minus_tooltip",),
                     location="bottom"
                 ):
                     with vuetify3.Template(v_slot_activator="{ props }"):
@@ -82,7 +82,7 @@ def translation_interaction(self):
                             icon=True,
                             border=True,
                             classes="mx-1",
-                            click=(self.translate, f"['{Directions.YAxisMinus}']"),
+                            click=(self.rotate, f"['{Directions.YAxisMinus}']"),
                         ):
                             vuetify3.VIcon(icon="mdi-minus")
 
@@ -93,7 +93,7 @@ def translation_interaction(self):
                 
                 # Plus button (Z-Axis)
                 with vuetify3.VTooltip(
-                    text=("language.translate_z_axis_plus_tooltip",),
+                    text=("language.rotate_z_axis_plus_tooltip",),
                     location="bottom"
                 ):
                     with vuetify3.Template(v_slot_activator="{ props }"):
@@ -103,13 +103,13 @@ def translation_interaction(self):
                             icon=True,
                             border=True,
                             classes="mx-1",
-                            click=(self.translate, f"['{Directions.ZAxisPlus}']"),
+                            click=(self.rotate, f"['{Directions.ZAxisPlus}']"),
                         ):
                             vuetify3.VIcon(icon="mdi-plus")
                 
                 # Minus button (Z-Axis)
                 with vuetify3.VTooltip(
-                    text=("language.translate_z_axis_minus_tooltip",),
+                    text=("language.rotate_z_axis_minus_tooltip",),
                     location="bottom"
                 ):
                     with vuetify3.Template(v_slot_activator="{ props }"):
@@ -119,6 +119,6 @@ def translation_interaction(self):
                             icon=True,
                             border=True,
                             classes="mx-1",
-                            click=(self.translate, f"['{Directions.ZAxisMinus}']"),
+                            click=(self.rotate, f"['{Directions.ZAxisMinus}']"),
                         ):
                             vuetify3.VIcon(icon="mdi-minus")

@@ -4,6 +4,7 @@ from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import vuetify3, vtk, trame
 
 from asyncio import sleep
+from vtkmodules.vtkCommonTransforms import vtkTransform
 
 from .components.progress_bar import progress_bar
 from .components.upload_vti_files import upload_vti_files
@@ -26,7 +27,7 @@ from .constants import (
     ZOOM_FACTOR,
     TRANSLATION_FACTOR,
     Zoom,
-    Translation,
+    Directions,
     Representation,
     Planes,
     PickerModes,
@@ -301,35 +302,35 @@ class MRIViewerApp:
         self._pipeline.renderer.ResetCameraClippingRange()
         self._pipeline.render_window.Render()
 
-    def zoom(self, variant, **kwargs):
+    def zoom(self, direction, **kwargs):
         camera = self._pipeline.renderer.GetActiveCamera()
         
-        if variant == Zoom.In:
+        if direction == Zoom.In:
             camera.Zoom(1 + ZOOM_FACTOR)
-        elif variant == Zoom.Out:
+        elif direction == Zoom.Out:
             camera.Zoom(1 - ZOOM_FACTOR)
         
         self._pipeline.renderer.SetActiveCamera(camera)
         self._pipeline.render_window.Render()
         self.ctrl.push_camera()
 
-    def translate(self, variant, **kwargs):
+    def translate(self, direction, **kwargs):
         camera = self._pipeline.renderer.GetActiveCamera()
         camera_position = camera.GetPosition()
         focal_point_position = camera.GetFocalPoint()
         offset_x, offset_y, offset_z = 0.0, 0.0, 0.0
         
-        if variant == Translation.XAxisPlus:
+        if direction == Directions.XAxisPlus:
             offset_x -= TRANSLATION_FACTOR
-        elif variant == Translation.XAxisMinus:
+        elif direction == Directions.XAxisMinus:
             offset_x += TRANSLATION_FACTOR
-        elif variant == Translation.YAxisPlus:
+        elif direction == Directions.YAxisPlus:
             offset_y -= TRANSLATION_FACTOR
-        elif variant == Translation.YAxisMinus:
+        elif direction == Directions.YAxisMinus:
             offset_y += TRANSLATION_FACTOR
-        elif variant == Translation.ZAxisPlus:
+        elif direction == Directions.ZAxisPlus:
             offset_z -= TRANSLATION_FACTOR
-        elif variant == Translation.ZAxisMinus:
+        elif direction == Directions.ZAxisMinus:
             offset_z += TRANSLATION_FACTOR
         
         offset = (offset_x, offset_y, offset_z)
@@ -342,8 +343,35 @@ class MRIViewerApp:
         
         self._pipeline.renderer.SetActiveCamera(camera)
         self._pipeline.render_window.Render()
-        self.ctrl.push_camera()  
+        self.ctrl.push_camera()
+
+    def rotate(self, direction, **kwargs):
+        camera = self._pipeline.renderer.GetActiveCamera()
+        x, y, z = camera.GetFocalPoint()
         
+        rotation = vtkTransform()
+        rotation.Translate(x, y, z)
+        
+        if direction == Directions.XAxisPlus:
+            rotation.RotateX(-30.0)
+        elif direction == Directions.XAxisMinus:
+            rotation.RotateX(30.0)
+        elif direction == Directions.YAxisPlus:
+            rotation.RotateY(-30.0)
+        elif direction == Directions.YAxisMinus:
+            rotation.RotateY(30.0)
+        elif direction == Directions.ZAxisPlus:
+            rotation.RotateZ(-30.0)
+        elif direction == Directions.ZAxisMinus:
+            rotation.RotateZ(30.0)
+        
+        rotation.Translate(-x, -y, -z)
+        camera.ApplyTransform(rotation)
+        
+        self._pipeline.renderer.SetActiveCamera(camera)
+        self._pipeline.render_window.Render()
+        self.ctrl.push_camera()
+
     @life_cycle.server_reload
     def _build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self._server) as layout:

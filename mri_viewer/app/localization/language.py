@@ -29,6 +29,13 @@ class Language:
         translate_y_axis_minus_tooltip,
         translate_z_axis_plus_tooltip,
         translate_z_axis_minus_tooltip,
+        section_rotation_title,
+        rotate_x_axis_plus_tooltip,
+        rotate_x_axis_minus_tooltip,
+        rotate_y_axis_plus_tooltip,
+        rotate_y_axis_minus_tooltip,
+        rotate_z_axis_plus_tooltip,
+        rotate_z_axis_minus_tooltip,
     ):
         self._words = {
             "upload_vti_files_title": upload_vti_files_title,
@@ -74,6 +81,13 @@ class Language:
             "translate_y_axis_minus_tooltip": translate_y_axis_minus_tooltip,
             "translate_z_axis_plus_tooltip": translate_z_axis_plus_tooltip,
             "translate_z_axis_minus_tooltip": translate_z_axis_minus_tooltip,
+            "section_rotation_title": section_rotation_title,
+            "rotate_x_axis_plus_tooltip": rotate_x_axis_plus_tooltip,
+            "rotate_x_axis_minus_tooltip": rotate_x_axis_minus_tooltip,
+            "rotate_y_axis_plus_tooltip": rotate_y_axis_plus_tooltip,
+            "rotate_y_axis_minus_tooltip": rotate_y_axis_minus_tooltip,
+            "rotate_z_axis_plus_tooltip": rotate_z_axis_plus_tooltip,
+            "rotate_z_axis_minus_tooltip": rotate_z_axis_minus_tooltip,
         }
 
     @property

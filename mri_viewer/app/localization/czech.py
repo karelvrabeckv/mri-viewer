@@ -18,7 +18,7 @@ class Czech(Language):
         x_axis_title = "Osa X"
         y_axis_title = "Osa Y"
         z_axis_title = "Osa Z"
-        section_zoom_title = "Přiblížení/oddálení"
+        section_zoom_title = "Přiblížení"
         zoom_in_tooltip = "Klikněte pro přiblížení"
         zoom_out_tooltip = "Klikněte pro oddálení"
         section_translation_title = "Posun"
@@ -28,6 +28,13 @@ class Czech(Language):
         translate_y_axis_minus_tooltip = "Klikněte pro posun vzad po ose Y"
         translate_z_axis_plus_tooltip = "Klikněte pro posun vpřed po ose Z"
         translate_z_axis_minus_tooltip = "Klikněte pro posun vzad po ose Z"
+        section_rotation_title = "Rotace"
+        rotate_x_axis_plus_tooltip = "Klikněte pro kladnou rotaci kolem osy X"
+        rotate_x_axis_minus_tooltip = "Klikněte pro zápornou rotaci kolem osy X"
+        rotate_y_axis_plus_tooltip = "Klikněte pro kladnou rotaci kolem osy Y"
+        rotate_y_axis_minus_tooltip = "Klikněte pro zápornou rotaci kolem osy Y"
+        rotate_z_axis_plus_tooltip = "Klikněte pro kladnou rotaci kolem osy Z"
+        rotate_z_axis_minus_tooltip = "Klikněte pro zápornou rotaci kolem osy Z"
         
         super().__init__(
             upload_vti_files_title,
@@ -56,4 +63,11 @@ class Czech(Language):
             translate_y_axis_minus_tooltip,
             translate_z_axis_plus_tooltip,
             translate_z_axis_minus_tooltip,
+            section_rotation_title,
+            rotate_x_axis_plus_tooltip,
+            rotate_x_axis_minus_tooltip,
+            rotate_y_axis_plus_tooltip,
+            rotate_y_axis_minus_tooltip,
+            rotate_z_axis_plus_tooltip,
+            rotate_z_axis_minus_tooltip,
         )
