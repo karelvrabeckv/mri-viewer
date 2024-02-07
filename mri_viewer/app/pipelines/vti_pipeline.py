@@ -1,10 +1,10 @@
-from vtkmodules.vtkCommonDataModel import vtkPlane
-from vtkmodules.vtkFiltersGeneral import vtkClipDataSet
-from vtkmodules.vtkRenderingAnnotation import vtkCubeAxesActor
 from vtkmodules.vtkCommonDataModel import vtkImageData
+from vtkmodules.vtkImagingCore import vtkExtractVOI
+from vtkmodules.vtkRenderingAnnotation import vtkCubeAxesActor
 from vtkmodules.vtkRenderingCore import (
     vtkCellPicker,
     vtkDataSetMapper,
+    vtkPolyDataMapper,
     vtkActor,
 )
 
@@ -12,7 +12,8 @@ from .pipeline_builder import PipelineBuilder
 from ..files.file import File
 from ..constants import (
     AXES_COLOR,
-    DEFAULT_PLANE_NORMAL,
+    DEFAULT_SLICE_POSITION,
+    DEFAULT_SLICE_ORIENTATION,
     Planes,
     Representation,
 )
@@ -29,11 +30,9 @@ class VTIPipeline(PipelineBuilder):
         self._actor = vtkActor()
         self._cube_axes_actor = vtkCubeAxesActor()
         
-        self._slicing_plane = vtkPlane()
-        self._slicer = vtkClipDataSet()
-        
-        self._sliced_data_set_mapper = vtkDataSetMapper()
-        self._sliced_actor = vtkActor()
+        self._slice = vtkExtractVOI()
+        self._slice_poly_data_mapper = vtkPolyDataMapper()
+        self._slice_actor = vtkActor()
         
         self._picker = vtkCellPicker()
         
@@ -56,18 +55,17 @@ class VTIPipeline(PipelineBuilder):
         return self._cube_axes_actor
         
     @property
-    def sliced_actor(self):
-        return self._sliced_actor
+    def slice_actor(self):
+        return self._slice_actor
 
     def run_vti_pipeline(self, file: File, group_active_array: str):
         self.build_data_set_mapper(file, group_active_array)
         self.build_actor()
         self.build_cube_axes_actor()
         
-        # self.build_slicing_plane()
-        # self.build_slicer(file)
-        # self.build_sliced_data_set_mapper(file, group_active_array)
-        # self.build_sliced_actor()
+        self.build_slice(file, DEFAULT_SLICE_POSITION, DEFAULT_SLICE_ORIENTATION)
+        self.build_slice_poly_data_mapper(file, group_active_array)
+        self.build_slice_actor()
         
         self._render_window.Render()
 
@@ -93,27 +91,25 @@ class VTIPipeline(PipelineBuilder):
         self._renderer.AddActor(self._cube_axes_actor)
         self._renderer.ResetCamera()
         
-    def build_slicing_plane(self):
-        self._slicing_plane.SetNormal(*DEFAULT_PLANE_NORMAL)
-        self._slicing_plane.SetOrigin(0, 0, 0)
-
-    def build_slicer(self, file):
-        self._slicer.SetInputConnection(file.reader.GetOutputPort())
-        self._slicer.SetClipFunction(self._slicing_plane)
-        self._slicer.GenerateClippedOutputOn()
+    def build_slice(self, file, slice_position: int, slice_orientation: Planes):
+        self._slice.SetInputConnection(file.reader.GetOutputPort())
+        image_data = file.reader.GetOutput()
+        max_x, max_y, max_z = image_data.GetDimensions()
         
-    def build_sliced_data_set_mapper(self, file: File, group_active_array: str):
-        self._sliced_data_set_mapper.SetInputConnection(self._slicer.GetOutputPort())
-        self._sliced_data_set_mapper.SetScalarRange(file.data.GetArray(group_active_array).GetRange())
-        self._sliced_data_set_mapper.SetLookupTable(self._lookup_table)     
+        self.set_slice(slice_position, slice_orientation, max_x, max_y, max_z)
 
-    def build_sliced_actor(self):
-        self._sliced_actor.SetMapper(self._sliced_data_set_mapper)
-        self._sliced_actor.GetProperty().LightingOff()
+    def build_slice_poly_data_mapper(self, file: File, group_active_array: str):
+        self._slice_poly_data_mapper.SetInputConnection(self._slice.GetOutputPort())
+        self._slice_poly_data_mapper.SetScalarRange(file.data.GetArray(group_active_array).GetRange())
+        self._slice_poly_data_mapper.SetLookupTable(self._lookup_table)
 
-        self._renderer.AddActor(self._sliced_actor)
+    def build_slice_actor(self):
+        self._slice_actor.SetMapper(self._slice_poly_data_mapper)
+        self._slice_actor.GetProperty().LightingOff()
+
+        self._renderer.AddActor(self._slice_actor)
         self._renderer.ResetCamera()
-    
+
     def get_point_information(self, data: vtkImageData, x: float, y: float):
         self._picker.Pick(x, y, 0.0, self._renderer)
 
@@ -151,13 +147,13 @@ class VTIPipeline(PipelineBuilder):
         file.data.SetActiveScalars(new_active_array)
         
         self._data_set_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
-        self._sliced_data_set_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
+        self._slice_poly_data_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
 
     def set_representation(self, new_active_representation):
         actor_property = self._actor.GetProperty()
         
         self._actor.VisibilityOn()
-        self._sliced_actor.VisibilityOff()
+        self._slice_actor.VisibilityOff()
 
         if new_active_representation == Representation.Points:
             self.set_representation_to_points(actor_property)
@@ -188,21 +184,13 @@ class VTIPipeline(PipelineBuilder):
         actor_property.SetPointSize(1)
         actor_property.EdgeVisibilityOff()
 
-    def set_slice_orientation(self, current_slice_orientation):
-        if current_slice_orientation == Planes.XY:
-            self._slicing_plane.SetNormal(*Planes.XYNormal)
-        elif current_slice_orientation == Planes.YZ:
-            self._slicing_plane.SetNormal(*Planes.YZNormal)
-        elif current_slice_orientation == Planes.XZ:
-            self._slicing_plane.SetNormal(*Planes.XZNormal)
-
-    def set_slice_position(self, current_slice_orientation, current_slice_position):
-        if current_slice_orientation == Planes.XY:
-            self._slicing_plane.SetOrigin(0, 0, current_slice_position)
-        elif current_slice_orientation == Planes.YZ:
-            self._slicing_plane.SetOrigin(current_slice_position, 0, 0)
-        elif current_slice_orientation == Planes.XZ:
-            self._slicing_plane.SetOrigin(0, current_slice_position, 0)
+    def set_slice(self, slice_position, slice_orientation, max_x, max_y, max_z):
+        if slice_orientation == Planes.XY:
+            self._slice.SetVOI(0, max_x - 1, 0, max_y - 1, slice_position, slice_position)
+        elif slice_orientation == Planes.YZ:
+            self._slice.SetVOI(slice_position, slice_position, 0, max_y - 1, 0, max_z - 1)
+        elif slice_orientation == Planes.XZ:
+            self._slice.SetVOI(0, max_x - 1, slice_position, slice_position, 0, max_z - 1)
         
     def set_axes_visibility(self, axes_visibility):
         if self._cube_axes_actor is not None:

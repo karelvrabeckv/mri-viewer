@@ -11,13 +11,14 @@ class English(Language):
         representation_select_item_surface = "Surface"
         representation_select_item_surface_with_edges = "Surface with Edges"
         representation_select_item_wireframe = "Wireframe"
-        slice_orientation_select_title = "Slice Orientation"
-        slice_position_slider_title = "Slice Position"
         point_information_title = "Point Information"
         cell_information_title = "Cell Information"
         x_axis_title = "X-Axis"
         y_axis_title = "Y-Axis"
         z_axis_title = "Z-Axis"
+        section_slice_title = "Slice"
+        slice_orientation_select_title = "Orientation"
+        slice_position_slider_title = "Position"
         section_zoom_title = "Zoom"
         zoom_in_tooltip = "Click to zoom in"
         zoom_out_tooltip = "Click to zoom out"
@@ -46,13 +47,14 @@ class English(Language):
             representation_select_item_surface,
             representation_select_item_surface_with_edges,
             representation_select_item_wireframe,
-            slice_orientation_select_title,
-            slice_position_slider_title,
             point_information_title,
             cell_information_title,
             x_axis_title,
             y_axis_title,
             z_axis_title,
+            section_slice_title,
+            slice_orientation_select_title,
+            slice_position_slider_title,
             section_zoom_title,
             zoom_in_tooltip,
             zoom_out_tooltip,

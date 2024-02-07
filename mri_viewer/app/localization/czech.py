@@ -11,13 +11,14 @@ class Czech(Language):
         representation_select_item_surface = "Povrch"
         representation_select_item_surface_with_edges = "Povrch s hranami"
         representation_select_item_wireframe = "Mřížka"
-        slice_orientation_select_title = "Orientace řezu"
-        slice_position_slider_title = "Pozice řezu"
         point_information_title = "Informace o bodě"
         cell_information_title = "Informace o buňce"
         x_axis_title = "Osa X"
         y_axis_title = "Osa Y"
         z_axis_title = "Osa Z"
+        section_slice_title = "Řez"
+        slice_orientation_select_title = "Orientace"
+        slice_position_slider_title = "Pozice"
         section_zoom_title = "Přiblížení"
         zoom_in_tooltip = "Klikněte pro přiblížení"
         zoom_out_tooltip = "Klikněte pro oddálení"
@@ -46,13 +47,14 @@ class Czech(Language):
             representation_select_item_surface,
             representation_select_item_surface_with_edges,
             representation_select_item_wireframe,
-            slice_orientation_select_title,
-            slice_position_slider_title,
             point_information_title,
             cell_information_title,
             x_axis_title,
             y_axis_title,
             z_axis_title,
+            section_slice_title,
+            slice_orientation_select_title,
+            slice_position_slider_title,
             section_zoom_title,
             zoom_in_tooltip,
             zoom_out_tooltip,

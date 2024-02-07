@@ -39,15 +39,12 @@ class Representation:
 DEFAULT_REPRESENTATION = Representation.Surface
 
 class Planes:
-    XY = 0
-    XYNormal = (0.0, 0.0, 1.0)
-    YZ = 1
-    YZNormal = (1.0, 0.0, 0.0)
-    XZ = 2
-    XZNormal = (0.0, 1.0, 0.0)
+    XY = "0"
+    YZ = "1"
+    XZ = "2"
 
-DEFAULT_PLANE = Planes.XY
-DEFAULT_PLANE_NORMAL = Planes.XYNormal
+DEFAULT_SLICE_POSITION = 0
+DEFAULT_SLICE_ORIENTATION = Planes.XY
 
 class PickerModes:
     Off = "0"

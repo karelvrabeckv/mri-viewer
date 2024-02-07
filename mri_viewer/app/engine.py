@@ -8,7 +8,6 @@ from vtkmodules.vtkCommonTransforms import vtkTransform
 
 from .components.progress_bar import progress_bar
 from .components.upload_vti_files import upload_vti_files
-from .components.slice_position_slider import slice_position_slider
 from .components.icons.animation_icons import animation_icons
 from .components.icons.picker_modes_icons import picker_modes_icons
 from .components.icons.toolbar_icons import toolbar_icons
@@ -16,14 +15,14 @@ from .components.language_buttons import language_buttons
 from .components.selects.vti_file_select import vti_file_select
 from .components.selects.data_array_select import data_array_select
 from .components.selects.representation_select import representation_select
-from .components.selects.slice_orientation_select import slice_orientation_select
+from .components.interaction.slice_interaction import slice_interaction
 from .components.interaction.zoom_interaction import zoom_interaction
 from .components.interaction.rotation_interaction import rotation_interaction
 from .components.interaction.translation_interaction import translation_interaction
 
 from .constants import (
     APPLICATION_NAME,
-    DEFAULT_PLANE,
+    DEFAULT_SLICE_ORIENTATION,
     ZOOM_FACTOR,
     TRANSLATION_FACTOR,
     Zoom,
@@ -136,10 +135,10 @@ class MRIViewerApp:
         group.active_representation = current_representation
         
         if current_representation == Representation.Slice:
-            self.state.current_slice_orientation = DEFAULT_PLANE
+            self.state.current_slice_orientation = DEFAULT_SLICE_ORIENTATION
             
             self._pipeline.actor.VisibilityOff()
-            self._pipeline.sliced_actor.VisibilityOn()
+            self._pipeline.slice_actor.VisibilityOn()
         else:
             self.state.current_slice_orientation = None
         
@@ -150,24 +149,23 @@ class MRIViewerApp:
         if current_slice_orientation is None:
             return
 
-        # Set the orientation of the slice plane
-        self._pipeline.set_slice_orientation(current_slice_orientation)
+        file, _, _, _ = self._file_manager.get_file(self.state.current_vti_file)
+        image_data = file.reader.GetOutput()
+        max_x, max_y, max_z = image_data.GetDimensions()
 
-        # Set values for the slider
-        min_x, max_x, min_y, max_y, min_z, max_z = self._pipeline.actor.GetBounds()
+        # Set values for the slider        
+        self.state.current_slice_position = 0
+        self.state.slider_range_min = 0
         
         if current_slice_orientation == Planes.XY:
-            self.state.slider_range_min = min_z
-            self.state.slider_range_max = max_z
-            self.state.current_slice_position = min_z
+            self.state.slider_range_max = max_z - 1
         elif current_slice_orientation == Planes.YZ:
-            self.state.slider_range_min = min_x
-            self.state.slider_range_max = max_x
-            self.state.current_slice_position = min_x
+            self.state.slider_range_max = max_x - 1
         elif current_slice_orientation == Planes.XZ:
-            self.state.slider_range_min = min_y
-            self.state.slider_range_max = max_y
-            self.state.current_slice_position = min_y
+            self.state.slider_range_max = max_y - 1
+
+        # Set the position of the slice plane
+        self._pipeline.set_slice(self.state.current_slice_position, current_slice_orientation, max_x, max_y, max_z)
 
         self.ctrl.update()
         
@@ -176,9 +174,12 @@ class MRIViewerApp:
         if current_slice_position is None:
             return
 
+        file, _, _, _ = self._file_manager.get_file(self.state.current_vti_file)
+        image_data = file.reader.GetOutput()
+        max_x, max_y, max_z = image_data.GetDimensions()
+
         # Set the position of the slice plane
-        current_slice_orientation = self.state.current_slice_orientation
-        self._pipeline.set_slice_position(current_slice_orientation, current_slice_position)
+        self._pipeline.set_slice(current_slice_position, self.state.current_slice_orientation, max_x, max_y, max_z)
         
         self.ctrl.update()
 
@@ -410,8 +411,7 @@ class MRIViewerApp:
                 representation_select()
                 
                 # Slice
-                slice_orientation_select()
-                slice_position_slider()
+                slice_interaction()
                 
                 # Interaction
                 zoom_interaction(self)
