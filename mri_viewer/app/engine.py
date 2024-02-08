@@ -1,10 +1,12 @@
 from trame.app import get_server, asynchronous
 from trame.decorators import TrameApp, change, life_cycle
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout
-from trame.widgets import vuetify3, vtk, trame
+from trame.widgets import vuetify3, vtk, trame, html
 
 from asyncio import sleep
 from vtkmodules.vtkCommonTransforms import vtkTransform
+
+from .assets import asset_manager
 
 from .components.progress_bar import progress_bar
 from .components.upload_vti_files import upload_vti_files
@@ -377,8 +379,10 @@ class MRIViewerApp:
     def _build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self._server) as layout:
             # Icon
-            with layout.icon:
-                vuetify3.VIcon("mdi-hospital-box-outline")
+            with layout.icon as icon:
+                icon.click = None
+                with html.A(href="https://www.ikem.cz/", target="_blank"):
+                    html.Img(src=asset_manager.logo, height=50)
 
             # Title
             layout.title.set_text(APPLICATION_NAME)
