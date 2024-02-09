@@ -3,11 +3,11 @@ from trame.widgets import vuetify3
 from ...constants import Directions
 
 def rotation_interaction(self):
-    with vuetify3.VCard(v_show=f"current_vti_file != None", classes="ma-4"):
+    with vuetify3.VCard(v_show=f"current_vti_file != None", classes="ma-4", border=True):
         # Title
         vuetify3.VCardTitle(
             "{{ language.section_rotation_title }}",
-            classes="text-white bg-grey-darken-1 py-1"
+            classes="bg-grey-darken-2 py-1"
         )
         
         # Content

@@ -1,5 +1,6 @@
 from vtkmodules.vtkCommonColor import vtkNamedColors
 from vtkmodules.vtkCommonCore import vtkLookupTable
+from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
 from vtkmodules.vtkRenderingCore import (
     vtkRenderer,
     vtkRenderWindow,
@@ -32,6 +33,7 @@ class PipelineBuilder:
     def create_render_window_interactor(self, render_window: vtkRenderWindow):
         render_window_interactor = vtkRenderWindowInteractor()
         
+        render_window_interactor.SetInteractorStyle(vtkInteractorStyleTrackballCamera())
         render_window_interactor.SetRenderWindow(render_window)
         
         return render_window_interactor

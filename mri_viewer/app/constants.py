@@ -1,5 +1,25 @@
 APPLICATION_NAME = "MRI Viewer"
 
+class Theme:
+    Light = "light"
+    Dark = "dark"
+
+DEFAULT_THEME = Theme.Light
+
+VUETIFY_CONFIG = {
+    "theme": {
+        "themes": {
+            Theme.Light: {
+                "dark": False,
+            },
+            Theme.Dark: {
+                "dark": True,
+            }
+        }
+    }
+}
+
+IKEM_COLOR = "#e2001a"
 BACKGROUND_COLOR = "Gainsboro"
 AXES_COLOR = (0.0, 0.0, 0.0)
 
@@ -30,11 +50,11 @@ class Languages:
 DEFAULT_LANGUAGE = Languages.English
 
 class Representation:
-    Points = 0
-    Slice = 1
-    Surface = 2
-    SurfaceWithEdges = 3
-    Wireframe = 4
+    Points = "0"
+    Slice = "1"
+    Surface = "2"
+    SurfaceWithEdges = "3"
+    Wireframe = "4"
 
 DEFAULT_REPRESENTATION = Representation.Surface
 

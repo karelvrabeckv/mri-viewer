@@ -3,9 +3,9 @@ from trame.widgets import vuetify3
 from ...constants import Planes, Representation
 
 def slice_interaction():
-    with vuetify3.VCard(v_show=f"current_representation == {Representation.Slice}", classes="ma-4"): 
+    with vuetify3.VCard(v_show=f"current_representation == {Representation.Slice}", classes="ma-4", border=True): 
         # Title
-        vuetify3.VCardTitle("{{ language.section_slice_title }}", classes="text-white bg-grey-darken-1 py-1")
+        vuetify3.VCardTitle("{{ language.section_slice_title }}", classes="bg-grey-darken-2 py-1")
         
         # Content
         with vuetify3.VCardText(classes="py-2"):

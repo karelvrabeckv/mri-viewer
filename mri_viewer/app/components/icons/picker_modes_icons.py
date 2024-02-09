@@ -8,6 +8,7 @@ def picker_modes_icons():
         disabled=("ui_disabled", True),
         mandatory=True,
         border=True,
+        classes="mx-2",
     ):
         with vuetify3.VBtn(icon=True, value=PickerModes.Off):
             vuetify3.VIcon("mdi-cube-outline")

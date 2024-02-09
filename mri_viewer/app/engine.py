@@ -24,9 +24,12 @@ from .components.interaction.translation_interaction import translation_interact
 
 from .constants import (
     APPLICATION_NAME,
+    DEFAULT_THEME,
+    VUETIFY_CONFIG,
     DEFAULT_SLICE_ORIENTATION,
     ZOOM_FACTOR,
     TRANSLATION_FACTOR,
+    Theme,
     Zoom,
     Directions,
     Representation,
@@ -56,6 +59,8 @@ class MRIViewerApp:
         self._ui = self._build_ui()
         
         self.state.trame__title = APPLICATION_NAME
+        self.state.trame__favicon = asset_manager.favicon
+        
         self.state.language = self._language_manager.get_language()
         
         self.state.is_playing = False
@@ -222,6 +227,13 @@ class MRIViewerApp:
         self.state.tooltip_message = ""
         self.state.tooltip_style = HIDDEN_STYLE
 
+    @change("theme")
+    def on_theme_change(self, theme, **kwargs):
+        if theme == Theme.Light:
+            self.state.icon = asset_manager.icon_dark
+        else:
+            self.state.icon = asset_manager.icon_light
+
     @change("is_playing")
     @asynchronous.task
     async def on_is_playing_change(self, is_playing, **kwargs):
@@ -273,6 +285,12 @@ class MRIViewerApp:
     def on_push_camera(self, **kwargs):
         self.ctrl.push_camera()
         self.ctrl.update()
+
+    def on_change_theme(self, **kwargs):
+        if self.state.theme == Theme.Light:
+            self.state.theme = Theme.Dark
+        else:
+            self.state.theme = Theme.Light
 
     def on_picker(self, event, **kwargs):
         if self.state.picker_mode == PickerModes.Off:
@@ -377,15 +395,18 @@ class MRIViewerApp:
 
     @life_cycle.server_reload
     def _build_ui(self, **kwargs):
-        with SinglePageWithDrawerLayout(self._server) as layout:
+        with SinglePageWithDrawerLayout(self._server, vuetify_config=VUETIFY_CONFIG) as layout:
+            layout.root.theme = ("theme", DEFAULT_THEME)
+            
             # Icon
             with layout.icon as icon:
                 icon.click = None
                 with html.A(href="https://www.ikem.cz/", target="_blank"):
-                    html.Img(src=asset_manager.logo, height=50)
-
+                    html.Img(src=("icon",), height=35)
+            
             # Title
-            layout.title.set_text(APPLICATION_NAME)
+            with layout.title as title:
+                title.set_text(APPLICATION_NAME)
             
             # Toolbar
             with layout.toolbar:
@@ -394,10 +415,10 @@ class MRIViewerApp:
                 animation_icons(self)
                 vuetify3.VDivider(vertical=True, classes="mx-2")
                 vuetify3.VSpacer()
-                
-                vuetify3.VDivider(vertical=True, classes="mx-2")
+
+                vuetify3.VDivider(vertical=True)
                 picker_modes_icons()
-                vuetify3.VDivider(vertical=True, classes="mx-2")
+                vuetify3.VDivider(vertical=True)
                 toolbar_icons(self)
                 vuetify3.VDivider(vertical=True)
                 language_buttons()
