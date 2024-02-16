@@ -37,7 +37,7 @@ def translation_interaction(self):
         _, _, group, _ = self.current_file_information
         group.current_view = self._pipeline.get_camera_params()
     
-    with vuetify3.VCard(v_show="current_file_name != None", border=True, classes="ma-4"): 
+    with vuetify3.VCard(disabled=("ui_off",), border=True, classes="ma-4"): 
         with vuetify3.VCardTitle(
             "{{ language.section_translation_title }}",
             classes="d-flex justify-space-between bg-grey-darken-2 py-2"

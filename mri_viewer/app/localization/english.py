@@ -3,6 +3,12 @@ from .language import Language
 class English(Language):
     def __init__(self):
         super().__init__(
+            load_files_title="Load files",
+            load_files_from_pc="Load files from PC",
+            load_file_from_url="Load file from URL",
+            supported_file_formats="Supported formats: .vti",
+            load_file_button_title="Load",
+            cancel_button_title="Cancel",
             previous_file_tooltip="Show the previous file",
             player_tooltip="Play or pause the player",
             next_file_tooltip="Show the next file",
@@ -11,7 +17,6 @@ class English(Language):
             toggle_axes_tooltip="Toggle the axes",
             reset_camera_tooltip="Reset the view",
             change_theme_tooltip="Toggle the light and dark themes",
-            upload_files_title="Upload VTI Files",
             file_name_select_title="File",
             data_array_select_title="Data Array",
             representation_select_title="Representation",

@@ -3,6 +3,12 @@ import mri_viewer.app.constants as const
 class Language:
     def __init__(
         self,
+        load_files_title,
+        load_files_from_pc,
+        load_file_from_url,
+        supported_file_formats,
+        load_file_button_title,
+        cancel_button_title,
         previous_file_tooltip,
         player_tooltip,
         next_file_tooltip,
@@ -11,7 +17,6 @@ class Language:
         toggle_axes_tooltip,
         reset_camera_tooltip,
         change_theme_tooltip,
-        upload_files_title,
         file_name_select_title,
         data_array_select_title,
         representation_select_title,
@@ -53,6 +58,12 @@ class Language:
         rotation_factor_slider_title,
     ):
         self._words = {
+            "load_files_title": load_files_title,
+            "load_files_from_pc": load_files_from_pc,
+            "load_file_from_url": load_file_from_url,
+            "supported_file_formats": supported_file_formats,
+            "load_file_button_title": load_file_button_title,
+            "cancel_button_title": cancel_button_title,
             "previous_file_tooltip": previous_file_tooltip,
             "player_tooltip": player_tooltip,
             "next_file_tooltip": next_file_tooltip,
@@ -61,7 +72,6 @@ class Language:
             "toggle_axes_tooltip": toggle_axes_tooltip,
             "reset_camera_tooltip": reset_camera_tooltip,
             "change_theme_tooltip": change_theme_tooltip,
-            "upload_files_title": upload_files_title,
             "file_name_select_title": file_name_select_title,
             "data_array_select_title": data_array_select_title,
             "representation_select_title": representation_select_title,

@@ -3,6 +3,12 @@ from .language import Language
 class Czech(Language):
     def __init__(self):
         super().__init__(
+            load_files_title="Nahrát soubory",
+            load_files_from_pc="Nahrát soubory z PC",
+            load_file_from_url="Nahrát soubor z URL",
+            supported_file_formats="Podporované formáty: .vti",
+            load_file_button_title="Načíst",
+            cancel_button_title="Zavřít",
             previous_file_tooltip="Zobrazit předchozí snímek",
             player_tooltip="Přehrát či pozastavit sekvenci snímků",
             next_file_tooltip="Zobrazit následující snímek",
@@ -11,7 +17,6 @@ class Czech(Language):
             toggle_axes_tooltip="Zobrazit osy",
             reset_camera_tooltip="Obnovit původní zobrazení",
             change_theme_tooltip="Přepnout mezi světlým a tmavým režimem",
-            upload_files_title="Nahrát soubory VTI",
             file_name_select_title="Soubor",
             data_array_select_title="Datová složka",
             representation_select_title="Reprezentace",

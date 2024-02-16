@@ -39,6 +39,7 @@ class MRIViewerApp:
         self.state.player_on = False
         self.state.player_loop = False
         self.state.axes_on = True
+        self.state.dialog_on = True
         self.state.ui_player_off = True
         self.state.ui_picker_modes_off = True
         self.state.ui_off = True
@@ -83,6 +84,7 @@ class MRIViewerApp:
             # The user is trying to load another files
             self.toggle_player_ui()
         
+        self.state.dialog_on = False
         self.state.uploaded_files = None
         self.state.current_file_name = self._file_manager.get_first_file_name()
         self.state.current_file_name_items = self._file_manager.get_all_file_names()
@@ -328,6 +330,8 @@ class MRIViewerApp:
             
             # Toolbar
             with layout.toolbar:
+                load_files_dialog(self)
+                
                 animation_icons(self)
                 
                 picker_modes_icons()
@@ -338,8 +342,6 @@ class MRIViewerApp:
 
             # Sidebar
             with layout.drawer:
-                upload_files()
-                
                 file_name_select()
                 data_array_select()
                 representation_select()

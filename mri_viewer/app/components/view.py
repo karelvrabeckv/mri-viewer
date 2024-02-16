@@ -25,6 +25,10 @@ def view(self):
         self.state.picker_info_style = style.TOOLTIP if message else style.HIDDEN
 
     def on_interaction(client_camera, **kwargs):
+        if self.state.ui_off:
+            # There are no data
+            return
+        
         self.pipeline.set_camera_to_client_view(client_camera)
         
         _, _, group, _ = self.current_file_information
