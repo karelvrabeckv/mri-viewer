@@ -1,6 +1,6 @@
 from trame.widgets import vuetify3
 
-from ..constants import IKEM_COLOR
+import mri_viewer.app.constants as const
 
 def progress_bar():
     vuetify3.VProgressLinear(
@@ -8,7 +8,7 @@ def progress_bar():
         indeterminate=True,
         bg_opacity=1,
         bg_color="white",
-        color=IKEM_COLOR,
+        color=const.IKEM_COLOR,
         absolute=True,
         location="bottom",
     )

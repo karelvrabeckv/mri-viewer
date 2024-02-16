@@ -2,74 +2,53 @@ from .language import Language
 
 class English(Language):
     def __init__(self):
-        upload_vti_files_title = "Upload VTI Files"
-        vti_file_select_title = "File"
-        data_array_select_title = "Data Array"
-        representation_select_title = "Representation"
-        representation_select_item_points = "Points"
-        representation_select_item_slice = "Slice"
-        representation_select_item_surface = "Surface"
-        representation_select_item_surface_with_edges = "Surface with Edges"
-        representation_select_item_wireframe = "Wireframe"
-        point_information_title = "Point Information"
-        cell_information_title = "Cell Information"
-        x_axis_title = "X-Axis"
-        y_axis_title = "Y-Axis"
-        z_axis_title = "Z-Axis"
-        section_slice_title = "Slice"
-        slice_orientation_select_title = "Orientation"
-        slice_position_slider_title = "Position"
-        section_zoom_title = "Zoom"
-        zoom_in_tooltip = "Click to zoom in"
-        zoom_out_tooltip = "Click to zoom out"
-        section_translation_title = "Translation"
-        translate_x_axis_plus_tooltip = "Click to move forward along the X-Axis"
-        translate_x_axis_minus_tooltip = "Click to move backward along the X-Axis"
-        translate_y_axis_plus_tooltip = "Click to move forward along the Y-Axis"
-        translate_y_axis_minus_tooltip = "Click to move backward along the Y-Axis"
-        translate_z_axis_plus_tooltip = "Click to move forward along the Z-Axis"
-        translate_z_axis_minus_tooltip = "Click to move backward along the Z-Axis"
-        section_rotation_title = "Rotation"
-        rotate_x_axis_plus_tooltip = "Click to rotate positively around the X-Axis"
-        rotate_x_axis_minus_tooltip = "Click to rotate negatively around the X-Axis"
-        rotate_y_axis_plus_tooltip = "Click to rotate positively around the Y-Axis"
-        rotate_y_axis_minus_tooltip = "Click to rotate negatively around the Y-Axis"
-        rotate_z_axis_plus_tooltip = "Click to rotate positively around the Z-Axis"
-        rotate_z_axis_minus_tooltip = "Click to rotate negatively around the Z-Axis"
-        
         super().__init__(
-            upload_vti_files_title,
-            vti_file_select_title,
-            data_array_select_title,
-            representation_select_title,
-            representation_select_item_points,
-            representation_select_item_slice,
-            representation_select_item_surface,
-            representation_select_item_surface_with_edges,
-            representation_select_item_wireframe,
-            point_information_title,
-            cell_information_title,
-            x_axis_title,
-            y_axis_title,
-            z_axis_title,
-            section_slice_title,
-            slice_orientation_select_title,
-            slice_position_slider_title,
-            section_zoom_title,
-            zoom_in_tooltip,
-            zoom_out_tooltip,
-            section_translation_title,
-            translate_x_axis_plus_tooltip,
-            translate_x_axis_minus_tooltip,
-            translate_y_axis_plus_tooltip,
-            translate_y_axis_minus_tooltip,
-            translate_z_axis_plus_tooltip,
-            translate_z_axis_minus_tooltip,
-            section_rotation_title,
-            rotate_x_axis_plus_tooltip,
-            rotate_x_axis_minus_tooltip,
-            rotate_y_axis_plus_tooltip,
-            rotate_y_axis_minus_tooltip,
-            rotate_z_axis_plus_tooltip,
-            rotate_z_axis_minus_tooltip,
+            previous_file_tooltip="Show the previous file",
+            player_tooltip="Play or pause the player",
+            next_file_tooltip="Show the next file",
+            picker_mode_points_tooltip="Turn on the tooltip with information about POINTS after clicking on them",
+            picker_mode_cells_tooltip="Turn on the tooltip with information about CELLS after clicking on them",
+            toggle_axes_tooltip="Toggle the axes",
+            reset_camera_tooltip="Reset the view",
+            change_theme_tooltip="Toggle the light and dark themes",
+            upload_files_title="Upload VTI Files",
+            file_name_select_title="File",
+            data_array_select_title="Data Array",
+            representation_select_title="Representation",
+            representation_select_item_points="Points",
+            representation_select_item_slice="Slice",
+            representation_select_item_surface="Surface",
+            representation_select_item_surface_with_edges="Surface with Edges",
+            representation_select_item_wireframe="Wireframe",
+            point_information_title="Point Information",
+            cell_information_title="Cell Information",
+            x_axis_title="X-Axis",
+            y_axis_title="Y-Axis",
+            z_axis_title="Z-Axis",
+            section_slice_title="Slice",
+            slice_orientation_select_title="Orientation",
+            slice_position_slider_title="Position",
+            section_zoom_title="Zoom",
+            section_zoom_tooltip="You can also use the ROTATION WHEEL of your mouse for faster zooming",
+            zoom_in_tooltip="Click to zoom in",
+            zoom_out_tooltip="Click to zoom out",
+            zoom_factor_slider_title="Factor",
+            section_translation_title="Translation",
+            section_translation_tooltip="You can also press ALT + LEFT MOUSE BUTTON and MOVE for faster translation",
+            translate_x_axis_plus_tooltip="Click to move forward along the X-Axis",
+            translate_x_axis_minus_tooltip="Click to move backward along the X-Axis",
+            translate_y_axis_plus_tooltip="Click to move forward along the Y-Axis",
+            translate_y_axis_minus_tooltip="Click to move backward along the Y-Axis",
+            translate_z_axis_plus_tooltip="Click to move forward along the Z-Axis",
+            translate_z_axis_minus_tooltip="Click to move backward along the Z-Axis",
+            translation_factor_slider_title="Factor",
+            section_rotation_title="Rotation",
+            section_rotation_tooltip="You can also press LEFT MOUSE BUTTON and MOVE for faster rotation",
+            rotate_x_axis_plus_tooltip="Click to rotate positively around the X-Axis",
+            rotate_x_axis_minus_tooltip="Click to rotate negatively around the X-Axis",
+            rotate_y_axis_plus_tooltip="Click to rotate positively around the Y-Axis",
+            rotate_y_axis_minus_tooltip="Click to rotate negatively around the Y-Axis",
+            rotate_z_axis_plus_tooltip="Click to rotate positively around the Z-Axis",
+            rotate_z_axis_minus_tooltip="Click to rotate negatively around the Z-Axis",
+            rotation_factor_slider_title="Factor",
         )

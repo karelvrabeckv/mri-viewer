@@ -1,9 +1,9 @@
-TOOLTIP_STYLE = {
+TOOLTIP = {
     "position": "absolute",
-    "right": "20px",
     "bottom": "20px",
+    "right": "20px",
 }
 
-HIDDEN_STYLE = {
+HIDDEN = {
     "display": "none",
 }

@@ -1,5 +1,6 @@
-from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 from functools import reduce
+
+from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 
 from .file_group import FileGroup
 from .file import File
@@ -35,11 +36,11 @@ class FileManager:
         
         if num_of_point_arrays:
             file.data = point_data
-            file.default_array = point_data.GetScalars().GetName()
+            file.data_array = point_data.GetScalars().GetName()
             file.data_arrays = [point_data.GetArray(i).GetName() for i in range(num_of_point_arrays)]
         elif num_of_cell_arrays:
             file.data = cell_data
-            file.default_array = cell_data.GetScalars().GetName()
+            file.data_array = cell_data.GetScalars().GetName()
             file.data_arrays = [cell_data.GetArray(i).GetName() for i in range(num_of_cell_arrays)]    
 
         return file
@@ -90,6 +91,7 @@ class FileManager:
             file_names = []
             for group in self._groups:
                 file_names += group.get_all_file_names()
+
             return file_names
         return []
 
@@ -99,5 +101,6 @@ class FileManager:
             group = self._groups[group_index]
             file_index = group.get_all_file_names().index(file_name)
             file = group.files[file_name]
+
             return file, file_index, group, group_index
         return None

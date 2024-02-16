@@ -2,24 +2,19 @@ from vtkmodules.vtkCommonColor import vtkNamedColors
 from vtkmodules.vtkCommonCore import vtkLookupTable
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
 from vtkmodules.vtkRenderingCore import (
+    vtkColorTransferFunction,
     vtkRenderer,
     vtkRenderWindow,
     vtkRenderWindowInteractor,
-    vtkColorTransferFunction,
 )
 
-from ..constants import (
-    BACKGROUND_COLOR,
-    COLD_TEMPERATURE_COLOR,
-    LUKEWARM_TEMPERATURE_COLOR,
-    HOT_TEMPERATURE_COLOR,
-)
+import mri_viewer.app.constants as const
 
 class PipelineBuilder:
     def create_renderer(self):
         renderer = vtkRenderer()
         
-        renderer.SetBackground(vtkNamedColors().GetColor3d(BACKGROUND_COLOR))
+        renderer.SetBackground(vtkNamedColors().GetColor3d(const.BACKGROUND_COLOR))
         
         return renderer
          
@@ -43,9 +38,9 @@ class PipelineBuilder:
         
         color_transfer_function.SetColorSpaceToDiverging()
         
-        color_transfer_function.AddRGBPoint(0.0, *COLD_TEMPERATURE_COLOR)
-        color_transfer_function.AddRGBPoint(0.5, *LUKEWARM_TEMPERATURE_COLOR)
-        color_transfer_function.AddRGBPoint(1.0, *HOT_TEMPERATURE_COLOR)
+        color_transfer_function.AddRGBPoint(0.0, *const.COLD_TEMPERATURE_COLOR)
+        color_transfer_function.AddRGBPoint(0.5, *const.LUKEWARM_TEMPERATURE_COLOR)
+        color_transfer_function.AddRGBPoint(1.0, *const.HOT_TEMPERATURE_COLOR)
         
         return color_transfer_function
 

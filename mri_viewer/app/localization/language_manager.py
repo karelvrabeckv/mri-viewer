@@ -1,11 +1,11 @@
 from .czech import Czech
 from .english import English
 
-from ..constants import Languages, DEFAULT_LANGUAGE
+import mri_viewer.app.constants as const
 
 class LanguageManager:
     def __init__(self):
-        self._language = DEFAULT_LANGUAGE
+        self._language = const.DEFAULT_LANGUAGE
         
         self._czech = Czech()
         self._english = English()
@@ -19,9 +19,9 @@ class LanguageManager:
         self._language = language
 
     def get_language(self):
-        if self._language == Languages.Czech:
+        if self._language == const.Languages.Czech:
             return self._czech.words
-        elif self._language == Languages.English:
+        elif self._language == const.Languages.English:
             return self._english.words
         
         return None

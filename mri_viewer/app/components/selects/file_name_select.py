@@ -1,10 +1,10 @@
 from trame.widgets import vuetify3
 
-def data_array_select():
+def file_name_select():
     vuetify3.VSelect(
-        label=("language.data_array_select_title",),
-        v_model=("current_data_array", None),
-        items=("current_data_array_items", []),
+        label=("language.file_name_select_title",),
+        v_model=("current_file_name", None),
+        items=("current_file_name_items", []),
         disabled=("ui_off",),
         variant="outlined",
         hide_details=True,

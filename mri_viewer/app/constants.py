@@ -20,8 +20,8 @@ VUETIFY_CONFIG = {
 }
 
 IKEM_COLOR = "#e2001a"
-BACKGROUND_COLOR = "Gainsboro"
 AXES_COLOR = (0.0, 0.0, 0.0)
+BACKGROUND_COLOR = "Gainsboro"
 
 COLD_TEMPERATURE_COLOR = (0.230, 0.299, 0.754)
 LUKEWARM_TEMPERATURE_COLOR = (0.865, 0.865, 0.865)
@@ -31,8 +31,6 @@ class Zoom:
     In = "0"
     Out = "1"
 
-ZOOM_FACTOR = 0.1
-
 class Directions:
     XAxisPlus = "0"
     XAxisMinus = "1"
@@ -41,7 +39,20 @@ class Directions:
     ZAxisPlus = "4"
     ZAxisMinus = "5"
 
-TRANSLATION_FACTOR = 10.0
+ZOOM_STEP = 1
+DEFAULT_ZOOM_FACTOR = 1
+MIN_ZOOM_FACTOR = 1
+MAX_ZOOM_FACTOR = 9
+
+TRANSLATION_STEP = 10
+DEFAULT_TRANSLATION_FACTOR = 10
+MIN_TRANSLATION_FACTOR = 10
+MAX_TRANSLATION_FACTOR = 90
+
+ROTATION_STEP = 10
+DEFAULT_ROTATION_FACTOR = 30
+MIN_ROTATION_FACTOR = 10
+MAX_ROTATION_FACTOR = 350
 
 class Languages:
     Czech = "CZ"
@@ -72,3 +83,9 @@ class PickerModes:
     Cells = "2"
 
 DEFAULT_PICKER_MODE = PickerModes.Off
+
+class CameraParams:
+    Position = "position"
+    FocalPoint = "focal_point"
+    ViewUp = "view_up"
+    ViewAngle = "view_angle"

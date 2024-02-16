@@ -24,12 +24,12 @@ class File:
         self._data = data
 
     @property
-    def default_array(self):
-        return self._default_array 
+    def data_array(self):
+        return self._data_array
 
-    @default_array.setter 
-    def default_array(self, default_array): 
-        self._default_array = default_array
+    @data_array.setter 
+    def data_array(self, data_array): 
+        self._data_array = data_array
 
     @property
     def data_arrays(self):
