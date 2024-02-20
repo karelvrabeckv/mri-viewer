@@ -32,7 +32,7 @@ class MRIViewerApp:
         self._current_group_index: int = None
         
         self.state.trame__title = const.APPLICATION_NAME
-        self.state.trame__favicon = asset_manager.favicon
+        self.state.trame__favicon = asset_manager.logo
         
         self.state.language = self._language_manager.get_language()
 
@@ -72,21 +72,44 @@ class MRIViewerApp:
     def current_file_information(self):
         return self._current_file, self._current_file_index, self._current_group, self._current_group_index
 
-    @change("uploaded_files")
-    def on_uploaded_files_change(self, uploaded_files, **kwargs):
-        if uploaded_files is None:
+    @change("files_pc")
+    def on_files_pc_change(self, files_pc, **kwargs):
+        self.state.files_pc_error_message = ""
+
+    def on_files_pc_load(self):
+        # Load all the files uploaded by a user
+        if not self._file_manager.load_files_from_pc(self.state.files_pc):
+            self.state.files_pc_error_message = self.state.language["load_files_from_pc_error"]
             return
 
-        # Load all the files uploaded by a user        
-        self._file_manager.load_new_files(uploaded_files)
-        
+        self.post_loading_actions()
+    
+    @change("file_url")
+    def on_file_url_change(self, file_url, **kwargs):
+        self.state.file_url_error_message = ""
+    
+    def on_file_url_load(self):
+        # Load a file from the URL typed by a user
+        if not self._file_manager.load_file_from_url(self.state.file_url):
+            self.state.file_url_error_message = self.state.language["load_file_from_url_error"]
+            return
+
+        self.post_loading_actions()
+
+    def post_loading_actions(self):
         if self.state.current_file_name:
             # The user is trying to load another files
             self.toggle_player_ui()
         
         self.state.dialog_on = False
-        self.state.uploaded_files = None
-        self.state.current_file_name = self._file_manager.get_first_file_name()
+        
+        self.state.files_pc = None
+        self.state.files_pc_error_message = ""
+        
+        self.state.file_url = None
+        self.state.file_url_error_message = ""
+        
+        self.state.current_file_name = self._file_manager.latest
         self.state.current_file_name_items = self._file_manager.get_all_file_names()
 
     @change("current_file_name")
@@ -225,6 +248,14 @@ class MRIViewerApp:
         elif self.state.picker_mode == const.PickerModes.Cells:
             self.state.picker_info_title = self.state.language["cell_information_title"]
  
+        # Change the error message for uploading files locally
+        if self.state.files_pc_error_message:
+            self.state.files_pc_error_message = self.state.language["load_files_from_pc_error"]
+ 
+        # Change the error message for uploading file remotely
+        if self.state.file_url_error_message:
+            self.state.file_url_error_message = self.state.language["load_file_from_url_error"]
+ 
         if self.state.current_file_name:
             # Update the server camera
             self._pipeline.render_window.Render()
@@ -252,13 +283,6 @@ class MRIViewerApp:
         self.state.picker_info_title = ""
         self.state.picker_info_message = ""
         self.state.picker_info_style = style.HIDDEN
-
-    @change("theme")
-    def on_theme_change(self, theme, **kwargs):
-        if theme == const.Theme.Light:
-            self.state.icon = asset_manager.icon_dark
-        else:
-            self.state.icon = asset_manager.icon_light
 
     @change("player_on")
     @asynchronous.task
@@ -321,8 +345,8 @@ class MRIViewerApp:
             # Icon
             with layout.icon as icon:
                 icon.click = None
-                with html.A(href="https://www.ikem.cz/", target="_blank"):
-                    html.Img(src=("icon",), height=35)
+                with html.A(href="https://www.ikem.cz/", target="_blank", classes="d-flex align-center"):
+                    html.Img(src=asset_manager.logo, height=48)
 
             # Title
             with layout.title as title:

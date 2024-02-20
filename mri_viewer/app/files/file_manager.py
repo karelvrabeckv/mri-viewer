@@ -1,4 +1,4 @@
-from functools import reduce
+import re, requests
 
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 
@@ -7,30 +7,98 @@ from .file import File
 
 class FileManager:
     def __init__(self):
+        self._latest = None
         self._groups = []
         self._file_to_group_mapping = dict()
 
-    def load_new_files(self, input_raw_files):
-        for input_raw_file in input_raw_files:
-            self.load_new_file(input_raw_file)
+    @property
+    def latest(self):
+        return self._latest
 
-    def load_new_file(self, input_raw_file):
-        file = self.create_new_file(input_raw_file)
+    def load_files_from_pc(self, input_raw_files):
+        if not input_raw_files:
+            return False
+        
+        for position, input_raw_file in enumerate(input_raw_files):
+            if not self.load_file_from_pc(position, input_raw_file):
+                return False
+        return True
 
+    def load_file_from_pc(self, position, input_raw_file):
+        file = self.get_file_from_pc(input_raw_file)
+        if not file:
+            return False
+        
+        if position == 0:
+            self._latest = file.name
+        self.assign_file_to_group(file)
+        return True
+
+    def load_file_from_url(self, url):
+        file = self.get_file_from_url(url)
+        if not file:
+            return False
+        
+        self._latest = file.name
+        self.assign_file_to_group(file)
+        return True
+
+    def assign_file_to_group(self, file):
         if self.add_to_matching_group(file) is False:
             self.add_to_new_group(file)
 
-    def create_new_file(self, input_raw_file):
+    def get_file_from_pc(self, input_raw_file):
+        file_name = input_raw_file.get("name")
+        if not str(file_name).endswith(".vti"):
+            return False
+        
+        file_reader = self.create_new_reader(input_raw_file.get("content"))
+        if not file_reader:
+            return False
+        
+        return self.create_new_file(file_name, file_reader)
+
+    def get_file_from_url(self, url):
+        try:
+            response = requests.get(url)
+        except:
+            return False
+        
+        occurrences = re.findall("filename=\"(.+)\"", response.headers.get("content-disposition") or "")
+        file_name = occurrences[0] if len(occurrences) else ""
+        if not str(file_name).endswith(".vti"):
+            return False
+        
+        file_reader = self.create_new_reader(response.text)
+        if not file_reader:
+            return False
+
+        return self.create_new_file(file_name, file_reader)
+        
+    def create_new_reader(self, file_content):
         reader = vtkXMLImageDataReader()
         reader.ReadFromInputStringOn()
-        reader.SetInputString(reduce(lambda a, b: a + b, input_raw_file.get("content")))
+        
+        data = file_content
+        data_type = type(file_content)
+        
+        if data_type is str or (isinstance(data, list) and all(isinstance(i, str) for i in data)):
+            reader.SetInputString("".join(data))
+        elif data_type is bytes or (isinstance(data, list) and all(isinstance(i, bytes) for i in data)):
+            reader.SetInputString(b"".join(data))
+        else:
+            return False
+        
         reader.Update()
         
-        file = File()
-        file.name = input_raw_file.get("name")
-        file.reader = reader
+        return reader
         
-        image_data = reader.GetOutput()
+    def create_new_file(self, file_name, file_reader):
+        file = File()
+        file.name = file_name
+        file.reader = file_reader
+        
+        image_data = file_reader.GetOutput()
         point_data, cell_data = image_data.GetPointData(), image_data.GetCellData()
         num_of_point_arrays, num_of_cell_arrays = point_data.GetNumberOfArrays(), cell_data.GetNumberOfArrays()
         
@@ -57,7 +125,6 @@ class FileManager:
                 self._file_to_group_mapping[file.name] = i
                 
                 return True
-        
         return False
 
     def any_group(self):
@@ -71,7 +138,6 @@ class FileManager:
         for i in range(len(file_data_arrays)):
             if file_data_arrays[i] != group_data_arrays[i]:
                 return False
-        
         return True
 
     def add_to_new_group(self, file: File):

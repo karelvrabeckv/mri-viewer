@@ -5,7 +5,9 @@ class English(Language):
         super().__init__(
             load_files_title="Load files",
             load_files_from_pc="Load files from PC",
+            load_files_from_pc_error="An error has occurred while reading the uploaded file(s). Please check if the format of the file(s) is correct and not corrupted.",
             load_file_from_url="Load file from URL",
+            load_file_from_url_error="An error has occurred while fetching the remote file. Please check your internet connection and the URL entered. It is also possible that the format of the remote file is not correct or is corrupted.",
             supported_file_formats="Supported formats: .vti",
             load_file_button_title="Load",
             cancel_button_title="Cancel",
