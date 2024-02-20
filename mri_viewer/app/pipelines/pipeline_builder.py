@@ -1,6 +1,8 @@
 from vtkmodules.vtkCommonColor import vtkNamedColors
 from vtkmodules.vtkCommonCore import vtkLookupTable
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
+from vtkmodules.vtkInteractionWidgets import vtkOrientationMarkerWidget
+from vtkmodules.vtkRenderingAnnotation import vtkAxesActor
 from vtkmodules.vtkRenderingCore import (
     vtkColorTransferFunction,
     vtkRenderer,
@@ -32,6 +34,17 @@ class PipelineBuilder:
         render_window_interactor.SetRenderWindow(render_window)
         
         return render_window_interactor
+
+    def create_axes_widget(self, render_window_interactor: vtkRenderWindowInteractor):
+        axes_widget = vtkOrientationMarkerWidget()
+        
+        axes_widget.SetOrientationMarker(vtkAxesActor())
+        axes_widget.SetInteractor(render_window_interactor)
+        axes_widget.SetViewport(0.0, 0.0, 0.35, 0.35)
+        
+        axes_widget.EnabledOn()
+        
+        return axes_widget
 
     def create_color_transfer_function(self):
         color_transfer_function = vtkColorTransferFunction()

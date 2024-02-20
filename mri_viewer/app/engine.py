@@ -237,11 +237,6 @@ class MRIViewerApp:
         self._language_manager.language = current_language
         self.state.language = self._language_manager.get_language()
         
-        # Change the titles of axes
-        self._pipeline.cube_axes_actor.SetXTitle(self.state.language["x_axis_title"])
-        self._pipeline.cube_axes_actor.SetYTitle(self.state.language["y_axis_title"])
-        self._pipeline.cube_axes_actor.SetZTitle(self.state.language["z_axis_title"])
-
         # Change the title of picker information
         if self.state.picker_mode == const.PickerModes.Points:
             self.state.picker_info_title = self.state.language["point_information_title"]

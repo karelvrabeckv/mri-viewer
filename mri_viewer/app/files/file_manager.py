@@ -147,11 +147,6 @@ class FileManager:
         self._file_to_group_mapping[file.name] = len(self._groups)        
         self._groups.append(group)
         
-    def get_first_file_name(self):
-        if self.any_group():
-            return list(self._groups[0].files.keys())[0]
-        return ""
-
     def get_all_file_names(self):
         if self.any_group():
             file_names = []

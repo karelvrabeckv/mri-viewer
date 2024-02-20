@@ -25,7 +25,7 @@ def toolbar_icons(self):
     
     button(
         disabled=("ui_off",),
-        icon="mdi-axis-arrow",
+        icon="mdi-axis-arrow-info",
         border=False,
         tooltip=("language.toggle_axes_tooltip",),
         classes="mx-2",

@@ -37,6 +37,7 @@ def view(self):
     with vuetify3.VContainer(fluid=True, classes="pa-0 fill-height"):
         view = vtk.VtkLocalView(
             self.pipeline.render_window,
+            widgets=[self.pipeline.axes_widget],
             interactor_events=("events", ["LeftButtonPress", "EndAnimation"]),
             LeftButtonPress=(on_picker, "[utils.vtk.event($event)]"),
             EndAnimation=(on_interaction, "[$event.pokedRenderer.getActiveCamera().get()]")

@@ -23,6 +23,7 @@ class Pipeline(PipelineBuilder):
         self._renderer = self.create_renderer()
         self._render_window = self.create_render_window(self._renderer)
         self._render_window_interactor = self.create_render_window_interactor(self._render_window)
+        self._axes_widget = self.create_axes_widget(self._render_window_interactor)
         self._color_transfer_function = self.create_color_transfer_function()
         self._lookup_table = self.create_lookup_table(self._color_transfer_function)
         
@@ -49,25 +50,17 @@ class Pipeline(PipelineBuilder):
         return self._render_window
 
     @property
-    def data_set_mapper(self):
-        return self._data_set_mapper
+    def axes_widget(self):
+        return self._axes_widget
 
     @property
     def actor(self):
         return self._actor
 
     @property
-    def cube_axes_actor(self):
-        return self._cube_axes_actor
-
-    @property
     def slice(self):
         return self._slice
 
-    @property
-    def slice_poly_data_mapper(self):
-        return self._slice_poly_data_mapper
-      
     @property
     def slice_actor(self):
         return self._slice_actor
@@ -87,7 +80,11 @@ class Pipeline(PipelineBuilder):
         self._renderer.AddActor(self._actor)
         self._renderer.ResetCamera()
 
-    def build_cube_axes_actor(self):        
+    def build_cube_axes_actor(self):
+        self._cube_axes_actor.SetXTitle("X")
+        self._cube_axes_actor.SetYTitle("Y")
+        self._cube_axes_actor.SetZTitle("Z")
+        
         self._cube_axes_actor.GetXAxesLinesProperty().SetColor(*const.AXES_COLOR)
         self._cube_axes_actor.GetYAxesLinesProperty().SetColor(*const.AXES_COLOR)
         self._cube_axes_actor.GetZAxesLinesProperty().SetColor(*const.AXES_COLOR)
