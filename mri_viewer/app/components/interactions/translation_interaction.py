@@ -6,7 +6,7 @@ import mri_viewer.app.constants as const
 
 def translation_interaction(self):
     def translate(direction):
-        camera = self._pipeline.renderer.GetActiveCamera()
+        camera = self.pipeline.renderer.GetActiveCamera()
         offset_x, offset_y, offset_z = 0.0, 0.0, 0.0
 
         if direction == const.Directions.XAxisPlus:
@@ -30,12 +30,12 @@ def translation_interaction(self):
         camera.SetPosition(*new_camera_position)
         camera.SetFocalPoint(*new_focal_point_position)
         
-        self._pipeline.renderer.SetActiveCamera(camera)
-        self._pipeline.render_window.Render()
+        self.pipeline.renderer.SetActiveCamera(camera)
+        self.pipeline.render_window.Render()
         self.ctrl.push_camera()
         
         _, _, group, _ = self.current_file_information
-        group.current_view = self._pipeline.get_camera_params()
+        group.current_view = self.pipeline.get_camera_params()
     
     with vuetify3.VCard(disabled=("ui_off",), border=True, classes="ma-4"): 
         with vuetify3.VCardTitle(
@@ -53,46 +53,46 @@ def translation_interaction(self):
             with vuetify3.VRow(justify="center", classes="my-4"):
                 html.Div("X:", classes="d-flex align-center text-body-1 mx-1")
                 button(
-                    icon="mdi-plus",
-                    tooltip=("language.translate_x_axis_plus_tooltip",),
-                    classes="mx-1",
-                    click=(translate, f"['{const.Directions.XAxisPlus}']"),
-                )
-                button(
                     icon="mdi-minus",
                     tooltip=("language.translate_x_axis_minus_tooltip",),
                     classes="mx-1",
                     click=(translate, f"['{const.Directions.XAxisMinus}']"),
                 )
+                button(
+                    icon="mdi-plus",
+                    tooltip=("language.translate_x_axis_plus_tooltip",),
+                    classes="mx-1",
+                    click=(translate, f"['{const.Directions.XAxisPlus}']"),
+                )
 
             with vuetify3.VRow(justify="center", classes="my-4"):
                 html.Div("Y:", classes="d-flex align-center text-body-1 mx-1")
-                button(
-                    icon="mdi-plus",
-                    tooltip=("language.translate_y_axis_plus_tooltip",),
-                    classes="mx-1",
-                    click=(translate, f"['{const.Directions.YAxisPlus}']"),
-                )
                 button(
                     icon="mdi-minus",
                     tooltip=("language.translate_y_axis_minus_tooltip",),
                     classes="mx-1",
                     click=(translate, f"['{const.Directions.YAxisMinus}']"),
                 )
+                button(
+                    icon="mdi-plus",
+                    tooltip=("language.translate_y_axis_plus_tooltip",),
+                    classes="mx-1",
+                    click=(translate, f"['{const.Directions.YAxisPlus}']"),
+                )
 
             with vuetify3.VRow(justify="center", classes="my-4"):
                 html.Div("Z:", classes="d-flex align-center text-body-1 mx-1")
-                button(
-                    icon="mdi-plus",
-                    tooltip=("language.translate_z_axis_plus_tooltip",),
-                    classes="mx-1",
-                    click=(translate, f"['{const.Directions.ZAxisPlus}']"),
-                )
                 button(
                     icon="mdi-minus",
                     tooltip=("language.translate_z_axis_minus_tooltip",),
                     classes="mx-1",
                     click=(translate, f"['{const.Directions.ZAxisMinus}']"),
+                )
+                button(
+                    icon="mdi-plus",
+                    tooltip=("language.translate_z_axis_plus_tooltip",),
+                    classes="mx-1",
+                    click=(translate, f"['{const.Directions.ZAxisPlus}']"),
                 )
 
             with vuetify3.VRow(justify="center", classes="px-2 pb-4"):

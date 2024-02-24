@@ -6,7 +6,7 @@ import mri_viewer.app.constants as const
 
 def zoom_interaction(self):
     def zoom(direction):
-        camera = self._pipeline.renderer.GetActiveCamera()
+        camera = self.pipeline.renderer.GetActiveCamera()
         
         if direction == const.Zoom.In:
             for _ in range(self.state.current_zoom_factor):
@@ -15,12 +15,12 @@ def zoom_interaction(self):
             for _ in range(self.state.current_zoom_factor):
                 camera.Zoom(1 - 0.1)
         
-        self._pipeline.renderer.SetActiveCamera(camera)
-        self._pipeline.render_window.Render()
+        self.pipeline.renderer.SetActiveCamera(camera)
+        self.pipeline.render_window.Render()
         self.ctrl.push_camera()
 
         _, _, group, _ = self.current_file_information
-        group.current_view = self._pipeline.get_camera_params()
+        group.current_view = self.pipeline.get_camera_params()
 
     with vuetify3.VCard(disabled=("ui_off",), border=True, classes="ma-4"):
         with vuetify3.VCardTitle(
@@ -37,16 +37,16 @@ def zoom_interaction(self):
         with vuetify3.VCardText():
             with vuetify3.VRow(justify="center", classes="my-4"):
                 button(
-                    icon="mdi-plus",
-                    tooltip=("language.zoom_in_tooltip",),
-                    classes="mx-1",
-                    click=(zoom, f"['{const.Zoom.In}']"),
-                )
-                button(
                     icon="mdi-minus",
                     tooltip=("language.zoom_out_tooltip",),
                     classes="mx-1",
                     click=(zoom, f"['{const.Zoom.Out}']"),
+                )
+                button(
+                    icon="mdi-plus",
+                    tooltip=("language.zoom_in_tooltip",),
+                    classes="mx-1",
+                    click=(zoom, f"['{const.Zoom.In}']"),
                 )
 
             with vuetify3.VRow(justify="center", classes="px-2 pb-4"):

@@ -1,2 +1,2 @@
 def test_import():
-    from mri_viewer import main  # noqa: F401
+    from mri_viewer.app import main # noqa: F401

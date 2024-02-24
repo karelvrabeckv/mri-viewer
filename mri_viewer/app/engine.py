@@ -1,5 +1,5 @@
 from trame.app import asynchronous, get_server
-from trame.decorators import change, life_cycle, TrameApp
+from trame.decorators import change, TrameApp
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import html, trame, vuetify3
 
@@ -20,21 +20,24 @@ import mri_viewer.app.styles as style
 @TrameApp()
 class MRIViewerApp:
     def __init__(self, server=None):
-        self._server = get_server(server, client_type="vue3")
-        self._file_manager = FileManager()
-        self._language_manager = LanguageManager()
-        self._pipeline = Pipeline()
-        self._ui = self._build_ui()
+        self.__server = get_server(server, client_type="vue3")
+        if self.__server.hot_reload:
+            self.__server.controller.on_server_reload.add(self.__build_ui)
         
-        self._current_file: File = None
-        self._current_file_index: int = None
-        self._current_group: FileGroup = None
-        self._current_group_index: int = None
+        self.__file_manager = FileManager()
+        self.__language_manager = LanguageManager()
+        self.__pipeline = Pipeline()
+        self.__ui = self.__build_ui()
+        
+        self.__current_file: File = None
+        self.__current_file_index: int = None
+        self.__current_group: FileGroup = None
+        self.__current_group_index: int = None
         
         self.state.trame__title = const.APPLICATION_NAME
         self.state.trame__favicon = asset_manager.logo
         
-        self.state.language = self._language_manager.get_language()
+        self.state.language = self.__language_manager.get_language()
 
         self.state.player_on = False
         self.state.player_loop = False
@@ -54,23 +57,27 @@ class MRIViewerApp:
 
     @property
     def server(self):
-        return self._server
+        return self.__server
 
     @property
     def state(self):
-        return self._server.state
+        return self.__server.state
 
     @property
     def ctrl(self):
-        return self._server.controller
+        return self.__server.controller
     
     @property
     def pipeline(self):
-        return self._pipeline
-    
+        return self.__pipeline
+
+    @property
+    def ui(self):
+        return self.__ui
+
     @property
     def current_file_information(self):
-        return self._current_file, self._current_file_index, self._current_group, self._current_group_index
+        return self.__current_file, self.__current_file_index, self.__current_group, self.__current_group_index
 
     @change("files_pc")
     def on_files_pc_change(self, files_pc, **kwargs):
@@ -78,7 +85,7 @@ class MRIViewerApp:
 
     def on_files_pc_load(self):
         # Load all the files uploaded by a user
-        if not self._file_manager.load_files_from_pc(self.state.files_pc):
+        if not self.__file_manager.load_files_from_pc(self.state.files_pc):
             self.state.files_pc_error_message = self.state.language["load_files_from_pc_error"]
             return
 
@@ -90,7 +97,7 @@ class MRIViewerApp:
     
     def on_file_url_load(self):
         # Load a file from the URL typed by a user
-        if not self._file_manager.load_file_from_url(self.state.file_url):
+        if not self.__file_manager.load_file_from_url(self.state.file_url):
             self.state.file_url_error_message = self.state.language["load_file_from_url_error"]
             return
 
@@ -109,8 +116,8 @@ class MRIViewerApp:
         self.state.file_url = None
         self.state.file_url_error_message = ""
         
-        self.state.current_file_name = self._file_manager.latest
-        self.state.current_file_name_items = self._file_manager.get_all_file_names()
+        self.state.current_file_name = self.__file_manager.latest
+        self.state.current_file_name_items = self.__file_manager.get_all_file_names()
 
     @change("current_file_name")
     def on_current_file_name_change(self, current_file_name: str, **kwargs):
@@ -127,16 +134,16 @@ class MRIViewerApp:
         self.state.current_slice_position = group.slice_position
 
         # Update the server camera
-        self._pipeline.set_camera_to_initial_view()
-        self._pipeline.render_file(file, group.data_array, group.slice_orientation, group.slice_position)
+        self.__pipeline.set_camera_to_initial_view()
+        self.__pipeline.render_file(file, group.data_array, group.slice_orientation, group.slice_position)
 
         if group.default_view is None:
             # Save current camera parameters
-            group.default_view = self._pipeline.get_camera_params()
-            group.current_view = self._pipeline.get_camera_params()
+            group.default_view = self.__pipeline.get_camera_params()
+            group.current_view = self.__pipeline.get_camera_params()
         else:
             # Load saved camera parameters
-            self._pipeline.set_camera_to_group_current_view(group)
+            self.__pipeline.set_camera_to_group_current_view(group)
 
         if not self.state.player_on:
             # Transfer camera from server to client
@@ -158,7 +165,7 @@ class MRIViewerApp:
         
         # Render the particular data array
         file, _, group, _ = self.current_file_information
-        self._pipeline.render_data_array(file, current_data_array)
+        self.__pipeline.render_data_array(file, current_data_array)
         
         # Set the data array as the default of the group
         group.data_array = current_data_array
@@ -172,14 +179,14 @@ class MRIViewerApp:
         
         # Render the particular representation
         _, _, group, _ = self.current_file_information
-        self._pipeline.render_representation(current_representation)
+        self.__pipeline.render_representation(current_representation)
         
         # Set the representation as the default of the group
         group.representation = current_representation
         
         if current_representation == const.Representation.Slice:
-            self._pipeline.actor.VisibilityOff()
-            self._pipeline.slice_actor.VisibilityOn()
+            self.__pipeline.actor.VisibilityOff()
+            self.__pipeline.slice_actor.VisibilityOn()
         
         self.toggle_picker_modes_ui()
 
@@ -207,7 +214,7 @@ class MRIViewerApp:
         self.state.current_slice_position = const.DEFAULT_SLICE_POSITION
 
         # Render the particular slice
-        self._pipeline.render_slice(current_slice_orientation, const.DEFAULT_SLICE_POSITION, max_x, max_y, max_z)
+        self.__pipeline.render_slice(current_slice_orientation, const.DEFAULT_SLICE_POSITION, max_x, max_y, max_z)
 
         # Set the slice orientation as the default of the group
         group.slice_orientation = current_slice_orientation
@@ -224,7 +231,7 @@ class MRIViewerApp:
         max_x, max_y, max_z = image_data.GetDimensions()
 
         # Render the particular slice
-        self._pipeline.render_slice(group.slice_orientation, current_slice_position, max_x, max_y, max_z)
+        self.__pipeline.render_slice(group.slice_orientation, current_slice_position, max_x, max_y, max_z)
         
         # Set the slice position as the default of the group
         group.slice_position = current_slice_position
@@ -234,8 +241,8 @@ class MRIViewerApp:
     @change("current_language")
     def on_current_language_change(self, current_language, **kwargs):
         # Load the vocabulary of the current language
-        self._language_manager.language = current_language
-        self.state.language = self._language_manager.get_language()
+        self.__language_manager.language = current_language
+        self.state.language = self.__language_manager.get_language()
         
         # Change the title of picker information
         if self.state.picker_mode == const.PickerModes.Points:
@@ -253,7 +260,7 @@ class MRIViewerApp:
  
         if self.state.current_file_name:
             # Update the server camera
-            self._pipeline.render_window.Render()
+            self.__pipeline.render_window.Render()
             
             # Update the client camera
             _, _, group, _ = self.current_file_information
@@ -270,8 +277,8 @@ class MRIViewerApp:
         width = int(size["width"] * pixel_ratio)
         height = int(size["height"] * pixel_ratio)
 
-        self._pipeline.render_window.SetSize(width, height)
-        self._pipeline.render_window.Render()
+        self.__pipeline.render_window.SetSize(width, height)
+        self.__pipeline.render_window.Render()
 
     @change("picker_mode")
     def on_picker_mode_change(self, picker_mode, **kwargs):
@@ -301,17 +308,17 @@ class MRIViewerApp:
             self.state.player_loop = False
 
     def load_current_file_information(self):
-        file, file_index, group, group_index = self._file_manager.get_file(self.state.current_file_name)
+        file, file_index, group, group_index = self.__file_manager.get_file(self.state.current_file_name)
 
-        self._current_file = file
-        self._current_file_index = file_index
-        self._current_group = group
-        self._current_group_index = group_index
+        self.__current_file = file
+        self.__current_file_index = file_index
+        self.__current_group = group
+        self.__current_group_index = group_index
 
     def update_client_camera(self, group: FileGroup):
-        self._pipeline.set_camera_to_group_default_view(group)
+        self.__pipeline.set_camera_to_group_default_view(group)
         self.ctrl.update()
-        self._pipeline.set_camera_to_group_current_view(group)
+        self.__pipeline.set_camera_to_group_current_view(group)
 
     def toggle_player_ui(self):
         _, _, group, _ = self.current_file_information
@@ -332,9 +339,8 @@ class MRIViewerApp:
         else:
             self.state.ui_picker_modes_off = False
 
-    @life_cycle.server_reload
-    def _build_ui(self, **kwargs):
-        with SinglePageWithDrawerLayout(self._server, vuetify_config=const.VUETIFY_CONFIG) as layout:
+    def __build_ui(self, *args, **kwargs):
+        with SinglePageWithDrawerLayout(self.__server, vuetify_config=const.VUETIFY_CONFIG) as layout:
             layout.root.theme = ("theme", const.DEFAULT_THEME)
             
             # Icon

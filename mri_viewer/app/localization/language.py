@@ -56,7 +56,7 @@ class Language:
         rotate_z_axis_minus_tooltip,
         rotation_factor_slider_title,
     ):
-        self._words = {
+        self.__words = {
             "load_files_title": load_files_title,
             "load_files_from_pc": load_files_from_pc,
             "load_files_from_pc_error": load_files_from_pc_error,
@@ -130,4 +130,4 @@ class Language:
 
     @property
     def words(self):
-        return self._words
+        return self.__words

@@ -7,13 +7,13 @@ from .file import File
 
 class FileManager:
     def __init__(self):
-        self._latest = None
-        self._groups = []
-        self._file_to_group_mapping = dict()
+        self.__latest = None
+        self.__groups = []
+        self.__file_to_group_mapping = dict()
 
     @property
     def latest(self):
-        return self._latest
+        return self.__latest
 
     def load_files_from_pc(self, input_raw_files):
         if not input_raw_files:
@@ -30,7 +30,7 @@ class FileManager:
             return False
         
         if position == 0:
-            self._latest = file.name
+            self.__latest = file.name
         self.assign_file_to_group(file)
         return True
 
@@ -39,7 +39,7 @@ class FileManager:
         if not file:
             return False
         
-        self._latest = file.name
+        self.__latest = file.name
         self.assign_file_to_group(file)
         return True
 
@@ -118,17 +118,17 @@ class FileManager:
             # There are no groups
             return False
         
-        for i, group in enumerate(self._groups):
+        for i, group in enumerate(self.__groups):
             if self.are_equal(file.data_arrays, group.data_arrays):
                 group.add_file(file)
                 
-                self._file_to_group_mapping[file.name] = i
+                self.__file_to_group_mapping[file.name] = i
                 
                 return True
         return False
 
     def any_group(self):
-        return len(self._groups)
+        return len(self.__groups)
 
     def are_equal(self, file_data_arrays, group_data_arrays):
         # The lengths of data arrays differ
@@ -144,13 +144,13 @@ class FileManager:
         group = FileGroup(file)
         group.add_file(file)
         
-        self._file_to_group_mapping[file.name] = len(self._groups)        
-        self._groups.append(group)
+        self.__file_to_group_mapping[file.name] = len(self.__groups)        
+        self.__groups.append(group)
         
     def get_all_file_names(self):
         if self.any_group():
             file_names = []
-            for group in self._groups:
+            for group in self.__groups:
                 file_names += group.get_all_file_names()
 
             return file_names
@@ -158,8 +158,8 @@ class FileManager:
 
     def get_file(self, file_name) -> tuple[File, int, FileGroup, int]:
         if self.any_group():
-            group_index = self._file_to_group_mapping[file_name]
-            group = self._groups[group_index]
+            group_index = self.__file_to_group_mapping[file_name]
+            group = self.__groups[group_index]
             file_index = group.get_all_file_names().index(file_name)
             file = group.files[file_name]
 
