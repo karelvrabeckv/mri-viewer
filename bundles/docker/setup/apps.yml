@@ -1,4 +1,0 @@
-trame: # Default app under /index.html
-  app: mri-viewer
-mri-viewer: # /mri-viewer.html
-  app: mri-viewer
