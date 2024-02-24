@@ -1,0 +1,4 @@
+--extra-index-url https://wheels.vtk.org
+
+requests
+vtk-osmesa

@@ -23,6 +23,7 @@ class PipelineBuilder:
     def create_render_window(self, renderer: vtkRenderer):
         render_window = vtkRenderWindow()
         
+        render_window.OffScreenRenderingOn()
         render_window.AddRenderer(renderer)
         
         return render_window
