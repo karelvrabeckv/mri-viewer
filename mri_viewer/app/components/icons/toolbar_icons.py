@@ -1,7 +1,9 @@
 from mri_viewer.app.components import button
+from trame.decorators import hot_reload
 
 import mri_viewer.app.constants as const
 
+@hot_reload
 def toolbar_icons(self):
     def on_toggle_axes():
         self.state.axes_on = not self.state.axes_on

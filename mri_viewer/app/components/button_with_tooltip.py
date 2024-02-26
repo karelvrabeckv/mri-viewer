@@ -1,5 +1,7 @@
 from trame.widgets import vuetify3
+from trame.decorators import hot_reload
 
+@hot_reload
 def tooltip(content):
     def tooltip(**kwargs):
         with vuetify3.VTooltip(
@@ -11,6 +13,7 @@ def tooltip(content):
     return tooltip
 
 @tooltip
+@hot_reload
 def button(**kwargs):
     with vuetify3.VBtn(
         v_bind="props",
@@ -26,6 +29,7 @@ def button(**kwargs):
         vuetify3.VIcon(icon=kwargs["icon"])
 
 @tooltip
+@hot_reload
 def toggle_button(**kwargs):
     with vuetify3.VBtn(
         v_bind="props",

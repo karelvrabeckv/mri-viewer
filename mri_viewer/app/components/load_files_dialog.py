@@ -1,7 +1,9 @@
 from trame.widgets import vuetify3
+from trame.decorators import hot_reload
 
 import mri_viewer.app.constants as const
 
+@hot_reload
 def load_files_dialog(self):
     def close_dialog():
         self.state.dialog_on = False

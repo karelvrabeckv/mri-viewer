@@ -1,5 +1,5 @@
 from trame.app import asynchronous, get_server
-from trame.decorators import change, TrameApp
+from trame.decorators import hot_reload, change, TrameApp
 from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import html, trame, vuetify3
 
@@ -14,6 +14,8 @@ from mri_viewer.app.files import *
 from mri_viewer.app.localization import *
 from mri_viewer.app.pipelines import *
 
+from mri_viewer.app.watchdog import watchdog
+
 import mri_viewer.app.constants as const
 import mri_viewer.app.styles as style
 
@@ -21,13 +23,12 @@ import mri_viewer.app.styles as style
 class MRIViewerApp:
     def __init__(self, server=None):
         self.__server = get_server(server, client_type="vue3")
-        if self.__server.hot_reload:
-            self.__server.controller.on_server_reload.add(self.__build_ui)
-        
         self.__file_manager = FileManager()
         self.__language_manager = LanguageManager()
         self.__pipeline = Pipeline()
-        self.__ui = self.__build_ui()
+        self.__ui = self.build_ui()
+        
+        watchdog(self)
         
         self.__current_file: File = None
         self.__current_file_index: int = None
@@ -343,8 +344,9 @@ class MRIViewerApp:
         else:
             self.state.ui_picker_modes_off = False
 
-    def __build_ui(self, *args, **kwargs):
-        with SinglePageWithDrawerLayout(self.__server, vuetify_config=const.VUETIFY_CONFIG) as layout:
+    @hot_reload
+    def build_ui(self, **kwargs):
+        with SinglePageWithDrawerLayout(self.server, vuetify_config=const.VUETIFY_CONFIG) as layout:
             layout.root.theme = ("theme", const.DEFAULT_THEME)
             
             # Icon

@@ -1,5 +1,7 @@
 from trame.widgets import vuetify3
+from trame.decorators import hot_reload
 
+@hot_reload
 def representation_select():
     vuetify3.VSelect(
         variant="outlined",

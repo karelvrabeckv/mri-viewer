@@ -1,8 +1,10 @@
 from trame.widgets import vtk, vuetify3
+from trame.decorators import hot_reload
 
 import mri_viewer.app.constants as const
 import mri_viewer.app.styles as style
 
+@hot_reload
 def view(self):
     def on_picker(event, **kwargs):
         if self.state.picker_mode == const.PickerModes.Off:

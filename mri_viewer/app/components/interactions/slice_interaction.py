@@ -1,7 +1,9 @@
 from trame.widgets import vuetify3
+from trame.decorators import hot_reload
 
 import mri_viewer.app.constants as const
 
+@hot_reload
 def slice_interaction():
     with vuetify3.VCard(v_show=f"current_representation == {const.Representation.Slice}", border=True, classes="ma-4"): 
         vuetify3.VCardTitle("{{ language.section_slice_title }}", classes="bg-grey-darken-2 py-2")

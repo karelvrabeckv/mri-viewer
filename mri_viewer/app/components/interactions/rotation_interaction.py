@@ -1,4 +1,5 @@
 from trame.widgets import html, vuetify3
+from trame.decorators import hot_reload
 
 from vtkmodules.vtkCommonTransforms import vtkTransform
 
@@ -6,6 +7,7 @@ from mri_viewer.app.components import button
 
 import mri_viewer.app.constants as const
 
+@hot_reload
 def rotation_interaction(self):
     def rotate(direction):
         camera = self.pipeline.renderer.GetActiveCamera()

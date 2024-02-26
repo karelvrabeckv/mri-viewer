@@ -1,9 +1,11 @@
 from trame.widgets import html, vuetify3
+from trame.decorators import hot_reload
 
 from mri_viewer.app.components import button
 
 import mri_viewer.app.constants as const
 
+@hot_reload
 def zoom_interaction(self):
     def zoom(direction):
         camera = self.pipeline.renderer.GetActiveCamera()
