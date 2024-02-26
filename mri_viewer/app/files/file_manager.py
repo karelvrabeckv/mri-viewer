@@ -1,5 +1,7 @@
 import re, requests
 
+from trame.app.file_upload import ClientFile
+
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 
 from .file_group import FileGroup
@@ -7,122 +9,104 @@ from .file import File
 
 class FileManager:
     def __init__(self):
-        self.__latest = None
+        self.__file_to_show = None
         self.__groups = []
-        self.__file_to_group_mapping = dict()
+        self.__file_to_group_mapping = {}
 
     @property
-    def latest(self):
-        return self.__latest
+    def file_to_show(self):
+        return self.__file_to_show
 
-    def load_files_from_pc(self, input_raw_files):
-        if not input_raw_files:
-            return False
+    def load_files_from_pc(self, files_from_pc):
+        if self.is_empty(files_from_pc):
+            raise Exception("NO FILES")
         
-        for position, input_raw_file in enumerate(input_raw_files):
-            if not self.load_file_from_pc(position, input_raw_file):
-                return False
-        return True
+        for index, file_from_pc in enumerate(files_from_pc):
+            self.load_file_from_pc(index, file_from_pc)
 
-    def load_file_from_pc(self, position, input_raw_file):
-        file = self.get_file_from_pc(input_raw_file)
-        if not file:
-            return False
+    def load_file_from_pc(self, index, file_from_pc):
+        raw_file = ClientFile(file_from_pc)
+        if not raw_file.name.endswith(".vti") or raw_file.is_empty:
+            raise Exception("FILE FROM PC ERROR")
         
-        if position == 0:
-            self.__latest = file.name
+        if index == 0:
+            self.__file_to_show = raw_file.name
+        
+        reader = self.create_new_reader(raw_file.content)
+        file = self.create_new_file(raw_file.name, reader)
+        
         self.assign_file_to_group(file)
-        return True
-
+        
     def load_file_from_url(self, url):
-        file = self.get_file_from_url(url)
-        if not file:
-            return False
-        
-        self.__latest = file.name
-        self.assign_file_to_group(file)
-        return True
+        response = requests.get(url)
 
-    def assign_file_to_group(self, file):
-        if self.add_to_matching_group(file) is False:
-            self.add_to_new_group(file)
+        file_name = ""
+        content_disposition = response.headers.get("content-disposition")
+        if content_disposition:
+            occurrences = re.findall("filename=\"(.+)\"", content_disposition)
+            
+            if not self.is_empty(occurrences):
+                file_name = occurrences[0]
+        
+        if not file_name.endswith(".vti") or not response.content:
+            raise Exception("FILE FROM URL ERROR")
+        
+        self.__file_to_show = file_name
+        
+        reader = self.create_new_reader(response.content)
+        file = self.create_new_file(file_name, reader)
+        
+        self.assign_file_to_group(file)    
 
-    def get_file_from_pc(self, input_raw_file):
-        file_name = input_raw_file.get("name")
-        if not str(file_name).endswith(".vti"):
-            return False
-        
-        file_reader = self.create_new_reader(input_raw_file.get("content"))
-        if not file_reader:
-            return False
-        
-        return self.create_new_file(file_name, file_reader)
-
-    def get_file_from_url(self, url):
-        try:
-            response = requests.get(url)
-        except:
-            return False
-        
-        occurrences = re.findall("filename=\"(.+)\"", response.headers.get("content-disposition") or "")
-        file_name = occurrences[0] if len(occurrences) else ""
-        if not str(file_name).endswith(".vti"):
-            return False
-        
-        file_reader = self.create_new_reader(response.text)
-        if not file_reader:
-            return False
-
-        return self.create_new_file(file_name, file_reader)
-        
     def create_new_reader(self, file_content):
         reader = vtkXMLImageDataReader()
+        
         reader.ReadFromInputStringOn()
-        
-        data = file_content
-        data_type = type(file_content)
-        
-        if data_type is str or (isinstance(data, list) and all(isinstance(i, str) for i in data)):
-            reader.SetInputString("".join(data))
-        elif data_type is bytes or (isinstance(data, list) and all(isinstance(i, bytes) for i in data)):
-            reader.SetInputString(b"".join(data))
-        else:
-            return False
-        
+        reader.SetInputString(file_content)
         reader.Update()
         
         return reader
-        
-    def create_new_file(self, file_name, file_reader):
-        file = File()
-        file.name = file_name
-        file.reader = file_reader
-        
-        image_data = file_reader.GetOutput()
+
+    def create_new_file(self, name, reader):
+        image_data = reader.GetOutput()
+        if image_data is None:
+            raise Exception("NO IMAGE DATA")
+
         point_data, cell_data = image_data.GetPointData(), image_data.GetCellData()
         num_of_point_arrays, num_of_cell_arrays = point_data.GetNumberOfArrays(), cell_data.GetNumberOfArrays()
         
         if num_of_point_arrays:
-            file.data = point_data
-            file.data_array = point_data.GetScalars().GetName()
-            file.data_arrays = [point_data.GetArray(i).GetName() for i in range(num_of_point_arrays)]
+            data = point_data
+            data_arrays = [point_data.GetArray(i).GetName() for i in range(num_of_point_arrays)]
+            
+            scalars = point_data.GetScalars()
+            data_array = scalars.GetName() if scalars else data_arrays[0]
         elif num_of_cell_arrays:
-            file.data = cell_data
-            file.data_array = cell_data.GetScalars().GetName()
-            file.data_arrays = [cell_data.GetArray(i).GetName() for i in range(num_of_cell_arrays)]    
+            data = cell_data
+            data_arrays = [cell_data.GetArray(i).GetName() for i in range(num_of_cell_arrays)]
+            
+            scalars = cell_data.GetScalars()
+            data_array = scalars.GetName() if scalars else data_arrays[0]
+        else:
+            raise Exception("NO POINT OR CELL DATA")
+        
+        return File(name, reader, data, data_array, data_arrays)
 
-        return file
+    def is_empty(self, list):
+        return len(list) == 0
+ 
+    def assign_file_to_group(self, file):
+        if self.add_to_matching_group(file) is False:
+            self.add_to_new_group(file)
  
     def add_to_matching_group(self, file: File):
         if not self.any_group():
-            # There are no groups
             return False
         
-        for i, group in enumerate(self.__groups):
+        for index, group in enumerate(self.__groups):
             if self.are_equal(file.data_arrays, group.data_arrays):
                 group.add_file(file)
-                
-                self.__file_to_group_mapping[file.name] = i
+                self.__file_to_group_mapping[file.name] = index
                 
                 return True
         return False
@@ -135,6 +119,9 @@ class FileManager:
         if len(file_data_arrays) != len(group_data_arrays):
             return False
         
+        file_data_arrays.sort()
+        group_data_arrays.sort()
+        
         for i in range(len(file_data_arrays)):
             if file_data_arrays[i] != group_data_arrays[i]:
                 return False
@@ -146,15 +133,14 @@ class FileManager:
         
         self.__file_to_group_mapping[file.name] = len(self.__groups)        
         self.__groups.append(group)
-        
+
     def get_all_file_names(self):
+        file_names = []
         if self.any_group():
-            file_names = []
             for group in self.__groups:
                 file_names += group.get_all_file_names()
 
-            return file_names
-        return []
+        return file_names
 
     def get_file(self, file_name) -> tuple[File, int, FileGroup, int]:
         if self.any_group():

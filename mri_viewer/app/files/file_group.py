@@ -81,7 +81,7 @@ class FileGroup:
         return len(self.__files)
     
     def get_all_file_names(self):
-        return list(self.__files.keys())
+        return list(self.__files)
 
     def add_file(self, file: File):
         self.__files[file.name] = file

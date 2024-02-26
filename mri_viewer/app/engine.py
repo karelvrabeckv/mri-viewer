@@ -79,45 +79,49 @@ class MRIViewerApp:
     def current_file_information(self):
         return self.__current_file, self.__current_file_index, self.__current_group, self.__current_group_index
 
-    @change("files_pc")
-    def on_files_pc_change(self, files_pc, **kwargs):
-        self.state.files_pc_error_message = ""
-
-    def on_files_pc_load(self):
-        # Load all the files uploaded by a user
-        if not self.__file_manager.load_files_from_pc(self.state.files_pc):
-            self.state.files_pc_error_message = self.state.language["load_files_from_pc_error"]
+    """ Load all files from local computer uploaded by user. """
+    @change("files_from_pc")
+    def on_files_from_pc_change(self, files_from_pc, **kwargs):
+        if files_from_pc is None:
             return
+        
+        try:
+            self.__file_manager.load_files_from_pc(files_from_pc)
+            self.post_loading_actions()
+        except:
+            self.state.files_from_pc_error_message = self.state.language["load_files_from_pc_error"]
 
-        self.post_loading_actions()
+    def clear_files_from_pc_error_message(self):
+        self.state.files_from_pc = None
+        self.state.files_from_pc_error_message = ""
+
+    @change("file_from_url")
+    def on_file_from_url_change(self, file_from_url, **kwargs):
+        self.state.file_from_url_error_message = ""
     
-    @change("file_url")
-    def on_file_url_change(self, file_url, **kwargs):
-        self.state.file_url_error_message = ""
-    
-    def on_file_url_load(self):
-        # Load a file from the URL typed by a user
-        if not self.__file_manager.load_file_from_url(self.state.file_url):
-            self.state.file_url_error_message = self.state.language["load_file_from_url_error"]
-            return
+    """ Load file from url typed by user. """
+    def on_file_from_url_load(self):
+        try:
+            self.__file_manager.load_file_from_url(self.state.file_from_url)
+            self.post_loading_actions()
+        except:
+            self.state.file_from_url_error_message = self.state.language["load_file_from_url_error"]
 
-        self.post_loading_actions()
-
+    """ Actions to be executed after loading file/s. """
     def post_loading_actions(self):
         if self.state.current_file_name:
             # The user is trying to load another files
             self.toggle_player_ui()
         
-        self.state.dialog_on = False
-        
-        self.state.files_pc = None
-        self.state.files_pc_error_message = ""
-        
-        self.state.file_url = None
-        self.state.file_url_error_message = ""
-        
-        self.state.current_file_name = self.__file_manager.latest
-        self.state.current_file_name_items = self.__file_manager.get_all_file_names()
+        self.state.update({
+            "dialog_on": False,
+            "files_from_pc": None,
+            "files_from_pc_error_message": "",
+            "file_from_url": None,
+            "file_from_url_error_message": "",
+            "current_file_name": self.__file_manager.file_to_show,
+            "current_file_name_items": self.__file_manager.get_all_file_names(),
+        })
 
     @change("current_file_name")
     def on_current_file_name_change(self, current_file_name: str, **kwargs):
@@ -251,12 +255,12 @@ class MRIViewerApp:
             self.state.picker_info_title = self.state.language["cell_information_title"]
  
         # Change the error message for uploading files locally
-        if self.state.files_pc_error_message:
-            self.state.files_pc_error_message = self.state.language["load_files_from_pc_error"]
+        if self.state.files_from_pc_error_message:
+            self.state.files_from_pc_error_message = self.state.language["load_files_from_pc_error"]
  
         # Change the error message for uploading file remotely
-        if self.state.file_url_error_message:
-            self.state.file_url_error_message = self.state.language["load_file_from_url_error"]
+        if self.state.file_from_url_error_message:
+            self.state.file_from_url_error_message = self.state.language["load_file_from_url_error"]
  
         if self.state.current_file_name:
             # Update the server camera
