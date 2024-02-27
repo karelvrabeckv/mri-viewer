@@ -32,11 +32,11 @@ class Language:
         section_slice_title,
         slice_orientation_select_title,
         slice_position_slider_title,
+        factor_slider_title,
         section_zoom_title,
         section_zoom_tooltip,
         zoom_in_tooltip,
         zoom_out_tooltip,
-        zoom_factor_slider_title,
         section_translation_title,
         section_translation_tooltip,
         translate_x_axis_plus_tooltip,
@@ -45,7 +45,6 @@ class Language:
         translate_y_axis_minus_tooltip,
         translate_z_axis_plus_tooltip,
         translate_z_axis_minus_tooltip,
-        translation_factor_slider_title,
         section_rotation_title,
         section_rotation_tooltip,
         rotate_x_axis_plus_tooltip,
@@ -54,7 +53,6 @@ class Language:
         rotate_y_axis_minus_tooltip,
         rotate_z_axis_plus_tooltip,
         rotate_z_axis_minus_tooltip,
-        rotation_factor_slider_title,
     ):
         self.__words = {
             "load_files_title": load_files_title,
@@ -103,11 +101,11 @@ class Language:
             "section_slice_title": section_slice_title,
             "slice_orientation_select_title": slice_orientation_select_title,
             "slice_position_slider_title": slice_position_slider_title,
+            "factor_slider_title": factor_slider_title,
             "section_zoom_title": section_zoom_title,
             "section_zoom_tooltip": section_zoom_tooltip,
             "zoom_in_tooltip": zoom_in_tooltip,
             "zoom_out_tooltip": zoom_out_tooltip,
-            "zoom_factor_slider_title": zoom_factor_slider_title,
             "section_translation_title": section_translation_title,
             "section_translation_tooltip": section_translation_tooltip,
             "translate_x_axis_plus_tooltip": translate_x_axis_plus_tooltip,
@@ -116,7 +114,6 @@ class Language:
             "translate_y_axis_minus_tooltip": translate_y_axis_minus_tooltip,
             "translate_z_axis_plus_tooltip": translate_z_axis_plus_tooltip,
             "translate_z_axis_minus_tooltip": translate_z_axis_minus_tooltip,
-            "translation_factor_slider_title": translation_factor_slider_title,
             "section_rotation_title": section_rotation_title,
             "section_rotation_tooltip": section_rotation_tooltip,
             "rotate_x_axis_plus_tooltip": rotate_x_axis_plus_tooltip,
@@ -125,7 +122,6 @@ class Language:
             "rotate_y_axis_minus_tooltip": rotate_y_axis_minus_tooltip,
             "rotate_z_axis_plus_tooltip": rotate_z_axis_plus_tooltip,
             "rotate_z_axis_minus_tooltip": rotate_z_axis_minus_tooltip,
-            "rotation_factor_slider_title": rotation_factor_slider_title,
         }
 
     @property

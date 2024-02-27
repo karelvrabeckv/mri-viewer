@@ -4,6 +4,7 @@ from trame.decorators import hot_reload
 from mri_viewer.app.components import button
 
 import mri_viewer.app.constants as const
+import mri_viewer.app.styles as style
 
 @hot_reload
 def zoom_interaction(self):
@@ -24,13 +25,15 @@ def zoom_interaction(self):
         _, _, group, _ = self.current_file_information
         group.current_view = self.pipeline.get_camera_params()
 
-    with vuetify3.VCard(disabled=("ui_off",), border=True, classes="ma-4"):
+    with vuetify3.VCard(border=True, classes="ma-4"):
         with vuetify3.VCardTitle(
             "{{ language.section_zoom_title }}",
-            classes="d-flex justify-space-between bg-grey-darken-2 py-2"
+            style=style.HEADER,
+            classes="d-flex justify-space-between text-uppercase text-button font-weight-bold py-2"
         ):
             button(
                 icon="mdi-information-variant",
+                disabled=("ui_off",),
                 size="x-small",
                 tooltip=("language.section_zoom_tooltip",),
                 tooltip_location="right",
@@ -40,20 +43,23 @@ def zoom_interaction(self):
             with vuetify3.VRow(justify="center", classes="my-4"):
                 button(
                     icon="mdi-minus",
+                    disabled=("ui_off",),
                     tooltip=("language.zoom_out_tooltip",),
                     classes="mx-1",
                     click=(zoom, f"['{const.Zoom.Out}']"),
                 )
                 button(
                     icon="mdi-plus",
+                    disabled=("ui_off",),
                     tooltip=("language.zoom_in_tooltip",),
                     classes="mx-1",
                     click=(zoom, f"['{const.Zoom.In}']"),
                 )
 
             with vuetify3.VRow(justify="center", classes="px-2 pb-4"):
+                html.Span("{{ language.factor_slider_title }}", classes="d-flex align-center ml-2 mr-4")
                 vuetify3.VSlider(
-                    label=("language.zoom_factor_slider_title",),
+                    disabled=("ui_off",),
                     v_model="current_zoom_factor",
                     show_ticks="always",
                     min=const.MIN_ZOOM_FACTOR,
@@ -61,4 +67,4 @@ def zoom_interaction(self):
                     step=const.ZOOM_STEP,
                     hide_details=True,
                 )
-                html.Span("{{ current_zoom_factor }}x", classes="d-flex align-center text-caption mx-2")
+                html.Span("{{ current_zoom_factor }}x", classes="d-flex align-center ml-4 mr-2")

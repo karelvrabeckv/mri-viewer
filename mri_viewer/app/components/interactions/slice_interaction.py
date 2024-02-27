@@ -1,12 +1,17 @@
-from trame.widgets import vuetify3
+from trame.widgets import html, vuetify3
 from trame.decorators import hot_reload
 
 import mri_viewer.app.constants as const
+import mri_viewer.app.styles as style
 
 @hot_reload
 def slice_interaction():
     with vuetify3.VCard(v_show=f"current_representation == {const.Representation.Slice}", border=True, classes="ma-4"): 
-        vuetify3.VCardTitle("{{ language.section_slice_title }}", classes="bg-grey-darken-2 py-2")
+        vuetify3.VCardTitle(
+            "{{ language.section_slice_title }}",
+            style=style.HEADER,
+            classes="text-uppercase text-button font-weight-bold py-2"
+        )
         
         with vuetify3.VCardText():
             with vuetify3.VRow(justify="center", classes="mt-2 pa-4"):
@@ -25,8 +30,8 @@ def slice_interaction():
                 )
             
             with vuetify3.VRow(justify="center", classes="px-2 pb-4"):
+                html.Span("{{ language.slice_position_slider_title }}", classes="d-flex align-center ml-2 mr-4")
                 vuetify3.VSlider(
-                    label=("language.slice_position_slider_title",),
                     v_model=("current_slice_position", None),
                     min=("min_slice_position", None),
                     max=("max_slice_position", None),

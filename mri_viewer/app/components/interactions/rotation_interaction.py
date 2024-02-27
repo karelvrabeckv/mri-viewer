@@ -6,6 +6,7 @@ from vtkmodules.vtkCommonTransforms import vtkTransform
 from mri_viewer.app.components import button
 
 import mri_viewer.app.constants as const
+import mri_viewer.app.styles as style
 
 @hot_reload
 def rotation_interaction(self):
@@ -39,13 +40,15 @@ def rotation_interaction(self):
         _, _, group, _ = self.current_file_information
         group.current_view = self.pipeline.get_camera_params()
 
-    with vuetify3.VCard(disabled=("ui_off",), border=True, classes="ma-4"):
+    with vuetify3.VCard(border=True, classes="ma-4"):
         with vuetify3.VCardTitle(
             "{{ language.section_rotation_title }}",
-            classes="d-flex justify-space-between bg-grey-darken-2 py-2"
+            style=style.HEADER,
+            classes="d-flex justify-space-between text-uppercase text-button font-weight-bold py-2"
         ):
             button(
                 icon="mdi-information-variant",
+                disabled=("ui_off",),
                 size="x-small",
                 tooltip=("language.section_rotation_tooltip",),
                 tooltip_location="right",
@@ -56,12 +59,14 @@ def rotation_interaction(self):
                 html.Div("X:", classes="d-flex align-center text-body-1 mx-1")
                 button(
                     icon="mdi-minus",
+                    disabled=("ui_off",),
                     tooltip=("language.rotate_x_axis_minus_tooltip",),
                     classes="mx-1",
                     click=(rotate, f"['{const.Directions.XAxisMinus}']"),
                 )
                 button(
                     icon="mdi-plus",
+                    disabled=("ui_off",),
                     tooltip=("language.rotate_x_axis_plus_tooltip",),
                     classes="mx-1",
                     click=(rotate, f"['{const.Directions.XAxisPlus}']"),
@@ -71,12 +76,14 @@ def rotation_interaction(self):
                 html.Div("Y:", classes="d-flex align-center text-body-1 mx-1")
                 button(
                     icon="mdi-minus",
+                    disabled=("ui_off",),
                     tooltip=("language.rotate_y_axis_minus_tooltip",),
                     classes="mx-1",
                     click=(rotate, f"['{const.Directions.YAxisMinus}']"),
                 )
                 button(
                     icon="mdi-plus",
+                    disabled=("ui_off",),
                     tooltip=("language.rotate_y_axis_plus_tooltip",),
                     classes="mx-1",
                     click=(rotate, f"['{const.Directions.YAxisPlus}']"),
@@ -86,20 +93,23 @@ def rotation_interaction(self):
                 html.Div("Z:", classes="d-flex align-center text-body-1 mx-1")
                 button(
                     icon="mdi-minus",
+                    disabled=("ui_off",),
                     tooltip=("language.rotate_z_axis_minus_tooltip",),
                     classes="mx-1",
                     click=(rotate, f"['{const.Directions.ZAxisMinus}']"),
                 )
                 button(
                     icon="mdi-plus",
+                    disabled=("ui_off",),
                     tooltip=("language.rotate_z_axis_plus_tooltip",),
                     classes="mx-1",
                     click=(rotate, f"['{const.Directions.ZAxisPlus}']"),
                 )
             
             with vuetify3.VRow(justify="center", classes="px-2 pb-4"):
+                html.Span("{{ language.factor_slider_title }}", classes="d-flex align-center ml-2 mr-4")
                 vuetify3.VSlider(
-                    label=("language.rotation_factor_slider_title",),
+                    disabled=("ui_off",),
                     v_model="current_rotation_factor",
                     show_ticks="always",
                     min=const.MIN_ROTATION_FACTOR,
@@ -107,4 +117,4 @@ def rotation_interaction(self):
                     step=const.ROTATION_STEP,
                     hide_details=True,
                 )
-                html.Span("{{ current_rotation_factor }}", classes="d-flex align-center text-caption mx-2")
+                html.Span("{{ current_rotation_factor }}", classes="d-flex align-center ml-4 mr-2")
