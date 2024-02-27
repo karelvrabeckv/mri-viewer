@@ -4,6 +4,7 @@ from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import html, trame, vuetify3
 
 from asyncio import sleep
+from tkinter import Tk, filedialog
 
 from mri_viewer.app.assets import *
 from mri_viewer.app.components.icons import *
@@ -26,6 +27,9 @@ class MRIViewerApp:
         self.__file_manager = FileManager()
         self.__language_manager = LanguageManager()
         self.__pipeline = Pipeline()
+        self.__root = Tk()
+        self.__root.withdraw()
+        self.__root.wm_attributes("-topmost", 1)
         self.__ui = self.build_ui()
         
         watchdog(self)
@@ -81,10 +85,8 @@ class MRIViewerApp:
         return self.__current_file, self.__current_file_index, self.__current_group, self.__current_group_index
 
     """ Load all files from local computer uploaded by user. """
-    @change("files_from_pc")
-    def on_files_from_pc_change(self, files_from_pc, **kwargs):
-        if files_from_pc is None:
-            return
+    def on_files_from_pc_load(self):
+        files_from_pc = filedialog.askopenfilenames(filetypes=[("VTI", "*.vti")])
         
         try:
             self.__file_manager.load_files_from_pc(files_from_pc)
@@ -93,7 +95,6 @@ class MRIViewerApp:
             self.state.files_from_pc_error_message = self.state.language["load_files_from_pc_error"]
 
     def clear_files_from_pc_error_message(self):
-        self.state.files_from_pc = None
         self.state.files_from_pc_error_message = ""
 
     @change("file_from_url")
@@ -116,10 +117,9 @@ class MRIViewerApp:
         
         self.state.update({
             "dialog_on": False,
-            "files_from_pc": None,
-            "files_from_pc_error_message": "",
             "file_from_url": None,
             "file_from_url_error_message": "",
+            "files_from_pc_error_message": "",
             "current_file_name": self.__file_manager.file_to_show,
             "current_file_name_items": self.__file_manager.get_all_file_names(),
         })

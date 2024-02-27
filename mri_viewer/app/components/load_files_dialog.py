@@ -25,22 +25,16 @@ def load_files_dialog(self):
                 
                 with vuetify3.VCardText(classes="py-2"):
                     with vuetify3.VRow(classes="my-4 mx-0"):
-                        vuetify3.VFileInput(
+                        vuetify3.VTextField(
                             variant="outlined",
                             prepend_icon="mdi-monitor",
                             label=("language.load_files_from_pc",),
-                            v_model=("files_from_pc", None),
                             density="comfortable",
-                            clearable=False,
-                            multiple=True,
-                            chips=True,
-                            show_size=True,
-                            accept=".vti",
-                            __properties=["accept"],
                             hint=("language.supported_file_formats",),
                             persistent_hint=True,
                             error_messages=("files_from_pc_error_message", None),
-                            mouseup=self.clear_files_from_pc_error_message,
+                            mousedown=self.clear_files_from_pc_error_message,
+                            click=self.on_files_from_pc_load,
                         )
                         
                     vuetify3.VDivider(classes="my-6")

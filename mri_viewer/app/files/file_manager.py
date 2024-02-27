@@ -1,7 +1,5 @@
 import re, requests
 
-from trame.app.file_upload import ClientFile
-
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 
 from .file_group import FileGroup
@@ -18,23 +16,29 @@ class FileManager:
         return self.__file_to_show
 
     def load_files_from_pc(self, files_from_pc):
-        if self.is_empty(files_from_pc):
+        if (files_from_pc is None) or self.is_empty(files_from_pc):
             raise Exception("NO FILES")
         
         for index, file_from_pc in enumerate(files_from_pc):
             self.load_file_from_pc(index, file_from_pc)
 
-    def load_file_from_pc(self, index, file_from_pc):
-        raw_file = ClientFile(file_from_pc)
-        if not raw_file.name.endswith(".vti") or raw_file.is_empty:
+    def load_file_from_pc(self, index, file_from_pc: str):
+        occurrences = re.split(r"/|\\", file_from_pc)
+        if not self.is_empty(occurrences):
+            file_name = occurrences[-1]
+        
+        if (file_name and not file_name.endswith(".vti")) or not file_from_pc:
             raise Exception("FILE FROM PC ERROR")
         
         if index == 0:
-            self.__file_to_show = raw_file.name
+            self.__file_to_show = file_name
         
-        reader = self.create_new_reader(raw_file.content)
-        file = self.create_new_file(raw_file.name, reader)
+        reader = vtkXMLImageDataReader()
         
+        reader.SetFileName(file_from_pc)
+        reader.Update()
+        
+        file = self.create_new_file(file_name, reader)        
         self.assign_file_to_group(file)
         
     def load_file_from_url(self, url):
@@ -48,30 +52,26 @@ class FileManager:
             if not self.is_empty(occurrences):
                 file_name = occurrences[0]
         
-        if not file_name.endswith(".vti") or not response.content:
+        if (file_name and not file_name.endswith(".vti")) or not response.content:
             raise Exception("FILE FROM URL ERROR")
         
         self.__file_to_show = file_name
         
-        reader = self.create_new_reader(response.content)
-        file = self.create_new_file(file_name, reader)
-        
-        self.assign_file_to_group(file)    
-
-    def create_new_reader(self, file_content):
         reader = vtkXMLImageDataReader()
         
         reader.ReadFromInputStringOn()
-        reader.SetInputString(file_content)
+        reader.SetInputString(response.content)
         reader.Update()
         
-        return reader
+        file = self.create_new_file(file_name, reader)
+        self.assign_file_to_group(file)
 
     def create_new_file(self, name, reader):
         image_data = reader.GetOutput()
         if image_data is None:
             raise Exception("NO IMAGE DATA")
 
+        extent = image_data.GetExtent()
         point_data, cell_data = image_data.GetPointData(), image_data.GetCellData()
         num_of_point_arrays, num_of_cell_arrays = point_data.GetNumberOfArrays(), cell_data.GetNumberOfArrays()
         
@@ -90,7 +90,7 @@ class FileManager:
         else:
             raise Exception("NO POINT OR CELL DATA")
         
-        return File(name, reader, data, data_array, data_arrays)
+        return File(name, reader, extent, data, data_array, data_arrays)
 
     def is_empty(self, list):
         return len(list) == 0
@@ -115,7 +115,6 @@ class FileManager:
         return len(self.__groups)
 
     def are_equal(self, file_data_arrays, group_data_arrays):
-        # The lengths of data arrays differ
         if len(file_data_arrays) != len(group_data_arrays):
             return False
         
