@@ -287,9 +287,9 @@ class MRIViewerApp:
         
         # Change the title of picker information
         if self.state.picker_mode == const.PickerModes.Points:
-            self.state.picker_info_title = self.state.language["point_information_title"]
+            self.state.picker_info_title = self.state.language["point_info_title"]
         elif self.state.picker_mode == const.PickerModes.Cells:
-            self.state.picker_info_title = self.state.language["cell_information_title"]
+            self.state.picker_info_title = self.state.language["cell_info_title"]
  
         # Change the error message for uploading files locally
         if self.state.files_from_pc_error_message:
@@ -322,9 +322,18 @@ class MRIViewerApp:
 
     @change("picker_mode")
     def on_picker_mode_change(self, picker_mode, **kwargs):
-        self.state.picker_info_title = ""
-        self.state.picker_info_message = {}
-        self.state.picker_info_style = style.HIDDEN
+        self.__pipeline.hide_picked_point()
+        self.__pipeline.hide_picked_cell()
+
+        self.state.update({
+            "picker_info_title": "",
+            "picker_info_message": {},
+            "picker_info_style": style.HIDDEN,
+        })
+
+        if self.state.current_file_name:
+            _, _, group, _ = self.current_file_info
+            self.update_client_camera(group)
 
     @change("player_on")
     @asynchronous.task
@@ -367,9 +376,20 @@ class MRIViewerApp:
         current_representation = self.state.current_representation
         
         if player_on or current_representation == const.Representation.Slice:
-            self.state.ui_picker_modes_off = True
+            self.__pipeline.hide_picked_point()
+            self.__pipeline.hide_picked_cell()
+
+            self.state.update({
+                "ui_picker_modes_off": True,
+                "picker_info_style": style.HIDDEN,
+            })
         else:
-            self.state.ui_picker_modes_off = False
+            self.state.update({
+                "ui_picker_modes_off": False,
+            })
+
+        _, _, group, _ = self.current_file_info
+        self.update_client_camera(group)
 
     def build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self.server, vuetify_config=const.VUETIFY_CONFIG) as layout:

@@ -1,5 +1,9 @@
 from vtkmodules.vtkCommonColor import vtkNamedColors
 from vtkmodules.vtkCommonCore import vtkLookupTable
+from vtkmodules.vtkFiltersSources import (
+    vtkSphereSource,
+    vtkCubeSource,
+)
 from vtkmodules.vtkImagingCore import vtkExtractVOI
 from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
 from vtkmodules.vtkInteractionWidgets import vtkOrientationMarkerWidget
@@ -48,6 +52,62 @@ class PipelineFactory:
 
     def create_picker(self):
         return vtkCellPicker()
+
+    def create_picked_point(self, position):
+        picked_point = vtkSphereSource()
+
+        picked_point.SetCenter(position)
+        picked_point.SetRadius(0.25)
+        picked_point.SetPhiResolution(100)
+        picked_point.SetThetaResolution(100)
+
+        return picked_point
+
+    def create_picked_point_mapper(self, picked_point):
+        picked_point_mapper = vtkPolyDataMapper()
+
+        picked_point_mapper.SetInputConnection(picked_point.GetOutputPort())
+
+        return picked_point_mapper
+
+    def create_picked_point_actor(self, picked_point_mapper):
+        picked_point_actor = vtkActor()
+
+        picked_point_actor.SetMapper(picked_point_mapper)
+        picked_point_actor.GetProperty().SetColor(vtkNamedColors().GetColor3d("White"))
+        picked_point_actor.GetProperty().LightingOff()
+
+        return picked_point_actor
+
+    def create_picked_cell(self, bounds):
+        picked_cell = vtkCubeSource()
+
+        picked_cell.SetBounds(bounds)
+        picked_cell.SetCenter(
+            (bounds[0] + bounds[1]) / 2,
+            (bounds[2] + bounds[3]) / 2,
+            (bounds[4] + bounds[5]) / 2,
+        )
+
+        return picked_cell
+
+    def create_picked_cell_mapper(self, picked_cell):
+        picked_cell_mapper = vtkPolyDataMapper()
+
+        picked_cell_mapper.SetInputConnection(picked_cell.GetOutputPort())
+
+        return picked_cell_mapper
+
+    def create_picked_cell_actor(self, picked_cell_mapper):
+        picked_cell_actor = vtkActor()
+
+        picked_cell_actor.SetMapper(picked_cell_mapper)
+        picked_cell_actor.GetProperty().SetColor(vtkNamedColors().GetColor3d("White"))
+        picked_cell_actor.GetProperty().SetRepresentationToWireframe()
+        picked_cell_actor.GetProperty().SetLineWidth(5)
+        picked_cell_actor.GetProperty().LightingOff()
+
+        return picked_cell_actor
 
     def create_axes_widget(self, render_window_interactor: vtkRenderWindowInteractor):
         axes_widget = vtkOrientationMarkerWidget()

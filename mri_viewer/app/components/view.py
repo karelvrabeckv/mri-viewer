@@ -8,6 +8,8 @@ def view(self):
         if self.state.picker_mode == const.PickerModes.Off:
             return
 
+        self.state.picker_info_style = style.HIDDEN
+
         file, _, _, _ = self.current_file_info
         image_data = file.reader.GetOutput()
 
@@ -15,18 +17,41 @@ def view(self):
         x, y = position["x"], position["y"]
         
         if self.state.picker_mode == const.PickerModes.Points:
-            self.state.picker_info_title = self.state.language["point_information_title"]
-            message = self.pipeline.get_point_information(image_data, x, y)
+            message = self.pipeline.get_picked_point_info(image_data, x, y)
+
+            if message:
+                self.state.update({
+                    "picker_info_title": self.state.language["point_info_title"],
+                    "picker_info_message": message,
+                    "picker_info_style": style.TOOLTIP,
+                })
+
+                point_id = message["Id"]
+                point_position = image_data.GetPoint(point_id)
+                self.pipeline.show_picked_point(point_position)
+            else:
+                self.pipeline.hide_picked_point()
         elif self.state.picker_mode == const.PickerModes.Cells:
-            self.state.picker_info_title = self.state.language["cell_information_title"]
-            message = self.pipeline.get_cell_information(image_data, x, y)
-        
-        self.state.picker_info_message = message
-        self.state.picker_info_style = style.TOOLTIP if message else style.HIDDEN
+            message = self.pipeline.get_picked_cell_info(image_data, x, y)
+
+            if message:
+                self.state.update({
+                    "picker_info_title": self.state.language["cell_info_title"],
+                    "picker_info_message": message,
+                    "picker_info_style": style.TOOLTIP,
+                })
+
+                cell_id = message["Id"]
+                cell_bounds = image_data.GetCell(cell_id).GetBounds()
+                self.pipeline.show_picked_cell(cell_bounds)
+            else:
+                self.pipeline.hide_picked_cell()
+
+        _, _, group, _ = self.current_file_info
+        self.update_client_camera(group)
 
     def on_interaction(client_camera, **kwargs):
         if self.state.ui_off:
-            # There are no data
             return
         
         self.pipeline.set_camera_to_client_view(client_camera)

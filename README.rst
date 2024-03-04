@@ -20,6 +20,8 @@ Run the application:
 .. code-block:: console
 
     mri-viewer
+    mri-viewer --app
+    python run.py
 
 Features
 --------

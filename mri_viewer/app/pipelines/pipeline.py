@@ -73,10 +73,15 @@ class Pipeline():
     def slice_actor(self):
         return self.get_object(const.Objects.SliceActor)
 
-    def get_object(self, object: const.Objects):
+    def get_object(self, object_type: const.Objects):
         if not self.__latest_file_name:
             return        
-        return self.__objects[self.__latest_file_name][object]
+        return self.__objects[self.__latest_file_name][object_type]
+
+    def set_object(self, object_type: const.Objects, object):
+        if not self.__latest_file_name:
+            return        
+        self.__objects[self.__latest_file_name][object_type] = object
 
     def get_file_actor_center(self):
         file_actor = self.get_object(const.Objects.FileActor)
@@ -90,6 +95,9 @@ class Pipeline():
         latest_slice_actor = self.get_object(const.Objects.SliceActor)
         
         self.set_visibility(False, latest_file_actor, latest_cube_axes_actor, latest_slice_actor)
+
+        self.hide_picked_point()
+        self.hide_picked_cell()
         
         self.reset_camera()
         self.render()
@@ -124,6 +132,12 @@ class Pipeline():
                 const.Objects.Slice: slice,
                 const.Objects.SliceMapper: slice_mapper,
                 const.Objects.SliceActor: slice_actor,
+                const.Objects.PickedPoint: None,
+                const.Objects.PickedPointMapper: None,
+                const.Objects.PickedPointActor: None,
+                const.Objects.PickedCell: None,
+                const.Objects.PickedCellMapper: None,
+                const.Objects.PickedCellActor: None,
             }
             
             self.set_slice(file, group.slice_orientation, group.slice_position)
@@ -212,7 +226,7 @@ class Pipeline():
         self.__render_window.SetSize(width, height)
         self.render()
 
-    def get_point_information(self, data: vtkImageData, x: float, y: float):
+    def get_picked_point_info(self, data: vtkImageData, x: float, y: float):
         self.__picker.Pick(x, y, 0.0, self.__renderer)
 
         message = {}
@@ -221,10 +235,44 @@ class Pipeline():
         if point_id != -1:
             point = data.GetPoint(point_id)
             message = { "Id": point_id, "X": point[0], "Y": point[1], "Z": point[2] }
+
+            point_data = data.GetPointData()
+            num_of_data_arrays = point_data.GetNumberOfArrays()
         
+            for i in range(num_of_data_arrays):
+                data_array = point_data.GetArray(i)
+                message[data_array.GetName()] = data_array.GetValue(point_id)
+
         return message
     
-    def get_cell_information(self, data: vtkImageData, x: float, y: float):
+    def show_picked_point(self, position):
+        if not self.get_object(const.Objects.PickedPoint):
+            picked_point = self.__factory.create_picked_point(position)
+            self.set_object(const.Objects.PickedPoint, picked_point)
+
+            picked_point_mapper = self.__factory.create_picked_point_mapper(picked_point)
+            self.set_object(const.Objects.PickedPointMapper, picked_point_mapper)
+
+            picked_point_actor = self.__factory.create_picked_point_actor(picked_point_mapper)
+            self.set_object(const.Objects.PickedPointActor, picked_point_actor)
+
+            self.add_actors(picked_point_actor)
+        else:
+            picked_point = self.get_object(const.Objects.PickedPoint)
+            picked_point.SetCenter(position)
+
+            picked_point_actor = self.get_object(const.Objects.PickedPointActor)
+            self.set_visibility(True, picked_point_actor)
+
+        self.reset_camera()
+        self.render()
+
+    def hide_picked_point(self):
+        picked_point_actor = self.get_object(const.Objects.PickedPointActor)
+        if picked_point_actor:
+            self.set_visibility(False, picked_point_actor)
+
+    def get_picked_cell_info(self, data: vtkImageData, x: float, y: float):
         self.__picker.Pick(x, y, 0.0, self.__renderer)
         
         message = {}
@@ -240,6 +288,37 @@ class Pipeline():
                 message[data_array.GetName()] = data_array.GetValue(cell_id)
         
         return message
+
+    def show_picked_cell(self, bounds):
+        if not self.get_object(const.Objects.PickedCell):
+            picked_cell = self.__factory.create_picked_cell(bounds)
+            self.set_object(const.Objects.PickedCell, picked_cell)
+
+            picked_cell_mapper = self.__factory.create_picked_cell_mapper(picked_cell)
+            self.set_object(const.Objects.PickedCellMapper, picked_cell_mapper)
+
+            picked_cell_actor = self.__factory.create_picked_cell_actor(picked_cell_mapper)
+            self.set_object(const.Objects.PickedCellActor, picked_cell_actor)
+
+            self.add_actors(picked_cell_actor)
+        else:
+            picked_cell = self.get_object(const.Objects.PickedCell)
+            picked_cell.SetCenter(
+                (bounds[0] + bounds[1]) / 2,
+                (bounds[2] + bounds[3]) / 2,
+                (bounds[4] + bounds[5]) / 2,
+            )
+
+            picked_cell_actor = self.get_object(const.Objects.PickedCellActor)
+            self.set_visibility(True, picked_cell_actor)
+
+        self.reset_camera()
+        self.render()
+
+    def hide_picked_cell(self):
+        picked_cell_actor = self.get_object(const.Objects.PickedCellActor)
+        if picked_cell_actor:
+            self.set_visibility(False, picked_cell_actor)
 
     def get_camera_params(self):
         camera = self.__renderer.GetActiveCamera()
