@@ -1,19 +1,17 @@
 from mri_viewer.app.components import button
-from trame.decorators import hot_reload
 
 import mri_viewer.app.constants as const
 
-@hot_reload
 def toolbar_icons(self):
     def on_toggle_axes():
-        self.state.axes_on = not self.state.axes_on
-        self.pipeline.render_axes(self.state.axes_on)
+        self.pipeline.axes_on = not self.pipeline.axes_on
+        self.pipeline.render_axes()
         
-        _, _, group, _ = self.current_file_information
+        _, _, group, _ = self.current_file_info
         self.update_client_camera(group)
 
     def on_reset_camera():
-        _, _, group, _ = self.current_file_information
+        _, _, group, _ = self.current_file_info
         group.current_view = group.default_view
 
         self.pipeline.set_camera_to_group_default_view(group)

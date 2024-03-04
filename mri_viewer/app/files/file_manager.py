@@ -15,10 +15,7 @@ class FileManager:
     def file_to_show(self):
         return self.__file_to_show
 
-    def load_files_from_pc(self, files_from_pc):
-        if (files_from_pc is None) or self.is_empty(files_from_pc):
-            raise Exception("NO FILES")
-        
+    def load_files_from_pc(self, files_from_pc):        
         for index, file_from_pc in enumerate(files_from_pc):
             self.load_file_from_pc(index, file_from_pc)
 
@@ -104,7 +101,7 @@ class FileManager:
             return False
         
         for index, group in enumerate(self.__groups):
-            if self.are_equal(file.data_arrays, group.data_arrays):
+            if self.are_equal(file.data_arrays, group.data_arrays) and self.same_extent(file.extent, group.extent):
                 group.add_file(file)
                 self.__file_to_group_mapping[file.name] = index
                 
@@ -125,6 +122,9 @@ class FileManager:
             if file_data_arrays[i] != group_data_arrays[i]:
                 return False
         return True
+
+    def same_extent(self, file_extent, group_extent):
+        return file_extent == group_extent
 
     def add_to_new_group(self, file: File):
         group = FileGroup(file)

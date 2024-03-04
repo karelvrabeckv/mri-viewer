@@ -1,7 +1,5 @@
 from trame.widgets import vuetify3
-from trame.decorators import hot_reload
 
-@hot_reload
 def data_array_select():
     vuetify3.VSelect(
         variant="outlined",

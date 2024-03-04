@@ -1,15 +1,13 @@
 from trame.widgets import html, vuetify3
-from trame.decorators import hot_reload
 
 from mri_viewer.app.components import button
 
 import mri_viewer.app.constants as const
 import mri_viewer.app.styles as style
 
-@hot_reload
 def zoom_interaction(self):
     def zoom(direction):
-        camera = self.pipeline.renderer.GetActiveCamera()
+        camera = self.pipeline.camera
         
         if direction == const.Zoom.In:
             for _ in range(self.state.current_zoom_factor):
@@ -18,11 +16,11 @@ def zoom_interaction(self):
             for _ in range(self.state.current_zoom_factor):
                 camera.Zoom(1 - 0.1)
         
-        self.pipeline.renderer.SetActiveCamera(camera)
-        self.pipeline.render_window.Render()
+        self.pipeline.camera = camera
+        self.pipeline.render()
         self.ctrl.push_camera()
 
-        _, _, group, _ = self.current_file_information
+        _, _, group, _ = self.current_file_info
         group.current_view = self.pipeline.get_camera_params()
 
     with vuetify3.VCard(border=True, classes="ma-4"):

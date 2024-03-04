@@ -1,4 +1,5 @@
 APPLICATION_NAME = "MRI Viewer"
+DEBUG_MODE = False
 
 class Theme:
     Light = "light"
@@ -42,17 +43,17 @@ class Directions:
 ZOOM_STEP = 1
 DEFAULT_ZOOM_FACTOR = 1
 MIN_ZOOM_FACTOR = 1
-MAX_ZOOM_FACTOR = 9
+MAX_ZOOM_FACTOR = 10
 
 TRANSLATION_STEP = 10
 DEFAULT_TRANSLATION_FACTOR = 10
 MIN_TRANSLATION_FACTOR = 10
-MAX_TRANSLATION_FACTOR = 90
+MAX_TRANSLATION_FACTOR = 300
 
 ROTATION_STEP = 10
-DEFAULT_ROTATION_FACTOR = 30
+DEFAULT_ROTATION_FACTOR = 90
 MIN_ROTATION_FACTOR = 10
-MAX_ROTATION_FACTOR = 350
+MAX_ROTATION_FACTOR = 180
 
 class Languages:
     Czech = "CZ"
@@ -74,7 +75,6 @@ class Planes:
     YZ = "1"
     XZ = "2"
 
-DEFAULT_SLICE_POSITION = 0
 DEFAULT_SLICE_ORIENTATION = Planes.XY
 
 class PickerModes:
@@ -89,3 +89,13 @@ class CameraParams:
     FocalPoint = "focal_point"
     ViewUp = "view_up"
     ViewAngle = "view_angle"
+
+class Objects:
+    ColorTransferFunction = "color_transfer_function"
+    LookupTable = "lookup_table"
+    FileMapper = "file_mapper"
+    FileActor = "file_actor"
+    CubeAxesActor = "cube_axes_actor"
+    Slice = "slice"
+    SliceMapper = "slice_mapper"
+    SliceActor = "slice_actor"

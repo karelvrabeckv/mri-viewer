@@ -24,20 +24,23 @@ import mri_viewer.app.styles as style
 class MRIViewerApp:
     def __init__(self, server=None):
         self.__server = get_server(server, client_type="vue3")
+        
         self.__file_manager = FileManager()
         self.__language_manager = LanguageManager()
         self.__pipeline = Pipeline()
+        
+        self.__current_file_info = None
+        
         self.__root = Tk()
         self.__root.withdraw()
         self.__root.wm_attributes("-topmost", 1)
-        self.__ui = self.build_ui()
         
-        watchdog(self)
-        
-        self.__current_file: File = None
-        self.__current_file_index: int = None
-        self.__current_group: FileGroup = None
-        self.__current_group_index: int = None
+        if const.DEBUG_MODE:
+            self.build_ui = hot_reload(self.build_ui)
+            self.__ui = self.build_ui()
+            watchdog(self)
+        else:
+            self.__ui = self.build_ui()
         
         self.state.trame__title = const.APPLICATION_NAME
         self.state.trame__favicon = asset_manager.logo
@@ -46,8 +49,8 @@ class MRIViewerApp:
 
         self.state.player_on = False
         self.state.player_loop = False
-        self.state.axes_on = True
         self.state.dialog_on = True
+        
         self.state.ui_player_off = True
         self.state.ui_picker_modes_off = True
         self.state.ui_off = True
@@ -57,7 +60,7 @@ class MRIViewerApp:
         self.state.current_rotation_factor = const.DEFAULT_ROTATION_FACTOR
 
         self.state.picker_info_title = None
-        self.state.picker_info_message = None
+        self.state.picker_info_message = {}
         self.state.picker_info_style = style.HIDDEN
 
     @property
@@ -77,16 +80,18 @@ class MRIViewerApp:
         return self.__pipeline
 
     @property
-    def ui(self):
-        return self.__ui
+    def current_file_info(self):
+        return self.__current_file_info
 
     @property
-    def current_file_information(self):
-        return self.__current_file, self.__current_file_index, self.__current_group, self.__current_group_index
+    def ui(self):
+        return self.__ui
 
     """ Load all files from local computer uploaded by user. """
     def on_files_from_pc_load(self):
         files_from_pc = filedialog.askopenfilenames(filetypes=[("VTI", "*.vti")])
+        if not files_from_pc or not len(files_from_pc):
+            return
         
         try:
             self.__file_manager.load_files_from_pc(files_from_pc)
@@ -129,118 +134,149 @@ class MRIViewerApp:
         if current_file_name is None:
             return
 
-        self.load_current_file_information()
-        file, _, group, _ = self.current_file_information
+        old_file_info = self.__current_file_info
+        self.__current_file_info = self.__file_manager.get_file(current_file_name)
+        new_file_info = self.__current_file_info
 
-        self.state.current_data_array = group.data_array
-        self.state.current_data_array_items = group.data_arrays
-        self.state.current_representation = group.representation
-        self.state.current_slice_orientation = group.slice_orientation
-        self.state.current_slice_position = group.slice_position
+        if not old_file_info:
+            # There are no files so far
+            self.load_file_at_startup()
+        else:
+            # There are already some files
+            _, _, _, old_group_index = old_file_info
+            _, _, _, new_group_index = new_file_info
 
-        # Update the server camera
+            if old_group_index == new_group_index:
+                # Switching files within same group
+                self.load_file_from_same_group()
+            else:
+                # Switching files between different groups
+                self.load_file_from_different_group()
+
+    def load_file_at_startup(self):
+        file, _, group, _ = self.__current_file_info
+        
+        self.__pipeline.render_file(file, group)
+        
+        group.default_view = self.__pipeline.get_camera_params()
+        group.current_view = self.__pipeline.get_camera_params()
+        
+        self.update_client_camera(group)
+        self.ctrl.push_camera()
+
+        self.toggle_player_ui()
+
+        self.state.update({
+            "ui_off": False,
+            "current_data_array": group.data_array,
+            "current_data_array_items": group.data_arrays,
+            "current_representation": group.representation,
+            "current_slice_orientation": group.slice_orientation,
+        })
+
+    def load_file_from_same_group(self):
+        file, _, group, _ = self.__current_file_info
+        
+        self.__pipeline.hide_current_file()
         self.__pipeline.set_camera_to_initial_view()
-        self.__pipeline.render_file(file, group.data_array, group.slice_orientation, group.slice_position)
+        
+        self.__pipeline.render_file(file, group)
+        self.__pipeline.render_data_array(file, group.data_array)
+        self.__pipeline.render_representation(group.representation)
+        
+        self.__pipeline.set_slice(file, group.slice_orientation, group.slice_position)
+        
+        self.update_client_camera(group)
+        
+        self.toggle_player_ui()
+        self.state.picker_info_style = style.HIDDEN
+
+    def load_file_from_different_group(self):
+        file, _, group, _ = self.__current_file_info
+        
+        self.__pipeline.hide_current_file()
+        self.__pipeline.set_camera_to_initial_view()
+        
+        self.__pipeline.render_file(file, group)
+        self.__pipeline.render_data_array(file, group.data_array)
+        self.__pipeline.render_representation(group.representation)
+        
+        self.__pipeline.set_slice(file, group.slice_orientation, group.slice_position)
 
         if group.default_view is None:
-            # Save current camera parameters
             group.default_view = self.__pipeline.get_camera_params()
             group.current_view = self.__pipeline.get_camera_params()
         else:
-            # Load saved camera parameters
             self.__pipeline.set_camera_to_group_current_view(group)
 
-        if not self.state.player_on:
-            # Transfer camera from server to client
-            self.ctrl.push_camera()
-                
         self.update_client_camera(group)
+        self.ctrl.push_camera()
         
-        # Activate the rest of UI
-        self.state.ui_off = False
         self.toggle_player_ui()
-        
-        # Hide the point/cell information
         self.state.picker_info_style = style.HIDDEN
+        
+        self.state.update({
+            "current_data_array": group.data_array,
+            "current_data_array_items": group.data_arrays,
+            "current_representation": group.representation,
+            "current_slice_orientation": group.slice_orientation,
+            "current_min_slice_position": group.deduce_min_slice_position(group.slice_orientation),
+            "current_slice_position": group.slice_position[group.slice_orientation],
+            "current_max_slice_position": group.deduce_max_slice_position(group.slice_orientation),
+        })
 
     @change("current_data_array")
     def on_current_data_array_change(self, current_data_array: str, **kwargs):
         if current_data_array is None:
             return
         
-        # Render the particular data array
-        file, _, group, _ = self.current_file_information
-        self.__pipeline.render_data_array(file, current_data_array)
-        
-        # Set the data array as the default of the group
+        file, _, group, _ = self.__current_file_info
         group.data_array = current_data_array
+        
+        self.__pipeline.render_data_array(file, group.data_array)
         
         self.update_client_camera(group)
 
     @change("current_representation")
-    def on_current_representation_change(self, current_representation: int, **kwargs):
+    def on_current_representation_change(self, current_representation: str, **kwargs):
         if current_representation is None:
             return
         
-        # Render the particular representation
-        _, _, group, _ = self.current_file_information
-        self.__pipeline.render_representation(current_representation)
-        
-        # Set the representation as the default of the group
+        _, _, group, _ = self.__current_file_info
         group.representation = current_representation
         
-        if current_representation == const.Representation.Slice:
-            self.__pipeline.actor.VisibilityOff()
-            self.__pipeline.slice_actor.VisibilityOn()
+        self.__pipeline.render_representation(group.representation)
         
         self.toggle_picker_modes_ui()
 
         self.update_client_camera(group)
 
     @change("current_slice_orientation")
-    def on_current_slice_orientation_change(self, current_slice_orientation, **kwargs):
+    def on_current_slice_orientation_change(self, current_slice_orientation: str, **kwargs):
         if current_slice_orientation is None:
             return
         
-        file, _, group, _ = self.current_file_information
-        image_data = file.reader.GetOutput()
-        max_x, max_y, max_z = image_data.GetDimensions()
-
-        # Set values for the slider
-        self.state.min_slice_position = 0
-        
-        if current_slice_orientation == const.Planes.XY:
-            self.state.max_slice_position = max_z - 1
-        elif current_slice_orientation == const.Planes.YZ:
-            self.state.max_slice_position = max_x - 1
-        elif current_slice_orientation == const.Planes.XZ:
-            self.state.max_slice_position = max_y - 1
-            
-        self.state.current_slice_position = const.DEFAULT_SLICE_POSITION
-
-        # Render the particular slice
-        self.__pipeline.render_slice(current_slice_orientation, const.DEFAULT_SLICE_POSITION, max_x, max_y, max_z)
-
-        # Set the slice orientation as the default of the group
+        file, _, group, _ = self.__current_file_info
         group.slice_orientation = current_slice_orientation
 
+        self.state.update({
+            "current_min_slice_position": group.deduce_min_slice_position(group.slice_orientation),
+            "current_slice_position": group.slice_position[group.slice_orientation],
+            "current_max_slice_position": group.deduce_max_slice_position(group.slice_orientation),
+        })
+
+        self.__pipeline.set_slice(file, group.slice_orientation, group.slice_position)
         self.update_client_camera(group)
 
     @change("current_slice_position")
-    def on_current_slice_position_change(self, current_slice_position, **kwargs):
+    def on_current_slice_position_change(self, current_slice_position: int, **kwargs):
         if current_slice_position is None:
             return
 
-        file, _, group, _ = self.current_file_information
-        image_data = file.reader.GetOutput()
-        max_x, max_y, max_z = image_data.GetDimensions()
+        file, _, group, _ = self.__current_file_info
+        group.slice_position[group.slice_orientation] = current_slice_position
 
-        # Render the particular slice
-        self.__pipeline.render_slice(group.slice_orientation, current_slice_position, max_x, max_y, max_z)
-        
-        # Set the slice position as the default of the group
-        group.slice_position = current_slice_position
-        
+        self.__pipeline.set_slice(file, group.slice_orientation, group.slice_position)
         self.update_client_camera(group)
 
     @change("current_language")
@@ -265,10 +301,10 @@ class MRIViewerApp:
  
         if self.state.current_file_name:
             # Update the server camera
-            self.__pipeline.render_window.Render()
+            self.__pipeline.render()
             
             # Update the client camera
-            _, _, group, _ = self.current_file_information
+            _, _, group, _ = self.__current_file_info
             self.update_client_camera(group)
 
     @change("content_size")
@@ -282,13 +318,12 @@ class MRIViewerApp:
         width = int(size["width"] * pixel_ratio)
         height = int(size["height"] * pixel_ratio)
 
-        self.__pipeline.render_window.SetSize(width, height)
-        self.__pipeline.render_window.Render()
+        self.__pipeline.resize_window(width, height)
 
     @change("picker_mode")
     def on_picker_mode_change(self, picker_mode, **kwargs):
         self.state.picker_info_title = ""
-        self.state.picker_info_message = ""
+        self.state.picker_info_message = {}
         self.state.picker_info_style = style.HIDDEN
 
     @change("player_on")
@@ -298,7 +333,7 @@ class MRIViewerApp:
             while self.state.player_on:
                 self.state.player_loop = True
                 
-                _, file_index, group, _ = self.current_file_information
+                _, file_index, group, _ = self.__current_file_info
                 
                 next_file_index = file_index + 1
                 if next_file_index >= group.get_num_of_files():
@@ -309,24 +344,16 @@ class MRIViewerApp:
                 
                 self.state.flush()
 
-                await sleep(0.25)
+                await sleep(0.2)
             self.state.player_loop = False
 
-    def load_current_file_information(self):
-        file, file_index, group, group_index = self.__file_manager.get_file(self.state.current_file_name)
-
-        self.__current_file = file
-        self.__current_file_index = file_index
-        self.__current_group = group
-        self.__current_group_index = group_index
-
-    def update_client_camera(self, group: FileGroup):
+    def update_client_camera(self, group):
         self.__pipeline.set_camera_to_group_default_view(group)
         self.ctrl.update()
         self.__pipeline.set_camera_to_group_current_view(group)
 
     def toggle_player_ui(self):
-        _, _, group, _ = self.current_file_information
+        _, _, group, _ = self.__current_file_info
         
         if group.get_num_of_files() > 1:
             # Activate the player UI
@@ -344,7 +371,6 @@ class MRIViewerApp:
         else:
             self.state.ui_picker_modes_off = False
 
-    @hot_reload
     def build_ui(self, **kwargs):
         with SinglePageWithDrawerLayout(self.server, vuetify_config=const.VUETIFY_CONFIG) as layout:
             layout.root.theme = ("theme", const.DEFAULT_THEME)
@@ -390,7 +416,9 @@ class MRIViewerApp:
 
                     # Picker information
                     with vuetify3.VCard(title=("picker_info_title",), style=("picker_info_style",)):
-                        vuetify3.VCardText("<pre>{{ picker_info_message }}</pre>")
+                        with vuetify3.VCardText():
+                            with vuetify3.Template(v_for="value, key in picker_info_message"):
+                                html.Pre("<b>{{ key }}:</b> {{ value }}")
 
             # Footer
             layout.footer.hide()

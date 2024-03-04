@@ -1,9 +1,7 @@
 from trame.widgets import vuetify3
-from trame.decorators import hot_reload
 
 import mri_viewer.app.constants as const
 
-@hot_reload
 def progress_bar():
     vuetify3.VProgressLinear(
         active=("trame__busy",),

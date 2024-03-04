@@ -1,14 +1,6 @@
 from vtkmodules.vtkCommonDataModel import vtkImageData
-from vtkmodules.vtkImagingCore import vtkExtractVOI
-from vtkmodules.vtkRenderingAnnotation import vtkCubeAxesActor
-from vtkmodules.vtkRenderingCore import (
-    vtkActor,
-    vtkCellPicker,
-    vtkDataSetMapper,
-    vtkPolyDataMapper,
-)
 
-from .pipeline_builder import PipelineBuilder
+from .pipeline_factory import PipelineFactory
 
 from mri_viewer.app.files import *
 
@@ -18,28 +10,24 @@ from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch # noqa
 
 import vtkmodules.vtkRenderingOpenGL2 # noqa
 
-class Pipeline(PipelineBuilder):
+class Pipeline():
     def __init__(self):
-        self.__renderer = self.create_renderer()
-        self.__render_window = self.create_render_window(self.__renderer)
-        self.__render_window_interactor = self.create_render_window_interactor(self.__render_window)
-        self.__axes_widget = self.create_axes_widget(self.__render_window_interactor)
-        self.__color_transfer_function = self.create_color_transfer_function()
-        self.__lookup_table = self.create_lookup_table(self.__color_transfer_function)
+        self.__factory = PipelineFactory()
         
-        self.__data_set_mapper = vtkDataSetMapper()
-        self.__actor = vtkActor()
-        self.__cube_axes_actor = vtkCubeAxesActor()
+        self.__renderer = self.__factory.create_renderer()
+        self.__render_window = self.__factory.create_render_window(self.__renderer)
+        self.__render_window_interactor = self.__factory.create_render_window_interactor(self.__render_window)
         
-        self.__slice = vtkExtractVOI()
-        self.__slice_poly_data_mapper = vtkPolyDataMapper()
-        self.__slice_actor = vtkActor()
+        self.__picker = self.__factory.create_picker()
+        self.__axes_widget = self.__factory.create_axes_widget(self.__render_window_interactor)
         
-        self.__picker = vtkCellPicker()
-        
-        self.__render_window.Render()
-
+        self.__objects = {}
+        self.__latest_file_name = ""
         self.__initial_view = self.get_camera_params()
+        self.__axes_on = True
+        
+        self.reset_camera()
+        self.render()
 
     @property
     def renderer(self):
@@ -54,95 +42,126 @@ class Pipeline(PipelineBuilder):
         return self.__axes_widget
 
     @property
-    def actor(self):
-        return self.__actor
-
-    @property
-    def slice(self):
-        return self.__slice
-
-    @property
-    def slice_actor(self):
-        return self.__slice_actor
-
-    @property
     def initial_view(self):
         return self.__initial_view
 
-    def build_data_set_mapper(self, file: File, group_active_array: str):
-        self.__data_set_mapper.SetInputConnection(file.reader.GetOutputPort())
-        self.__data_set_mapper.SetScalarRange(file.data.GetArray(group_active_array).GetRange())
-        self.__data_set_mapper.SetLookupTable(self.__lookup_table)
+    @property
+    def axes_on(self):
+        return self.__axes_on
 
-    def build_actor(self):
-        self.__actor.SetMapper(self.__data_set_mapper)
-                
-        self.__renderer.AddActor(self.__actor)
-        self.__renderer.ResetCamera()
+    @axes_on.setter
+    def axes_on(self, axes_on): 
+        self.__axes_on = axes_on
 
-    def build_cube_axes_actor(self):
-        self.__cube_axes_actor.SetXTitle("X")
-        self.__cube_axes_actor.SetYTitle("Y")
-        self.__cube_axes_actor.SetZTitle("Z")
+    @property
+    def camera(self):
+        return self.__renderer.GetActiveCamera()
+    
+    @camera.setter 
+    def camera(self, camera):
+        self.__renderer.SetActiveCamera(camera)
+
+    @property
+    def file_actor(self):
+        return self.get_object(const.Objects.FileActor)
+    
+    @property
+    def slice(self):
+        return self.get_object(const.Objects.Slice)
+
+    @property
+    def slice_actor(self):
+        return self.get_object(const.Objects.SliceActor)
+
+    def get_object(self, object: const.Objects):
+        if not self.__latest_file_name:
+            return        
+        return self.__objects[self.__latest_file_name][object]
+
+    def get_file_actor_center(self):
+        file_actor = self.get_object(const.Objects.FileActor)
+        if not file_actor:
+            return
+        return file_actor.GetCenter()
+
+    def hide_current_file(self):
+        latest_file_actor = self.get_object(const.Objects.FileActor)
+        latest_cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
+        latest_slice_actor = self.get_object(const.Objects.SliceActor)
         
-        self.__cube_axes_actor.GetXAxesLinesProperty().SetColor(*const.AXES_COLOR)
-        self.__cube_axes_actor.GetYAxesLinesProperty().SetColor(*const.AXES_COLOR)
-        self.__cube_axes_actor.GetZAxesLinesProperty().SetColor(*const.AXES_COLOR)
+        self.set_visibility(False, latest_file_actor, latest_cube_axes_actor, latest_slice_actor)
         
-        self.__cube_axes_actor.SetBounds(self.__actor.GetBounds())
-        self.__cube_axes_actor.SetCamera(self.__renderer.GetActiveCamera())
+        self.reset_camera()
+        self.render()
+
+    def render_file(self, file: File, group: FileGroup):
+        self.__latest_file_name = file.name
+        file.data.SetActiveScalars(group.data_array)
         
-        self.__renderer.AddActor(self.__cube_axes_actor)
-        self.__renderer.ResetCamera()
-
-    def build_slice(self, file: File, slice_orientation: const.Planes, slice_position: int):
-        image_data = file.reader.GetOutput()
-        self.__slice.SetInputData(image_data)
+        if self.__latest_file_name in self.__objects.keys():
+            file_actor = self.get_object(const.Objects.FileActor)
+            cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
+            
+            self.set_visibility(True, file_actor)
+        else:
+            color_transfer_function = self.__factory.create_color_transfer_function()
+            lookup_table = self.__factory.create_lookup_table(color_transfer_function)
+            
+            file_mapper = self.__factory.create_file_mapper(file, group.data_array, lookup_table)
+            file_actor = self.__factory.create_file_actor(file_mapper)
+            cube_axes_actor = self.__factory.create_cube_axes_actor(file_actor, self.__renderer)
+            
+            slice = self.__factory.create_slice(file)
+            slice_mapper = self.__factory.create_slice_mapper(file, slice, group.data_array, lookup_table)
+            slice_actor = self.__factory.create_slice_actor(slice_mapper)
+            
+            self.__objects[self.__latest_file_name] = {
+                const.Objects.ColorTransferFunction: color_transfer_function,
+                const.Objects.LookupTable: lookup_table,
+                const.Objects.FileMapper: file_mapper,
+                const.Objects.FileActor: file_actor,
+                const.Objects.CubeAxesActor: cube_axes_actor,
+                const.Objects.Slice: slice,
+                const.Objects.SliceMapper: slice_mapper,
+                const.Objects.SliceActor: slice_actor,
+            }
+            
+            self.set_slice(file, group.slice_orientation, group.slice_position)
+            self.add_actors(file_actor, cube_axes_actor, slice_actor)
         
-        max_x, max_y, max_z = image_data.GetDimensions()
-        self.render_slice(slice_orientation, slice_position, max_x, max_y, max_z)
+        self.set_visibility(self.__axes_on, cube_axes_actor)
 
-    def build_slice_poly_data_mapper(self, file: File, group_active_array: str):
-        self.__slice_poly_data_mapper.SetInputConnection(self.__slice.GetOutputPort())
-        self.__slice_poly_data_mapper.SetScalarRange(file.data.GetArray(group_active_array).GetRange())
-        self.__slice_poly_data_mapper.SetLookupTable(self.__lookup_table)
+        self.reset_camera()
+        self.render()
 
-    def build_slice_actor(self):
-        self.__slice_actor.SetMapper(self.__slice_poly_data_mapper)
-        self.__slice_actor.GetProperty().LightingOff()
-
-        self.__renderer.AddActor(self.__slice_actor)
-        self.__renderer.ResetCamera()
-
-    def render_file(self, file: File, group_active_array: str, slice_orientation: const.Planes, slice_position: int):
-        file.data.SetActiveScalars(group_active_array)
-
-        self.build_data_set_mapper(file, group_active_array)
-        self.build_actor()
-        self.build_cube_axes_actor()
-        
-        self.build_slice(file, slice_orientation, slice_position)
-        self.build_slice_poly_data_mapper(file, group_active_array)
-        self.build_slice_actor()
-        
-        self.__render_window.Render()
-
-    def render_data_array(self, file: File, new_active_array: str):
+    def render_data_array(self, file: File, new_active_array):
         file.data.SetActiveScalars(new_active_array)
         
-        self.__data_set_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
-        self.__slice_poly_data_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
+        file_mapper = self.get_object(const.Objects.FileMapper)
+        file_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
+        
+        slice_mapper = self.get_object(const.Objects.SliceMapper)
+        slice_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
+        
+        self.reset_camera()
+        self.render()
 
     def render_representation(self, new_active_representation):
-        actor_property = self.__actor.GetProperty()
+        file_actor = self.get_object(const.Objects.FileActor)
+        self.set_visibility(True, file_actor)
         
-        self.__actor.VisibilityOn()
-        self.__slice_actor.VisibilityOff()
-
+        slice_actor = self.get_object(const.Objects.SliceActor)
+        self.set_visibility(False, slice_actor)
+        
+        actor_property = file_actor.GetProperty()
+        
         if new_active_representation == const.Representation.Points:
             actor_property.SetRepresentationToPoints()
             actor_property.SetPointSize(2)
             actor_property.EdgeVisibilityOff()
+        elif new_active_representation == const.Representation.Slice:
+            self.set_visibility(False, file_actor)
+            self.set_visibility(True, slice_actor)
         elif new_active_representation == const.Representation.Surface:
             actor_property.SetRepresentationToSurface()
             actor_property.SetPointSize(1)
@@ -156,43 +175,69 @@ class Pipeline(PipelineBuilder):
             actor_property.SetPointSize(1)
             actor_property.EdgeVisibilityOff()
 
-    def render_slice(self, slice_orientation, slice_position, max_x, max_y, max_z):
-        if slice_orientation == const.Planes.XY:
-            self.__slice.SetVOI(0, max_x - 1, 0, max_y - 1, slice_position, slice_position)
-        elif slice_orientation == const.Planes.YZ:
-            self.__slice.SetVOI(slice_position, slice_position, 0, max_y - 1, 0, max_z - 1)
-        elif slice_orientation == const.Planes.XZ:
-            self.__slice.SetVOI(0, max_x - 1, slice_position, slice_position, 0, max_z - 1)
+        self.reset_camera()
+        self.render()
+
+    def set_slice(self, file, slice_orientation, slice_position):
+        min_x, max_x, min_y, max_y, min_z, max_z = file.extent
+        slice = self.get_object(const.Objects.Slice)
+        position = slice_position[slice_orientation]
         
-    def render_axes(self, axes_on: bool):
-        self.__cube_axes_actor.SetVisibility(axes_on)
+        if slice_orientation == const.Planes.XY:
+            slice.SetVOI(min_x, max_x, min_y, max_y, position, position)
+        elif slice_orientation == const.Planes.YZ:
+            slice.SetVOI(position, position, min_y, max_y, min_z, max_z)
+        elif slice_orientation == const.Planes.XZ:
+            slice.SetVOI(min_x, max_x, position, position, min_z, max_z)
+
+    def set_visibility(self, visibility, *actors):
+        for actor in actors:
+            actor.SetVisibility(visibility)
+    
+    def add_actors(self, *actors):
+        for actor in actors:
+            self.__renderer.AddActor(actor)
+
+    def reset_camera(self):
+        self.__renderer.ResetCamera()
+
+    def render(self):
+        self.__render_window.Render()
+
+    def render_axes(self):
+        cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
+        self.set_visibility(self.__axes_on, cube_axes_actor)
+
+    def resize_window(self, width, height):
+        self.__render_window.SetSize(width, height)
+        self.render()
 
     def get_point_information(self, data: vtkImageData, x: float, y: float):
         self.__picker.Pick(x, y, 0.0, self.__renderer)
 
-        message = ""
+        message = {}
         point_id = self.__picker.GetPointId()
         
         if point_id != -1:
             point = data.GetPoint(point_id)
-            message = f"Id: {point_id}\nX: {point[0]}\nY: {point[1]}\nZ: {point[2]}\n"
+            message = { "Id": point_id, "X": point[0], "Y": point[1], "Z": point[2] }
         
         return message
     
     def get_cell_information(self, data: vtkImageData, x: float, y: float):
         self.__picker.Pick(x, y, 0.0, self.__renderer)
         
-        message = ""
+        message = {}
         cell_id = self.__picker.GetCellId()
         
         if cell_id != -1:
             cell_data = data.GetCellData()
             num_of_data_arrays = cell_data.GetNumberOfArrays()
             
-            message = f"Id: {cell_id}\n"
+            message["Id"] = cell_id
             for i in range(num_of_data_arrays):
                 data_array = cell_data.GetArray(i)
-                message += f"{data_array.GetName()}: {data_array.GetValue(cell_id)}\n"
+                message[data_array.GetName()] = data_array.GetValue(cell_id)
         
         return message
 

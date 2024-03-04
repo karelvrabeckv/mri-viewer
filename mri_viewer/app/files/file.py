@@ -1,7 +1,8 @@
 class File:
-    def __init__(self, name, reader, data, data_array, data_arrays):
+    def __init__(self, name, reader, extent, data, data_array, data_arrays):
         self.__name = name
         self.__reader = reader
+        self.__extent = extent
         self.__data = data
         self.__data_array = data_array
         self.__data_arrays = data_arrays
@@ -13,6 +14,10 @@ class File:
     @property
     def reader(self):
         return self.__reader
+
+    @property
+    def extent(self):
+        return self.__extent
 
     @property
     def data(self):

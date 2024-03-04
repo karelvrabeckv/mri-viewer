@@ -1,16 +1,14 @@
 from trame.widgets import vtk, vuetify3
-from trame.decorators import hot_reload
 
 import mri_viewer.app.constants as const
 import mri_viewer.app.styles as style
 
-@hot_reload
 def view(self):
     def on_picker(event, **kwargs):
         if self.state.picker_mode == const.PickerModes.Off:
             return
 
-        file, _, _, _ = self.current_file_information
+        file, _, _, _ = self.current_file_info
         image_data = file.reader.GetOutput()
 
         position = event["position"]
@@ -33,7 +31,7 @@ def view(self):
         
         self.pipeline.set_camera_to_client_view(client_camera)
         
-        _, _, group, _ = self.current_file_information
+        _, _, group, _ = self.current_file_info
         group.current_view = self.pipeline.get_camera_params()
     
     with vuetify3.VContainer(fluid=True, classes="pa-0 fill-height"):

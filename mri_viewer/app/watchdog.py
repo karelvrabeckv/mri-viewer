@@ -1,5 +1,4 @@
-import asyncio
-
+from asyncio import get_event_loop
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
@@ -7,7 +6,7 @@ from watchdog.observers import Observer
 
 def watchdog(self):
     try:
-        current_event_loop = asyncio.get_event_loop()
+        current_event_loop = get_event_loop()
 
         def update_ui():
             with self.server.state:

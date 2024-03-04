@@ -1,5 +1,4 @@
 from trame.widgets import html, vuetify3
-from trame.decorators import hot_reload
 
 from vtkmodules.vtkCommonTransforms import vtkTransform
 
@@ -8,36 +7,35 @@ from mri_viewer.app.components import button
 import mri_viewer.app.constants as const
 import mri_viewer.app.styles as style
 
-@hot_reload
 def rotation_interaction(self):
     def rotate(direction):
-        camera = self.pipeline.renderer.GetActiveCamera()
-        x, y, z = self.pipeline.actor.GetCenter()
+        camera = self.pipeline.camera
+        x, y, z = self.pipeline.get_file_actor_center()
 
         rotation = vtkTransform()
         rotation.Translate(x, y, z)
         
         if direction == const.Directions.XAxisPlus:
-            rotation.RotateX(-self.state.current_rotation_factor)
-        elif direction == const.Directions.XAxisMinus:
             rotation.RotateX(self.state.current_rotation_factor)
+        elif direction == const.Directions.XAxisMinus:
+            rotation.RotateX(-self.state.current_rotation_factor)
         elif direction == const.Directions.YAxisPlus:
-            rotation.RotateY(-self.state.current_rotation_factor)
-        elif direction == const.Directions.YAxisMinus:
             rotation.RotateY(self.state.current_rotation_factor)
+        elif direction == const.Directions.YAxisMinus:
+            rotation.RotateY(-self.state.current_rotation_factor)
         elif direction == const.Directions.ZAxisPlus:
-            rotation.RotateZ(-self.state.current_rotation_factor)
-        elif direction == const.Directions.ZAxisMinus:
             rotation.RotateZ(self.state.current_rotation_factor)
+        elif direction == const.Directions.ZAxisMinus:
+            rotation.RotateZ(-self.state.current_rotation_factor)
         
         rotation.Translate(-x, -y, -z)
         camera.ApplyTransform(rotation)
 
-        self.pipeline.renderer.SetActiveCamera(camera)
-        self.pipeline.render_window.Render()
+        self.pipeline.camera = camera
+        self.pipeline.render()
         self.ctrl.push_camera()
         
-        _, _, group, _ = self.current_file_information
+        _, _, group, _ = self.current_file_info
         group.current_view = self.pipeline.get_camera_params()
 
     with vuetify3.VCard(border=True, classes="ma-4"):
@@ -56,53 +54,47 @@ def rotation_interaction(self):
         
         with vuetify3.VCardText():
             with vuetify3.VRow(justify="center", classes="my-4"):
-                html.Div("X:", classes="d-flex align-center text-body-1 mx-1")
                 button(
-                    icon="mdi-minus",
+                    icon="mdi-undo",
                     disabled=("ui_off",),
                     tooltip=("language.rotate_x_axis_minus_tooltip",),
-                    classes="mx-1",
                     click=(rotate, f"['{const.Directions.XAxisMinus}']"),
                 )
+                html.Div("X", classes="d-flex align-center text-body-1 mx-4")
                 button(
-                    icon="mdi-plus",
+                    icon="mdi-redo",
                     disabled=("ui_off",),
                     tooltip=("language.rotate_x_axis_plus_tooltip",),
-                    classes="mx-1",
                     click=(rotate, f"['{const.Directions.XAxisPlus}']"),
                 )
 
             with vuetify3.VRow(justify="center", classes="my-4"):
-                html.Div("Y:", classes="d-flex align-center text-body-1 mx-1")
                 button(
-                    icon="mdi-minus",
+                    icon="mdi-undo",
                     disabled=("ui_off",),
                     tooltip=("language.rotate_y_axis_minus_tooltip",),
-                    classes="mx-1",
                     click=(rotate, f"['{const.Directions.YAxisMinus}']"),
                 )
+                html.Div("Y", classes="d-flex align-center text-body-1 mx-4")
                 button(
-                    icon="mdi-plus",
+                    icon="mdi-redo",
                     disabled=("ui_off",),
                     tooltip=("language.rotate_y_axis_plus_tooltip",),
-                    classes="mx-1",
                     click=(rotate, f"['{const.Directions.YAxisPlus}']"),
                 )
             
             with vuetify3.VRow(justify="center", classes="my-4"):
-                html.Div("Z:", classes="d-flex align-center text-body-1 mx-1")
                 button(
-                    icon="mdi-minus",
+                    icon="mdi-undo",
                     disabled=("ui_off",),
                     tooltip=("language.rotate_z_axis_minus_tooltip",),
-                    classes="mx-1",
                     click=(rotate, f"['{const.Directions.ZAxisMinus}']"),
                 )
+                html.Div("Z", classes="d-flex align-center text-body-1 mx-4")
                 button(
-                    icon="mdi-plus",
+                    icon="mdi-redo",
                     disabled=("ui_off",),
                     tooltip=("language.rotate_z_axis_plus_tooltip",),
-                    classes="mx-1",
                     click=(rotate, f"['{const.Directions.ZAxisPlus}']"),
                 )
             

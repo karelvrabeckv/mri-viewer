@@ -1,15 +1,13 @@
 from trame.widgets import vuetify3
-from trame.decorators import hot_reload
 
 from mri_viewer.app.components import button, toggle_button
 
-@hot_reload
 def animation_icons(self):
     def on_previous_file():
         self.state.player_on = False
         self.toggle_picker_modes_ui()
         
-        _, file_index, group, _ = self.current_file_information
+        _, file_index, group, _ = self.current_file_info
         
         previous_file_index = file_index - 1
         if previous_file_index < 0:
@@ -26,7 +24,7 @@ def animation_icons(self):
         self.state.player_on = False
         self.toggle_picker_modes_ui()
         
-        _, file_index, group, _ = self.current_file_information
+        _, file_index, group, _ = self.current_file_info
         
         next_file_index = file_index + 1
         if next_file_index >= group.get_num_of_files():
