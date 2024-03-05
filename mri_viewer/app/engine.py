@@ -4,7 +4,6 @@ from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import html, trame, vuetify3
 
 from asyncio import sleep
-from tkinter import Tk, filedialog
 
 from mri_viewer.app.assets import *
 from mri_viewer.app.components.icons import *
@@ -30,10 +29,6 @@ class MRIViewerApp:
         self.__pipeline = Pipeline()
         
         self.__current_file_info = None
-        
-        self.__root = Tk()
-        self.__root.withdraw()
-        self.__root.wm_attributes("-topmost", 1)
         
         if const.DEBUG_MODE:
             self.build_ui = hot_reload(self.build_ui)
@@ -88,18 +83,19 @@ class MRIViewerApp:
         return self.__ui
 
     """ Load all files from local computer uploaded by user. """
-    def on_files_from_pc_load(self):
-        files_from_pc = filedialog.askopenfilenames(filetypes=[("VTI", "*.vti")])
-        if not files_from_pc or not len(files_from_pc):
+    @change("files_from_pc")
+    def on_files_from_pc_change(self, files_from_pc, **kwargs):
+        if files_from_pc is None:
             return
         
         try:
             self.__file_manager.load_files_from_pc(files_from_pc)
             self.post_loading_actions()
-        except:
-            self.state.files_from_pc_error_message = self.state.language["load_files_from_pc_error"]
+        except Exception as e:
+            self.state.files_from_pc_error_message = f"{self.state.language["load_files_from_pc_error"]} {str(e)}"
 
     def clear_files_from_pc_error_message(self):
+        self.state.files_from_pc = None
         self.state.files_from_pc_error_message = ""
 
     @change("file_from_url")
@@ -111,8 +107,8 @@ class MRIViewerApp:
         try:
             self.__file_manager.load_file_from_url(self.state.file_from_url)
             self.post_loading_actions()
-        except:
-            self.state.file_from_url_error_message = self.state.language["load_file_from_url_error"]
+        except Exception as e:
+            self.state.file_from_url_error_message = f"{self.state.language["load_file_from_url_error"]} {str(e)}"
 
     """ Actions to be executed after loading file/s. """
     def post_loading_actions(self):
@@ -122,9 +118,10 @@ class MRIViewerApp:
         
         self.state.update({
             "dialog_on": False,
+            "files_from_pc": None,
+            "files_from_pc_error_message": "",
             "file_from_url": None,
             "file_from_url_error_message": "",
-            "files_from_pc_error_message": "",
             "current_file_name": self.__file_manager.file_to_show,
             "current_file_name_items": self.__file_manager.get_all_file_names(),
         })
@@ -291,21 +288,21 @@ class MRIViewerApp:
         elif self.state.picker_mode == const.PickerModes.Cells:
             self.state.picker_info_title = self.state.language["cell_info_title"]
  
-        # Change the error message for uploading files locally
-        if self.state.files_from_pc_error_message:
-            self.state.files_from_pc_error_message = self.state.language["load_files_from_pc_error"]
- 
-        # Change the error message for uploading file remotely
-        if self.state.file_from_url_error_message:
-            self.state.file_from_url_error_message = self.state.language["load_file_from_url_error"]
- 
         if self.state.current_file_name:
-            # Update the server camera
             self.__pipeline.render()
             
-            # Update the client camera
             _, _, group, _ = self.__current_file_info
             self.update_client_camera(group)
+
+    @change("dialog_on")
+    def on_dialog_on_change(self, dialog_on, **kwargs):
+        if dialog_on == False:
+            self.state.update({
+                "files_from_pc": None,
+                "files_from_pc_error_message": "",
+                "file_from_url": None,
+                "file_from_url_error_message": "",
+            })
 
     @change("content_size")
     def on_content_size_change(self, content_size, **kwargs):

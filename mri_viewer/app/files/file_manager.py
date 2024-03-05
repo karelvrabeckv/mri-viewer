@@ -1,5 +1,7 @@
 import re, requests
 
+from trame.app.file_upload import ClientFile
+
 from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 
 from .file_group import FileGroup
@@ -15,58 +17,93 @@ class FileManager:
     def file_to_show(self):
         return self.__file_to_show
 
-    def load_files_from_pc(self, files_from_pc):        
+    def load_files_from_pc(self, files_from_pc):
+        self.validate_file_group(files_from_pc)
+
         for index, file_from_pc in enumerate(files_from_pc):
             self.load_file_from_pc(index, file_from_pc)
 
-    def load_file_from_pc(self, index, file_from_pc: str):
-        occurrences = re.split(r"/|\\", file_from_pc)
-        if not self.is_empty(occurrences):
-            file_name = occurrences[-1]
-        
-        if (file_name and not file_name.endswith(".vti")) or not file_from_pc:
-            raise Exception("FILE FROM PC ERROR")
+    def validate_file_group(self, files_from_pc):
+        if len(files_from_pc) == 0:
+            raise Exception("NO-FILES-TO-UPLOAD")
+        elif len(files_from_pc) > 10:
+            raise Exception("TOO-MANY-FILES-TO-UPLOAD")
+
+    def load_file_from_pc(self, index, file_from_pc):
+        raw_file = ClientFile(file_from_pc)
+        self.validate_file(raw_file.name, raw_file.content, raw_file.size)
         
         if index == 0:
-            self.__file_to_show = file_name
-        
-        reader = vtkXMLImageDataReader()
-        
-        reader.SetFileName(file_from_pc)
-        reader.Update()
-        
-        file = self.create_new_file(file_name, reader)        
+            self.__file_to_show = raw_file.name
+
+        reader = self.create_new_reader(raw_file.content)
+        file = self.create_new_file(raw_file.name, reader)
         self.assign_file_to_group(file)
         
     def load_file_from_url(self, url):
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+        except:
+            raise Exception("INVALID-URL")
+
+        content_disposition, content_length, content = self.validate_request(response)
 
         file_name = ""
-        content_disposition = response.headers.get("content-disposition")
-        if content_disposition:
-            occurrences = re.findall("filename=\"(.+)\"", content_disposition)
-            
-            if not self.is_empty(occurrences):
-                file_name = occurrences[0]
+        occurrences = re.findall("filename=\"(.+)\"", content_disposition)
+        if len(occurrences) != 0:
+            file_name = occurrences[0]
+
+        file_content = content
+        file_size = int(content_length)
         
-        if (file_name and not file_name.endswith(".vti")) or not response.content:
-            raise Exception("FILE FROM URL ERROR")
+        self.validate_file(file_name, file_content, file_size)
         
         self.__file_to_show = file_name
         
+        reader = self.create_new_reader(response.content)
+        file = self.create_new_file(file_name, reader)
+        self.assign_file_to_group(file)
+
+    def validate_request(self, response):
+        headers = response.headers
+        if not headers:
+            raise Exception("MISSING-HEADERS")
+
+        content_disposition = headers.get("content-disposition")
+        if not content_disposition:
+            raise Exception("MISSING-CONTENT-DISPOSITION-HEADER")
+
+        content_length = headers.get("content-length")
+        if not content_length:
+            raise Exception("MISSING-CONTENT-LENGTH-HEADER")
+
+        content = response.content
+        if not content:
+            raise Exception("MISSING-CONTENT")
+
+        return content_disposition, content_length, content
+
+    def validate_file(self, file_name: str, file_content: bytes, file_size: int):
+        if not file_name.endswith(".vti"):
+            raise Exception("WRONG-FILE-EXTENSION")
+        elif len(file_content) == 0:
+            raise Exception("EMPTY-FILE")
+        elif file_size > 100_000_000:
+            raise Exception("FILE-IS-TOO-LARGE")
+
+    def create_new_reader(self, file_content):
         reader = vtkXMLImageDataReader()
         
         reader.ReadFromInputStringOn()
-        reader.SetInputString(response.content)
+        reader.SetInputString(file_content)
         reader.Update()
         
-        file = self.create_new_file(file_name, reader)
-        self.assign_file_to_group(file)
+        return reader
 
     def create_new_file(self, name, reader):
         image_data = reader.GetOutput()
         if image_data is None:
-            raise Exception("NO IMAGE DATA")
+            raise Exception("NO-IMAGE-DATA")
 
         extent = image_data.GetExtent()
         point_data, cell_data = image_data.GetPointData(), image_data.GetCellData()
@@ -85,12 +122,9 @@ class FileManager:
             scalars = cell_data.GetScalars()
             data_array = scalars.GetName() if scalars else data_arrays[0]
         else:
-            raise Exception("NO POINT OR CELL DATA")
+            raise Exception("NO-POINT-NOR-CELL-DATA")
         
         return File(name, reader, extent, data, data_array, data_arrays)
-
-    def is_empty(self, list):
-        return len(list) == 0
  
     def assign_file_to_group(self, file):
         if self.add_to_matching_group(file) is False:

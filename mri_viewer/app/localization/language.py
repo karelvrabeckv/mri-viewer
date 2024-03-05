@@ -4,11 +4,11 @@ class Language:
     def __init__(
         self,
         load_files_title,
+        load_files_text,
         load_files_from_pc,
         load_files_from_pc_error,
         load_file_from_url,
         load_file_from_url_error,
-        supported_file_formats,
         load_file_button_title,
         cancel_button_title,
         previous_file_tooltip,
@@ -56,11 +56,11 @@ class Language:
     ):
         self.__words = {
             "load_files_title": load_files_title,
+            "load_files_text": load_files_text,
             "load_files_from_pc": load_files_from_pc,
             "load_files_from_pc_error": load_files_from_pc_error,
             "load_file_from_url": load_file_from_url,
             "load_file_from_url_error": load_file_from_url_error,
-            "supported_file_formats": supported_file_formats,
             "load_file_button_title": load_file_button_title,
             "cancel_button_title": cancel_button_title,
             "previous_file_tooltip": previous_file_tooltip,

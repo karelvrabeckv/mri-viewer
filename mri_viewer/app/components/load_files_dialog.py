@@ -1,4 +1,4 @@
-from trame.widgets import vuetify3
+from trame.widgets import html, vuetify3
 
 import mri_viewer.app.constants as const
 
@@ -23,16 +23,26 @@ def load_files_dialog(self):
                 
                 with vuetify3.VCardText(classes="py-2"):
                     with vuetify3.VRow(classes="my-4 mx-0"):
-                        vuetify3.VTextField(
+                        html.Span("{{ language.load_files_text }}", classes="text-caption")
+
+                    vuetify3.VDivider(classes="my-6")
+
+                    with vuetify3.VRow(classes="my-4 mx-0"):
+                        vuetify3.VFileInput(
                             variant="outlined",
                             prepend_icon="mdi-monitor",
                             label=("language.load_files_from_pc",),
+                            v_model=("files_from_pc", None),
                             density="comfortable",
-                            hint=("language.supported_file_formats",),
-                            persistent_hint=True,
+                            clearable=False,
+                            multiple=True,
+                            chips=True,
+                            show_size=True,
+                            accept=".vti",
+                            __properties=["accept"],
+                            hide_details="auto",
                             error_messages=("files_from_pc_error_message", None),
-                            mousedown=self.clear_files_from_pc_error_message,
-                            click=self.on_files_from_pc_load,
+                            mouseup=self.clear_files_from_pc_error_message,
                         )
                         
                     vuetify3.VDivider(classes="my-6")
@@ -45,8 +55,8 @@ def load_files_dialog(self):
                                 label=("language.load_file_from_url",),
                                 v_model=("file_from_url", None),
                                 density="comfortable",
-                                hint=("language.supported_file_formats",),
-                                persistent_hint=True,
+                                placeholder="https://...",
+                                hide_details="auto",
                                 error_messages=("file_from_url_error_message", None),
                             )
                         

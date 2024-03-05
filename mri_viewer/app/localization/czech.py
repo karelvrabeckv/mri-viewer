@@ -4,11 +4,11 @@ class Czech(Language):
     def __init__(self):
         super().__init__(
             load_files_title="Nahrát soubory",
+            load_files_text="Načtěte soubory z počítače nebo pomocí URL adresy. Maximální počet nahrávaných souborů je omezen na 10. Aktuálně podporovaný formát je VTI. Maximální velikost nahrávaného souboru je omezena na 100 MB.",
             load_files_from_pc="Nahrát soubory z PC",
-            load_files_from_pc_error="Při čtení nahraného souboru (souborů) došlo k chybě. Zkontrolujte prosím, zda je formát souboru (souborů) správný a zda není poškozen.",
+            load_files_from_pc_error="Při čtení nahraného souboru (souborů) došlo k chybě. Zkontrolujte prosím, zda je formát souboru (souborů) správný a zda není poškozen. Kód chyby:",
             load_file_from_url="Nahrát soubor z URL",
-            load_file_from_url_error="Při načítání vzdáleného souboru došlo k chybě. Zkontrolujte prosím své internetové připojení a zadanou URL adresu. Je také možné, že formát vzdáleného souboru není správný nebo je poškozen.",
-            supported_file_formats="Podporované formáty: .vti",
+            load_file_from_url_error="Při načítání vzdáleného souboru došlo k chybě. Zkontrolujte prosím své internetové připojení a zadanou URL adresu. Je také možné, že formát vzdáleného souboru není správný nebo je poškozen. Kód chyby:",
             load_file_button_title="Načíst",
             cancel_button_title="Zavřít",
             previous_file_tooltip="Zobrazit předchozí snímek",
