@@ -1,4 +1,4 @@
-from mri_viewer.app.components import button
+from mri_viewer.app.components.buttons import button
 
 import mri_viewer.app.constants as const
 

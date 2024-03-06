@@ -23,5 +23,9 @@ class LanguageManager:
             return self.__czech.words
         elif self.__language == const.Languages.English:
             return self.__english.words
-        
-        return None
+
+    def get_user_guide_url(self):
+        if self.__language == const.Languages.Czech:
+            return const.CZ_USER_GUIDE_URL
+        elif self.__language == const.Languages.English:
+            return const.EN_USER_GUIDE_URL

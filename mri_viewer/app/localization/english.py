@@ -11,6 +11,7 @@ class English(Language):
             load_file_from_url_error="An error has occurred while fetching the remote file. Please check your internet connection and the URL provided. It is also possible that the format of the remote file is not correct or is corrupted. Error code:",
             load_file_button_title="Load",
             cancel_button_title="Cancel",
+            user_guide_button_title="User guide",
             previous_file_tooltip="Show the previous file",
             player_tooltip="Play or pause the player",
             next_file_tooltip="Show the next file",

@@ -1,6 +1,6 @@
 from trame.widgets import vuetify3
 
-from mri_viewer.app.components import button, toggle_button
+from mri_viewer.app.components.buttons import button, toggle_button
 
 def animation_icons(self):
     def on_previous_file():

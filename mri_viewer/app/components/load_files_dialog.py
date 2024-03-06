@@ -1,5 +1,7 @@
 from trame.widgets import html, vuetify3
 
+from mri_viewer.app.components.buttons import dialog_button
+
 import mri_viewer.app.constants as const
 
 def load_files_dialog(self):
@@ -9,12 +11,7 @@ def load_files_dialog(self):
     with vuetify3.VDialog(v_model=("dialog_on",), width=500):
         # Button
         with vuetify3.Template(v_slot_activator="{ props }"):
-            vuetify3.VDivider(vertical=True)
-            
-            with vuetify3.VBtnGroup(v_bind="props", classes="mx-2"):
-                vuetify3.VBtn(text=("language.load_files_title",), color=const.IKEM_COLOR)
-            
-            vuetify3.VDivider(vertical=True)
+            dialog_button()
         
         # Dialog
         with vuetify3.Template(v_slot_default="{ props }"):

@@ -4,8 +4,10 @@ from trame.ui.vuetify3 import SinglePageWithDrawerLayout
 from trame.widgets import html, trame, vuetify3
 
 from asyncio import sleep
+from pathlib import Path
 
 from mri_viewer.app.assets import *
+from mri_viewer.app.components.buttons import *
 from mri_viewer.app.components.icons import *
 from mri_viewer.app.components.interactions import *
 from mri_viewer.app.components.selects import *
@@ -23,6 +25,7 @@ import mri_viewer.app.styles as style
 class MRIViewerApp:
     def __init__(self, server=None):
         self.__server = get_server(server, client_type="vue3")
+        self.__server.enable_module({ "serve": { "docs": str(Path(__file__).parent.resolve() / "docs") } })
         
         self.__file_manager = FileManager()
         self.__language_manager = LanguageManager()
@@ -41,6 +44,7 @@ class MRIViewerApp:
         self.state.trame__favicon = asset_manager.logo
         
         self.state.language = self.__language_manager.get_language()
+        self.state.user_guide_url = self.__language_manager.get_user_guide_url()
 
         self.state.player_on = False
         self.state.player_loop = False
@@ -92,7 +96,7 @@ class MRIViewerApp:
             self.__file_manager.load_files_from_pc(files_from_pc)
             self.post_loading_actions()
         except Exception as e:
-            self.state.files_from_pc_error_message = f"{self.state.language["load_files_from_pc_error"]} {str(e)}"
+            self.state.files_from_pc_error_message = f"{self.state.language['load_files_from_pc_error']} {str(e)}"
 
     def clear_files_from_pc_error_message(self):
         self.state.files_from_pc = None
@@ -108,7 +112,7 @@ class MRIViewerApp:
             self.__file_manager.load_file_from_url(self.state.file_from_url)
             self.post_loading_actions()
         except Exception as e:
-            self.state.file_from_url_error_message = f"{self.state.language["load_file_from_url_error"]} {str(e)}"
+            self.state.file_from_url_error_message = f"{self.state.language['load_file_from_url_error']} {str(e)}"
 
     """ Actions to be executed after loading file/s. """
     def post_loading_actions(self):
@@ -281,6 +285,7 @@ class MRIViewerApp:
         # Load the vocabulary of the current language
         self.__language_manager.language = current_language
         self.state.language = self.__language_manager.get_language()
+        self.state.user_guide_url = self.__language_manager.get_user_guide_url()
         
         # Change the title of picker information
         if self.state.picker_mode == const.PickerModes.Points:
@@ -405,6 +410,7 @@ class MRIViewerApp:
             # Toolbar
             with layout.toolbar:
                 load_files_dialog(self)
+                user_guide_button()
                 
                 animation_icons(self)
                 

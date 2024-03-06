@@ -2,7 +2,7 @@ from trame.widgets import html, vuetify3
 
 from vtkmodules.vtkCommonTransforms import vtkTransform
 
-from mri_viewer.app.components import button
+from mri_viewer.app.components.buttons import button
 
 import mri_viewer.app.constants as const
 import mri_viewer.app.styles as style

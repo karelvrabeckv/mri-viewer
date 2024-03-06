@@ -1,4 +1,5 @@
 from trame.decorators import hot_reload
+
 import mri_viewer.app.constants as const
 
 from .animation_icons import animation_icons

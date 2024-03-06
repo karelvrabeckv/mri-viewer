@@ -4,6 +4,8 @@ python -m PyInstaller ^
   --onefile ^
   --windowed ^
   --add-data "../mri_viewer/app/assets/logo.png:mri_viewer/app/assets" ^
+  --add-data "../mri_viewer/app/docs/user_guide_cz.pdf:mri_viewer/app/docs" ^
+  --add-data "../mri_viewer/app/docs/user_guide_en.pdf:mri_viewer/app/docs" ^
   --hidden-import vtkmodules.vtkCommonMath ^
   --hidden-import vtkmodules.vtkCommonMisc ^
   --hidden-import vtkmodules.vtkCommonExecutionModel ^

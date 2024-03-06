@@ -11,6 +11,7 @@ class Czech(Language):
             load_file_from_url_error="Při načítání vzdáleného souboru došlo k chybě. Zkontrolujte prosím své internetové připojení a zadanou URL adresu. Je také možné, že formát vzdáleného souboru není správný nebo je poškozen. Kód chyby:",
             load_file_button_title="Načíst",
             cancel_button_title="Zavřít",
+            user_guide_button_title="Příručka",
             previous_file_tooltip="Zobrazit předchozí snímek",
             player_tooltip="Přehrát či pozastavit sekvenci snímků",
             next_file_tooltip="Zobrazit následující snímek",
