@@ -103,7 +103,7 @@ class FileManager:
     def create_new_file(self, name, reader):
         image_data = reader.GetOutput()
         if image_data is None:
-            raise Exception("NO-IMAGE-DATA")
+            raise Exception("MISSING-IMAGE-DATA")
 
         extent = image_data.GetExtent()
         point_data, cell_data = image_data.GetPointData(), image_data.GetCellData()
@@ -122,7 +122,7 @@ class FileManager:
             scalars = cell_data.GetScalars()
             data_array = scalars.GetName() if scalars else data_arrays[0]
         else:
-            raise Exception("NO-POINT-NOR-CELL-DATA")
+            raise Exception("MISSING-POINT-AND-CELL-DATA")
         
         return File(name, reader, extent, data, data_array, data_arrays)
  

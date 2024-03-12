@@ -109,4 +109,4 @@ def rotation_interaction(self):
                     step=const.ROTATION_STEP,
                     hide_details=True,
                 )
-                html.Span("{{ current_rotation_factor }}", classes="d-flex align-center ml-4 mr-2")
+                html.Span("{{ current_rotation_factor }}°", classes="d-flex align-center ml-4 mr-2")
