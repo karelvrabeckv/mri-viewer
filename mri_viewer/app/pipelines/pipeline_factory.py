@@ -82,7 +82,11 @@ class PipelineFactory:
     def create_picked_cell(self, bounds):
         picked_cell = vtkCubeSource()
 
-        picked_cell.SetBounds(bounds)
+        picked_cell.SetBounds(
+            bounds[0] - const.PICKED_CELL_OFFSET, bounds[1] + const.PICKED_CELL_OFFSET,
+            bounds[2] - const.PICKED_CELL_OFFSET, bounds[3] + const.PICKED_CELL_OFFSET,
+            bounds[4] - const.PICKED_CELL_OFFSET, bounds[5] + const.PICKED_CELL_OFFSET,
+        )
         picked_cell.SetCenter(
             (bounds[0] + bounds[1]) / 2,
             (bounds[2] + bounds[3]) / 2,
