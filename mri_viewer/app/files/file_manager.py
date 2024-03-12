@@ -7,6 +7,8 @@ from vtkmodules.vtkIOXML import vtkXMLImageDataReader
 from .file_group import FileGroup
 from .file import File
 
+import mri_viewer.app.constants as const
+
 class FileManager:
     def __init__(self):
         self.__file_to_show = None
@@ -25,9 +27,9 @@ class FileManager:
 
     def validate_file_group(self, files_from_pc):
         if len(files_from_pc) == 0:
-            raise Exception("NO-FILES-TO-UPLOAD")
+            raise Exception(const.ErrorCodes.NoFilesToUpload)
         elif len(files_from_pc) > 10:
-            raise Exception("TOO-MANY-FILES-TO-UPLOAD")
+            raise Exception(const.ErrorCodes.TooManyFilesToUpload)
 
     def load_file_from_pc(self, index, file_from_pc):
         raw_file = ClientFile(file_from_pc)
@@ -44,7 +46,7 @@ class FileManager:
         try:
             response = requests.get(url)
         except:
-            raise Exception("INVALID-URL")
+            raise Exception(const.ErrorCodes.InvalidURL)
 
         content_disposition, content_length, content = self.validate_request(response)
 
@@ -67,29 +69,29 @@ class FileManager:
     def validate_request(self, response):
         headers = response.headers
         if not headers:
-            raise Exception("MISSING-HEADERS")
+            raise Exception(const.ErrorCodes.MissingHeaders)
 
         content_disposition = headers.get("content-disposition")
         if not content_disposition:
-            raise Exception("MISSING-CONTENT-DISPOSITION-HEADER")
+            raise Exception(const.ErrorCodes.MissingContentDispositionHeader)
 
         content_length = headers.get("content-length")
         if not content_length:
-            raise Exception("MISSING-CONTENT-LENGTH-HEADER")
+            raise Exception(const.ErrorCodes.MissingContentLengthHeader)
 
         content = response.content
         if not content:
-            raise Exception("MISSING-CONTENT")
+            raise Exception(const.ErrorCodes.MissingContent)
 
         return content_disposition, content_length, content
 
     def validate_file(self, file_name: str, file_content: bytes, file_size: int):
         if not file_name.endswith(".vti"):
-            raise Exception("WRONG-FILE-EXTENSION")
+            raise Exception(const.ErrorCodes.WrongFileExtension)
         elif len(file_content) == 0:
-            raise Exception("EMPTY-FILE")
+            raise Exception(const.ErrorCodes.EmptyFile)
         elif file_size > 100_000_000:
-            raise Exception("FILE-IS-TOO-LARGE")
+            raise Exception(const.ErrorCodes.FileIsTooLarge)
 
     def create_new_reader(self, file_content):
         reader = vtkXMLImageDataReader()
@@ -103,7 +105,7 @@ class FileManager:
     def create_new_file(self, name, reader):
         image_data = reader.GetOutput()
         if image_data is None:
-            raise Exception("MISSING-IMAGE-DATA")
+            raise Exception(const.ErrorCodes.MissingImageData)
 
         extent = image_data.GetExtent()
         point_data, cell_data = image_data.GetPointData(), image_data.GetCellData()
@@ -122,7 +124,7 @@ class FileManager:
             scalars = cell_data.GetScalars()
             data_array = scalars.GetName() if scalars else data_arrays[0]
         else:
-            raise Exception("MISSING-POINT-AND-CELL-DATA")
+            raise Exception(const.ErrorCodes.MissingPointAndCellData)
         
         return File(name, reader, extent, data, data_array, data_arrays)
  

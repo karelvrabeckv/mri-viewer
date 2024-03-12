@@ -109,3 +109,17 @@ class Objects:
     PickedCell = "picked_cell"
     PickedCellMapper = "picked_cell_mapper"
     PickedCellActor = "picked_cell_actor"
+
+class ErrorCodes:
+    NoFilesToUpload = "NO-FILES-TO-UPLOAD"
+    TooManyFilesToUpload = "TOO-MANY-FILES-TO-UPLOAD"
+    EmptyFile = "EMPTY-FILE"
+    WrongFileExtension = "WRONG-FILE-EXTENSION"
+    FileIsTooLarge = "FILE-IS-TOO-LARGE"
+    InvalidURL = "INVALID-URL"
+    MissingHeaders = "MISSING-HEADERS"
+    MissingContentDispositionHeader = "MISSING-CONTENT-DISPOSITION-HEADER"
+    MissingContentLengthHeader = "MISSING-CONTENT-LENGTH-HEADER"
+    MissingContent = "MISSING-CONTENT"
+    MissingImageData = "MISSING-IMAGE-DATA"
+    MissingPointAndCellData = "MISSING-POINT-AND-CELL-DATA"
