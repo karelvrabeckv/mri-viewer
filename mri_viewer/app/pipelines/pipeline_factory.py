@@ -192,7 +192,7 @@ class PipelineFactory:
         return slice
 
     def create_slice_mapper(self, file: File, slice, group_active_array, lookup_table):
-        slice_mapper = vtkPolyDataMapper()
+        slice_mapper = vtkDataSetMapper()
         
         slice_mapper.SetInputConnection(slice.GetOutputPort())
         slice_mapper.SetScalarRange(file.data.GetArray(group_active_array).GetRange())
