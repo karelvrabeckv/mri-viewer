@@ -6,10 +6,6 @@ from mri_viewer.app.files import *
 
 import mri_viewer.app.constants as const
 
-from vtkmodules.vtkInteractionStyle import vtkInteractorStyleSwitch # noqa
-
-import vtkmodules.vtkRenderingOpenGL2 # noqa
-
 class Pipeline():
     def __init__(self):
         self.__factory = PipelineFactory()
@@ -92,9 +88,14 @@ class Pipeline():
     def hide_current_file(self):
         latest_file_actor = self.get_object(const.Objects.FileActor)
         latest_cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
+        latest_scalar_bar_actor = self.get_object(const.Objects.ScalarBarActor)
         latest_slice_actor = self.get_object(const.Objects.SliceActor)
         
-        self.set_visibility(False, latest_file_actor, latest_cube_axes_actor, latest_slice_actor)
+        self.set_visibility(
+            False,
+            latest_file_actor, latest_cube_axes_actor,
+            latest_scalar_bar_actor, latest_slice_actor
+        )
 
         self.hide_picked_point()
         self.hide_picked_cell()
@@ -109,8 +110,9 @@ class Pipeline():
         if self.__latest_file_name in self.__objects.keys():
             file_actor = self.get_object(const.Objects.FileActor)
             cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
+            scalar_bar_actor = self.get_object(const.Objects.ScalarBarActor)
             
-            self.set_visibility(True, file_actor)
+            self.set_visibility(True, file_actor, scalar_bar_actor)
         else:
             color_transfer_function = self.__factory.create_color_transfer_function()
             lookup_table = self.__factory.create_lookup_table(color_transfer_function)
@@ -118,6 +120,7 @@ class Pipeline():
             file_mapper = self.__factory.create_file_mapper(file, group.data_array, lookup_table)
             file_actor = self.__factory.create_file_actor(file_mapper)
             cube_axes_actor = self.__factory.create_cube_axes_actor(file_actor, self.__renderer)
+            scalar_bar_actor = self.__factory.create_scalar_bar_actor(file, lookup_table)
             
             slice = self.__factory.create_slice(file)
             slice_mapper = self.__factory.create_slice_mapper(file, slice, group.data_array, lookup_table)
@@ -129,6 +132,7 @@ class Pipeline():
                 const.Objects.FileMapper: file_mapper,
                 const.Objects.FileActor: file_actor,
                 const.Objects.CubeAxesActor: cube_axes_actor,
+                const.Objects.ScalarBarActor: scalar_bar_actor,
                 const.Objects.Slice: slice,
                 const.Objects.SliceMapper: slice_mapper,
                 const.Objects.SliceActor: slice_actor,
@@ -142,6 +146,7 @@ class Pipeline():
             
             self.set_slice(file, group.slice_orientation, group.slice_position)
             self.add_actors(file_actor, cube_axes_actor, slice_actor)
+            self.add_actors_2d(scalar_bar_actor)
         
         self.set_visibility(self.__axes_on, cube_axes_actor)
 
@@ -153,6 +158,9 @@ class Pipeline():
         
         file_mapper = self.get_object(const.Objects.FileMapper)
         file_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
+
+        scalar_bar_actor = self.get_object(const.Objects.ScalarBarActor)
+        scalar_bar_actor.SetTitle(new_active_array)
         
         slice_mapper = self.get_object(const.Objects.SliceMapper)
         slice_mapper.SetScalarRange(file.data.GetArray(new_active_array).GetRange())
@@ -211,6 +219,10 @@ class Pipeline():
     def add_actors(self, *actors):
         for actor in actors:
             self.__renderer.AddActor(actor)
+
+    def add_actors_2d(self, *actors):
+        for actor in actors:
+            self.__renderer.AddActor2D(actor)
 
     def reset_camera(self):
         self.__renderer.ResetCamera()

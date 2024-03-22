@@ -23,10 +23,13 @@ def zoom_interaction(self):
         _, _, group, _ = self.current_file_info
         group.current_view = self.pipeline.get_camera_params()
 
+    # Bind method to controller
+    self.ctrl.zoom = zoom
+
     with vuetify3.VCard(border=True, classes="ma-4"):
         with vuetify3.VCardTitle(
             "{{ language.section_zoom_title }}",
-            style=style.HEADER,
+            style=style.TOOL_HEADER,
             classes="d-flex justify-space-between text-uppercase text-button font-weight-bold py-2"
         ):
             button(
@@ -44,18 +47,24 @@ def zoom_interaction(self):
                     disabled=("ui_off",),
                     tooltip=("language.zoom_out_tooltip",),
                     classes="mx-1",
-                    click=(zoom, f"['{const.Zoom.Out}']"),
+                    click=(self.ctrl.zoom, f"['{const.Zoom.Out}']"),
                 )
                 button(
                     icon="mdi-plus",
                     disabled=("ui_off",),
                     tooltip=("language.zoom_in_tooltip",),
                     classes="mx-1",
-                    click=(zoom, f"['{const.Zoom.In}']"),
+                    click=(self.ctrl.zoom, f"['{const.Zoom.In}']"),
                 )
 
+            vuetify3.VDivider()
+
+            with vuetify3.VRow(justify="center", classes="px-2 mt-4"):
+                html.Span("{{ language.section_zoom_slider_title }}", classes="d-flex align-center ml-2 mr-4")
+                vuetify3.VSpacer()
+                html.Span("{{ current_zoom_factor }}x", classes="d-flex align-center ml-4 mr-2")
+
             with vuetify3.VRow(justify="center", classes="px-2 pb-4"):
-                html.Span("{{ language.factor_slider_title }}", classes="d-flex align-center ml-2 mr-4")
                 vuetify3.VSlider(
                     disabled=("ui_off",),
                     v_model="current_zoom_factor",
@@ -65,4 +74,3 @@ def zoom_interaction(self):
                     step=const.ZOOM_STEP,
                     hide_details=True,
                 )
-                html.Span("{{ current_zoom_factor }}x", classes="d-flex align-center ml-4 mr-2")

@@ -24,7 +24,7 @@ import mri_viewer.app.styles as style
 @TrameApp()
 class MRIViewerApp:
     def __init__(self, server=None):
-        self.__server = get_server(server, client_type="vue3")
+        self.__server = get_server(server)
         self.__server.enable_module({ "serve": { "docs": str(Path(__file__).parent.resolve() / "docs") } })
         
         self.__file_manager = FileManager()
@@ -350,12 +350,14 @@ class MRIViewerApp:
                 if next_file_index >= group.get_num_of_files():
                     next_file_index = 0
                 
-                group_file_names = group.get_all_file_names() 
-                self.state.current_file_name = group_file_names[next_file_index]
-                
-                self.state.flush()
+                # Synchronize state between client and server
+                with self.state:
+                    # Change current file
+                    group_file_names = group.get_all_file_names()
+                    self.state.current_file_name = group_file_names[next_file_index]
 
-                await sleep(0.2)
+                # Wait for certain time interval
+                await sleep(0.25)
             self.state.player_loop = False
 
     def update_client_camera(self, group):

@@ -21,7 +21,7 @@ Run the application:
 
     mri-viewer
     mri-viewer --app
-    python run.py
+    jupyter-lab
 
 Features
 --------

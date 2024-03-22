@@ -24,13 +24,14 @@ VUETIFY_CONFIG = {
 }
 
 IKEM_COLOR = "#e2001a"
-AXES_COLOR = (0.0, 0.0, 0.0)
-BACKGROUND_COLOR = "Gainsboro"
-PICKED_CELL_OFFSET = 0.01
+DEFAULT_TEXT_COLOR = (0.0, 0.0, 0.0)
+DEFAULT_BACKGROUND_COLOR = "Gainsboro"
 
 COLD_TEMPERATURE_COLOR = (0.230, 0.299, 0.754)
 LUKEWARM_TEMPERATURE_COLOR = (0.865, 0.865, 0.865)
 HOT_TEMPERATURE_COLOR = (0.706, 0.016, 0.15)
+
+PICKED_CELL_OFFSET = 0.01
 
 class Zoom:
     In = "0"
@@ -45,12 +46,12 @@ class Directions:
     ZAxisMinus = "5"
 
 ZOOM_STEP = 1
-DEFAULT_ZOOM_FACTOR = 1
+DEFAULT_ZOOM_FACTOR = 3
 MIN_ZOOM_FACTOR = 1
 MAX_ZOOM_FACTOR = 10
 
 TRANSLATION_STEP = 10
-DEFAULT_TRANSLATION_FACTOR = 10
+DEFAULT_TRANSLATION_FACTOR = 50
 MIN_TRANSLATION_FACTOR = 10
 MAX_TRANSLATION_FACTOR = 300
 
@@ -100,6 +101,7 @@ class Objects:
     FileMapper = "file_mapper"
     FileActor = "file_actor"
     CubeAxesActor = "cube_axes_actor"
+    ScalarBarActor = "scalar_bar_actor"
     Slice = "slice"
     SliceMapper = "slice_mapper"
     SliceActor = "slice_actor"

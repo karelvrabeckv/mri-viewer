@@ -10,6 +10,7 @@ from vtkmodules.vtkInteractionWidgets import vtkOrientationMarkerWidget
 from vtkmodules.vtkRenderingAnnotation import (
     vtkAxesActor,
     vtkCubeAxesActor,
+    vtkScalarBarActor,
 )
 from vtkmodules.vtkRenderingCore import (
     vtkColorTransferFunction,
@@ -30,7 +31,7 @@ class PipelineFactory:
     def create_renderer(self):
         renderer = vtkRenderer()
         
-        renderer.SetBackground(vtkNamedColors().GetColor3d(const.BACKGROUND_COLOR))
+        renderer.SetBackground(vtkNamedColors().GetColor3d(const.DEFAULT_BACKGROUND_COLOR))
         
         return renderer
          
@@ -118,7 +119,7 @@ class PipelineFactory:
         
         axes_widget.SetOrientationMarker(vtkAxesActor())
         axes_widget.SetInteractor(render_window_interactor)
-        axes_widget.SetViewport(0.0, 0.0, 0.35, 0.35)
+        axes_widget.SetViewport(0.0, 0.0, 0.3, 0.3)
         
         axes_widget.EnabledOn()
         
@@ -170,18 +171,30 @@ class PipelineFactory:
         cube_axes_actor.SetYTitle("Y")
         cube_axes_actor.SetZTitle("Z")
         
-        cube_axes_actor.GetXAxesLinesProperty().SetColor(*const.AXES_COLOR)
-        cube_axes_actor.GetYAxesLinesProperty().SetColor(*const.AXES_COLOR)
-        cube_axes_actor.GetZAxesLinesProperty().SetColor(*const.AXES_COLOR)
+        cube_axes_actor.GetXAxesLinesProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
+        cube_axes_actor.GetYAxesLinesProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
+        cube_axes_actor.GetZAxesLinesProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
         
         for i in range(3):
-            cube_axes_actor.GetTitleTextProperty(i).SetColor(*const.AXES_COLOR)
-            cube_axes_actor.GetLabelTextProperty(i).SetColor(*const.AXES_COLOR)
+            cube_axes_actor.GetTitleTextProperty(i).SetColor(*const.DEFAULT_TEXT_COLOR)
+            cube_axes_actor.GetLabelTextProperty(i).SetColor(*const.DEFAULT_TEXT_COLOR)
         
         cube_axes_actor.SetBounds(file_actor.GetBounds())
         cube_axes_actor.SetCamera(renderer.GetActiveCamera())
+        cube_axes_actor.SetFlyModeToOuterEdges()
         
         return cube_axes_actor
+
+    def create_scalar_bar_actor(self, file: File, lookup_table):
+        scalar_bar = vtkScalarBarActor()
+
+        scalar_bar.SetTitle(file.data_array)
+        scalar_bar.SetLookupTable(lookup_table)
+
+        scalar_bar.GetTitleTextProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
+        scalar_bar.GetLabelTextProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
+
+        return scalar_bar
 
     def create_slice(self, file: File):
         slice = vtkExtractVOI()

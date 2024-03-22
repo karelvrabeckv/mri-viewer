@@ -23,7 +23,7 @@ def view(self):
                 self.state.update({
                     "picker_info_title": self.state.language["point_info_title"],
                     "picker_info_message": message,
-                    "picker_info_style": style.TOOLTIP,
+                    "picker_info_style": style.PICKER_INFO,
                 })
 
                 point_id = message["Id"]
@@ -38,7 +38,7 @@ def view(self):
                 self.state.update({
                     "picker_info_title": self.state.language["cell_info_title"],
                     "picker_info_message": message,
-                    "picker_info_style": style.TOOLTIP,
+                    "picker_info_style": style.PICKER_INFO,
                 })
 
                 cell_id = message["Id"]
