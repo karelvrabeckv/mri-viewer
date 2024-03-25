@@ -1,6 +1,10 @@
+from trame.decorators import hot_reload
 from trame.widgets import vuetify3
 
+@hot_reload
 def data_array_select():
+    """A selector for selecting a particular data array."""
+
     vuetify3.VSelect(
         variant="outlined",
         label=("language.data_array_select_title",),

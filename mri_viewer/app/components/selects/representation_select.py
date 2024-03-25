@@ -1,6 +1,10 @@
+from trame.decorators import hot_reload
 from trame.widgets import vuetify3
 
+@hot_reload
 def representation_select():
+    """A selector for selecting a particular representation."""
+
     vuetify3.VSelect(
         variant="outlined",
         label=("language.representation_select_title",),
@@ -11,4 +15,3 @@ def representation_select():
         hide_details=True,
         classes="ma-4",
     )
-    vuetify3.VDivider()

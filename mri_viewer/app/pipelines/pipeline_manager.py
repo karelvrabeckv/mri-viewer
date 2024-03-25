@@ -2,11 +2,11 @@ from vtkmodules.vtkCommonDataModel import vtkImageData
 
 from .pipeline_factory import PipelineFactory
 
-from mri_viewer.app.files import *
+from mri_viewer.app.files import File, FileGroup
 
 import mri_viewer.app.constants as const
 
-class Pipeline():
+class PipelineManager():
     def __init__(self):
         self.__factory = PipelineFactory()
         
@@ -20,7 +20,7 @@ class Pipeline():
         self.__objects = {}
         self.__latest_file_name = ""
         self.__initial_view = self.get_camera_params()
-        self.__axes_on = True
+        self.__axes_info_on = True
         
         self.reset_camera()
         self.render()
@@ -42,12 +42,12 @@ class Pipeline():
         return self.__initial_view
 
     @property
-    def axes_on(self):
-        return self.__axes_on
+    def axes_info_on(self):
+        return self.__axes_info_on
 
-    @axes_on.setter
-    def axes_on(self, axes_on): 
-        self.__axes_on = axes_on
+    @axes_info_on.setter
+    def axes_info_on(self, axes_info_on): 
+        self.__axes_info_on = axes_info_on
 
     @property
     def camera(self):
@@ -148,7 +148,7 @@ class Pipeline():
             self.add_actors(file_actor, cube_axes_actor, slice_actor)
             self.add_actors_2d(scalar_bar_actor)
         
-        self.set_visibility(self.__axes_on, cube_axes_actor)
+        self.set_visibility(self.__axes_info_on, cube_axes_actor)
 
         self.reset_camera()
         self.render()
@@ -230,9 +230,9 @@ class Pipeline():
     def render(self):
         self.__render_window.Render()
 
-    def render_axes(self):
+    def render_axes_info(self):
         cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
-        self.set_visibility(self.__axes_on, cube_axes_actor)
+        self.set_visibility(self.__axes_info_on, cube_axes_actor)
 
     def resize_window(self, width, height):
         self.__render_window.SetSize(width, height)

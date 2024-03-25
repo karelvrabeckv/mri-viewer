@@ -17,7 +17,7 @@ class Czech(Language):
             next_file_tooltip="Zobrazit následující snímek",
             picker_mode_points_tooltip="Zapnout zobrazování informací o BODECH po kliknutí na ně",
             picker_mode_cells_tooltip="Zapnout zobrazování informací o BUŇKÁCH po kliknutí na ně",
-            toggle_axes_tooltip="Zobrazit informace o osách včetně mřížky",
+            toggle_axes_info_tooltip="Zobrazit informace o osách včetně mřížky",
             reset_camera_tooltip="Obnovit původní zobrazení",
             change_theme_tooltip="Přepnout mezi světlým a tmavým režimem",
             file_name_select_title="Soubor",

@@ -111,17 +111,17 @@ class FileManager:
         point_data, cell_data = image_data.GetPointData(), image_data.GetCellData()
         num_of_point_arrays, num_of_cell_arrays = point_data.GetNumberOfArrays(), cell_data.GetNumberOfArrays()
         
-        if num_of_point_arrays:
-            data = point_data
-            data_arrays = [point_data.GetArray(i).GetName() for i in range(num_of_point_arrays)]
-            
-            scalars = point_data.GetScalars()
-            data_array = scalars.GetName() if scalars else data_arrays[0]
-        elif num_of_cell_arrays:
+        if num_of_cell_arrays:
             data = cell_data
             data_arrays = [cell_data.GetArray(i).GetName() for i in range(num_of_cell_arrays)]
             
             scalars = cell_data.GetScalars()
+            data_array = scalars.GetName() if scalars else data_arrays[0]
+        elif num_of_point_arrays:
+            data = point_data
+            data_arrays = [point_data.GetArray(i).GetName() for i in range(num_of_point_arrays)]
+            
+            scalars = point_data.GetScalars()
             data_array = scalars.GetName() if scalars else data_arrays[0]
         else:
             raise Exception(const.ErrorCodes.MissingPointAndCellData)

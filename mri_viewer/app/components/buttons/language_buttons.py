@@ -1,15 +1,17 @@
+from trame.decorators import hot_reload
 from trame.widgets import vuetify3
 
-import mri_viewer.app.constants as const
+from mri_viewer.app.constants import DEFAULT_LANGUAGE, Languages
 
+@hot_reload
 def language_buttons():
-    vuetify3.VDivider(vertical=True)
+    """Buttons for switching between different languages."""
     
     with vuetify3.VBtnToggle(
-        v_model=("current_language", const.DEFAULT_LANGUAGE),
+        v_model=("current_language", DEFAULT_LANGUAGE),
         mandatory=True,
         border=True,
         classes="mx-2",
     ):
-        vuetify3.VBtn(text=const.Languages.Czech, value=const.Languages.Czech)
-        vuetify3.VBtn(text=const.Languages.English, value=const.Languages.English)
+        vuetify3.VBtn(text=Languages.Czech, value=Languages.Czech)
+        vuetify3.VBtn(text=Languages.English, value=Languages.English)

@@ -1,17 +1,17 @@
+from trame.decorators import hot_reload
 from trame.widgets import html, vuetify3
 
-from mri_viewer.app.components.buttons import dialog_button
+from mri_viewer.app.components.buttons import open_dialog_button
+from mri_viewer.app.constants import IKEM_COLOR
 
-import mri_viewer.app.constants as const
-
-def load_files_dialog(self):
-    def close_dialog():
-        self.state.dialog_on = False
+@hot_reload
+def load_files_dialog(ctrl):
+    """A dialog for uploading files."""
 
     with vuetify3.VDialog(v_model=("dialog_on",), width=500):
         # Button
         with vuetify3.Template(v_slot_activator="{ props }"):
-            dialog_button()
+            open_dialog_button()
         
         # Dialog
         with vuetify3.Template(v_slot_default="{ props }"):
@@ -39,7 +39,7 @@ def load_files_dialog(self):
                             __properties=["accept"],
                             hide_details="auto",
                             error_messages=("files_from_pc_error_message", None),
-                            mouseup=self.clear_files_from_pc_error_message,
+                            mouseup=ctrl.clear_files_from_pc_error_message,
                         )
                         
                     vuetify3.VDivider(classes="my-6")
@@ -61,8 +61,8 @@ def load_files_dialog(self):
                             with vuetify3.VBtnGroup():
                                 vuetify3.VBtn(
                                     text=("language.load_file_button_title",),
-                                    color=const.IKEM_COLOR,
-                                    click=self.on_file_from_url_load,
+                                    color=IKEM_COLOR,
+                                    click=ctrl.on_file_from_url_load,
                                 )
                         
                 vuetify3.VDivider()
@@ -71,4 +71,7 @@ def load_files_dialog(self):
                     vuetify3.VSpacer()
                     
                     with vuetify3.VBtnGroup(v_bind="props", border=True):
-                        vuetify3.VBtn(text=("language.cancel_button_title",), click=close_dialog)
+                        vuetify3.VBtn(
+                            text=("language.cancel_button_title",),
+                            click=ctrl.close_dialog
+                        )

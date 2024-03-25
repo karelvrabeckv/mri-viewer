@@ -1,13 +1,17 @@
+from trame.decorators import hot_reload
 from trame.widgets import html, vuetify3
 
-import mri_viewer.app.constants as const
-import mri_viewer.app.styles as style
+from mri_viewer.app.constants import Planes, Representation
+from mri_viewer.app.styles import TOOL_HEADER
 
-def slice_interaction():
-    with vuetify3.VCard(v_show=f"current_representation == {const.Representation.Slice}", border=True, classes="ma-4"): 
+@hot_reload
+def slice_tool():
+    """A tool for slicing data."""
+
+    with vuetify3.VCard(v_show=f"current_representation == {Representation.Slice}", border=True, classes="ma-4"): 
         vuetify3.VCardTitle(
             "{{ language.section_slice_title }}",
-            style=style.TOOL_HEADER,
+            style=TOOL_HEADER,
             classes="text-uppercase text-button font-weight-bold py-2"
         )
         
@@ -18,9 +22,9 @@ def slice_interaction():
                     v_model=("current_slice_orientation", None),
                     items=(
                         [
-                            {"title": "XY", "value": const.Planes.XY},
-                            {"title": "YZ", "value": const.Planes.YZ},
-                            {"title": "XZ", "value": const.Planes.XZ},
+                            {"title": "XY", "value": Planes.XY},
+                            {"title": "YZ", "value": Planes.YZ},
+                            {"title": "XZ", "value": Planes.XZ},
                         ],
                     ),
                     variant="outlined",

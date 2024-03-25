@@ -17,7 +17,7 @@ class English(Language):
             next_file_tooltip="Show next file",
             picker_mode_points_tooltip="Turn on tooltip with info about POINTS after clicking on them",
             picker_mode_cells_tooltip="Turn on tooltip with info about CELLS after clicking on them",
-            toggle_axes_tooltip="Toggle axes info with grid",
+            toggle_axes_info_tooltip="Toggle axes info with grid",
             reset_camera_tooltip="Reset view",
             change_theme_tooltip="Toggle light and dark themes",
             file_name_select_title="File",
