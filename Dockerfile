@@ -5,3 +5,5 @@ COPY --chown=trame-user:trame-user ./docker /deploy
 
 ENV TRAME_CLIENT_TYPE=vue3
 RUN /opt/trame/entrypoint.sh build
+
+COPY --chown=trame-user:trame-user ./mri_viewer/app/docs/*.pdf /deploy/server/www/docs/
