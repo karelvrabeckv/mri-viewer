@@ -3,6 +3,9 @@ FROM kitware/trame:py3.9
 COPY --chown=trame-user:trame-user . /local-app
 COPY --chown=trame-user:trame-user ./docker /deploy
 
+# TODO: this is a deployment config (necessary for serving in a subdirectory)
+ENV TRAME_USE_HOST=wss://vz.fjfi.cvut.cz/mri-viewer
+
 ENV TRAME_CLIENT_TYPE=vue3
 RUN /opt/trame/entrypoint.sh build
 
