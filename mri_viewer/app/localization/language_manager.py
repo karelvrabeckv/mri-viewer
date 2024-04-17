@@ -4,6 +4,11 @@ from .english import English
 import mri_viewer.app.constants as const
 
 class LanguageManager:
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super().__new__(cls)
+        return cls.instance
+
     def __init__(self):
         self.__language = const.DEFAULT_LANGUAGE
         

@@ -10,14 +10,49 @@ from .file import File
 import mri_viewer.app.constants as const
 
 class FileManager:
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super().__new__(cls)
+        return cls.instance
+
     def __init__(self):
         self.__file_to_show = None
         self.__groups = []
         self.__file_to_group_mapping = {}
 
+        self.__current_file = None
+        self.__current_file_index = None
+        self.__current_group = None
+        self.__current_group_index = None
+        
     @property
     def file_to_show(self):
         return self.__file_to_show
+
+    @property
+    def current_file(self):
+        return self.__current_file
+
+    @property
+    def current_file_index(self):
+        return self.__current_file_index
+
+    @property
+    def current_group(self):
+        return self.__current_group
+
+    @property
+    def current_group_index(self):
+        return self.__current_group_index
+
+    def set_as_current(self, file_name):
+        if not self.any_group():
+            return
+
+        self.__current_group_index = self.__file_to_group_mapping[file_name]
+        self.__current_group = self.__groups[self.__current_group_index]
+        self.__current_file_index = self.__current_group.get_all_file_names().index(file_name)
+        self.__current_file = self.__current_group.files[file_name]
 
     def load_files_from_pc(self, files_from_pc):
         self.validate_file_group(files_from_pc)
@@ -176,13 +211,3 @@ class FileManager:
                 file_names += group.get_all_file_names()
 
         return file_names
-
-    def get_file(self, file_name) -> tuple[File, int, FileGroup, int]:
-        if self.any_group():
-            group_index = self.__file_to_group_mapping[file_name]
-            group = self.__groups[group_index]
-            file_index = group.get_all_file_names().index(file_name)
-            file = group.files[file_name]
-
-            return file, file_index, group, group_index
-        return None

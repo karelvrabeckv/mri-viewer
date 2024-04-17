@@ -1,5 +1,5 @@
 APPLICATION_NAME = "MRI Viewer"
-DEBUG_MODE = False
+DEVELOPER_MODE = False
 
 CZ_USER_GUIDE_URL = "docs/user_guide_cz.pdf"
 EN_USER_GUIDE_URL = "docs/user_guide_en.pdf"

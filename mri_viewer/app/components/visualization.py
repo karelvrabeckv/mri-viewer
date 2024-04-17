@@ -2,13 +2,13 @@ from trame.decorators import hot_reload
 from trame.widgets import vtk, vuetify3
 
 @hot_reload
-def visualization(ctrl, pipeline):
+def visualization(ctrl, vtk_manager):
     """A view for visualizing the data."""
 
     with vuetify3.VContainer(fluid=True, classes="pa-0 fill-height"):
         view = vtk.VtkLocalView(
-            pipeline.render_window,
-            widgets=[pipeline.axes_widget],
+            vtk_manager.render_window,
+            widgets=[vtk_manager.axes_widget],
             interactor_events=("events", ["LeftButtonPress", "EndAnimation"]),
             LeftButtonPress=(ctrl.on_picker, "[utils.vtk.event($event)]"),
             EndAnimation=(ctrl.on_interaction, "[$event.pokedRenderer.getActiveCamera().get()]")

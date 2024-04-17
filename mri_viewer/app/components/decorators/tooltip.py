@@ -3,7 +3,7 @@ from trame.widgets import vuetify3
 def tooltip(content):
     """Add a tooltip to the surrounded content."""
 
-    def tooltip(**kwargs):
+    def wrapper(**kwargs):
         with vuetify3.VTooltip(
             text=kwargs["tooltip"],
             location=kwargs["tooltip_location"],
@@ -11,4 +11,4 @@ def tooltip(content):
             with vuetify3.Template(v_slot_activator="{ props }"):
                 content(**kwargs)
     
-    return tooltip
+    return wrapper

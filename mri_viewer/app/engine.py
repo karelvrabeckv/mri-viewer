@@ -8,8 +8,6 @@ from pathlib import Path
 
 from vtkmodules.vtkCommonTransforms import vtkTransform
 
-from mri_viewer.app.assets import asset_manager
-
 from mri_viewer.app.components.buttons import (
     language_buttons,
     user_guide_button,
@@ -40,14 +38,15 @@ from mri_viewer.app.components import (
     visualization,
 )
 
+from mri_viewer.app.assets import AssetManager
 from mri_viewer.app.files import FileManager
 from mri_viewer.app.localization import LanguageManager
-from mri_viewer.app.pipelines import PipelineManager
+from mri_viewer.app.vtk import VTKManager
 
 from mri_viewer.app.watchdog import watchdog
+from mri_viewer.app.styles import HIDDEN, PICKER_INFO
 
 import mri_viewer.app.constants as const
-import mri_viewer.app.styles as style
 
 @TrameApp()
 class MRIViewerApp:
@@ -55,18 +54,17 @@ class MRIViewerApp:
         self.__server = get_server(server)
         self.__server.enable_module({ "serve": { "docs": str(Path(__file__).parent.resolve() / "docs") } })
         
+        self.__asset_manager = AssetManager()
         self.__file_manager = FileManager()
         self.__language_manager = LanguageManager()
-        self.__pipeline = PipelineManager()
-        
-        self.__current_file_info = None
+        self.__vtk_manager = VTKManager()
         
         # ========================================
         # State
         # ========================================
         
         self.state.trame__title = const.APPLICATION_NAME
-        self.state.trame__favicon = asset_manager.logo
+        self.state.trame__favicon = self.__asset_manager.assets.logo
         
         self.state.language = self.__language_manager.get_language()
         self.state.user_guide_url = self.__language_manager.get_user_guide_url()
@@ -85,7 +83,7 @@ class MRIViewerApp:
 
         self.state.picker_info_title = None
         self.state.picker_info_message = {}
-        self.state.picker_info_style = style.HIDDEN
+        self.state.picker_info_style = HIDDEN
 
         # ========================================
         # Controller
@@ -115,7 +113,7 @@ class MRIViewerApp:
         # ========================================
 
         self.__ui = self.build_ui()
-        if const.DEBUG_MODE:
+        if const.DEVELOPER_MODE:
             watchdog(self)
 
     @property
@@ -131,12 +129,20 @@ class MRIViewerApp:
         return self.__server.controller
     
     @property
-    def pipeline(self):
-        return self.__pipeline
+    def asset_manager(self):
+        return self.__asset_manager
 
     @property
-    def current_file_info(self):
-        return self.__current_file_info
+    def file_manager(self):
+        return self.__file_manager
+
+    @property
+    def language_manager(self):
+        return self.__language_manager
+
+    @property
+    def vtk_manager(self):
+        return self.__vtk_manager
 
     @property
     def ui(self):
@@ -194,18 +200,15 @@ class MRIViewerApp:
         if current_file_name is None:
             return
 
-        old_file_info = self.__current_file_info
-        self.__current_file_info = self.__file_manager.get_file(current_file_name)
-        new_file_info = self.__current_file_info
+        old_group_index = self.__file_manager.current_group_index
+        self.__file_manager.set_as_current(current_file_name)
+        new_group_index = self.__file_manager.current_group_index
 
-        if not old_file_info:
+        if old_group_index is None:
             # There are no files so far
             self.load_file_at_startup()
         else:
             # There are already some files
-            _, _, _, old_group_index = old_file_info
-            _, _, _, new_group_index = new_file_info
-
             if old_group_index == new_group_index:
                 # Switching files within same group
                 self.load_file_from_same_group()
@@ -214,12 +217,13 @@ class MRIViewerApp:
                 self.load_file_from_different_group()
 
     def load_file_at_startup(self):
-        file, _, group, _ = self.__current_file_info
+        file = self.__file_manager.current_file
+        group = self.__file_manager.current_group
         
-        self.__pipeline.render_file(file, group)
+        self.__vtk_manager.render_file(file, group)
         
-        group.default_view = self.__pipeline.get_camera_params()
-        group.current_view = self.__pipeline.get_camera_params()
+        group.default_view = self.__vtk_manager.get_camera_params()
+        group.current_view = self.__vtk_manager.get_camera_params()
         
         self.update_client_camera(group)
         self.ctrl.push_camera()
@@ -235,45 +239,47 @@ class MRIViewerApp:
         })
 
     def load_file_from_same_group(self):
-        file, _, group, _ = self.__current_file_info
+        file = self.__file_manager.current_file
+        group = self.__file_manager.current_group
         
-        self.__pipeline.hide_current_file()
-        self.__pipeline.set_camera_to_initial_view()
+        self.__vtk_manager.hide_current_file()
+        self.__vtk_manager.set_camera_to_initial_view()
         
-        self.__pipeline.render_file(file, group)
-        self.__pipeline.render_data_array(file, group.data_array)
-        self.__pipeline.render_representation(group.representation)
+        self.__vtk_manager.render_file(file, group)
+        self.__vtk_manager.render_data_array(file, group.data_array)
+        self.__vtk_manager.render_representation(group.representation)
         
-        self.__pipeline.set_slice(file, group.slice_orientation, group.slice_position)
+        self.__vtk_manager.set_slice(file, group.slice_orientation, group.slice_position)
         
         self.update_client_camera(group)
         
         self.toggle_player_ui()
-        self.state.picker_info_style = style.HIDDEN
+        self.state.picker_info_style = HIDDEN
 
     def load_file_from_different_group(self):
-        file, _, group, _ = self.__current_file_info
+        file = self.__file_manager.current_file
+        group = self.__file_manager.current_group
         
-        self.__pipeline.hide_current_file()
-        self.__pipeline.set_camera_to_initial_view()
+        self.__vtk_manager.hide_current_file()
+        self.__vtk_manager.set_camera_to_initial_view()
         
-        self.__pipeline.render_file(file, group)
-        self.__pipeline.render_data_array(file, group.data_array)
-        self.__pipeline.render_representation(group.representation)
+        self.__vtk_manager.render_file(file, group)
+        self.__vtk_manager.render_data_array(file, group.data_array)
+        self.__vtk_manager.render_representation(group.representation)
         
-        self.__pipeline.set_slice(file, group.slice_orientation, group.slice_position)
+        self.__vtk_manager.set_slice(file, group.slice_orientation, group.slice_position)
 
         if group.default_view is None:
-            group.default_view = self.__pipeline.get_camera_params()
-            group.current_view = self.__pipeline.get_camera_params()
+            group.default_view = self.__vtk_manager.get_camera_params()
+            group.current_view = self.__vtk_manager.get_camera_params()
         else:
-            self.__pipeline.set_camera_to_group_current_view(group)
+            self.__vtk_manager.set_camera_to_group_current_view(group)
 
         self.update_client_camera(group)
         self.ctrl.push_camera()
         
         self.toggle_player_ui()
-        self.state.picker_info_style = style.HIDDEN
+        self.state.picker_info_style = HIDDEN
         
         self.state.update({
             "current_data_array": group.data_array,
@@ -290,10 +296,11 @@ class MRIViewerApp:
         if current_data_array is None:
             return
         
-        file, _, group, _ = self.__current_file_info
+        file = self.__file_manager.current_file
+        group = self.__file_manager.current_group
         group.data_array = current_data_array
         
-        self.__pipeline.render_data_array(file, group.data_array)
+        self.__vtk_manager.render_data_array(file, group.data_array)
         
         self.update_client_camera(group)
 
@@ -302,10 +309,10 @@ class MRIViewerApp:
         if current_representation is None:
             return
         
-        _, _, group, _ = self.__current_file_info
+        group = self.__file_manager.current_group
         group.representation = current_representation
         
-        self.__pipeline.render_representation(group.representation)
+        self.__vtk_manager.render_representation(group.representation)
         
         self.toggle_picker_modes_ui()
 
@@ -316,7 +323,8 @@ class MRIViewerApp:
         if current_slice_orientation is None:
             return
         
-        file, _, group, _ = self.__current_file_info
+        file = self.__file_manager.current_file
+        group = self.__file_manager.current_group
         group.slice_orientation = current_slice_orientation
 
         self.state.update({
@@ -325,7 +333,7 @@ class MRIViewerApp:
             "current_max_slice_position": group.deduce_max_slice_position(group.slice_orientation),
         })
 
-        self.__pipeline.set_slice(file, group.slice_orientation, group.slice_position)
+        self.__vtk_manager.set_slice(file, group.slice_orientation, group.slice_position)
         self.update_client_camera(group)
 
     @change("current_slice_position")
@@ -333,10 +341,11 @@ class MRIViewerApp:
         if current_slice_position is None:
             return
 
-        file, _, group, _ = self.__current_file_info
+        file = self.__file_manager.current_file
+        group = self.__file_manager.current_group
         group.slice_position[group.slice_orientation] = current_slice_position
 
-        self.__pipeline.set_slice(file, group.slice_orientation, group.slice_position)
+        self.__vtk_manager.set_slice(file, group.slice_orientation, group.slice_position)
         self.update_client_camera(group)
 
     @change("current_language")
@@ -353,9 +362,9 @@ class MRIViewerApp:
             self.state.picker_info_title = self.state.language["cell_info_title"]
  
         if self.state.current_file_name:
-            self.__pipeline.render()
+            self.__vtk_manager.render()
             
-            _, _, group, _ = self.__current_file_info
+            group = self.__file_manager.current_group
             self.update_client_camera(group)
 
     @change("dialog_on")
@@ -379,21 +388,21 @@ class MRIViewerApp:
         width = int(size["width"] * pixel_ratio)
         height = int(size["height"] * pixel_ratio)
 
-        self.__pipeline.resize_window(width, height)
+        self.__vtk_manager.resize_window(width, height)
 
     @change("picker_mode")
     def on_picker_mode_change(self, picker_mode, **kwargs):
-        self.__pipeline.hide_picked_point()
-        self.__pipeline.hide_picked_cell()
+        self.__vtk_manager.hide_picked_point()
+        self.__vtk_manager.hide_picked_cell()
 
         self.state.update({
             "picker_info_title": "",
             "picker_info_message": {},
-            "picker_info_style": style.HIDDEN,
+            "picker_info_style": HIDDEN,
         })
 
         if self.state.current_file_name:
-            _, _, group, _ = self.current_file_info
+            group = self.__file_manager.current_group
             self.update_client_camera(group)
 
     @change("player_on")
@@ -403,7 +412,8 @@ class MRIViewerApp:
             while self.state.player_on:
                 self.state.player_loop = True
                 
-                _, file_index, group, _ = self.__current_file_info
+                file_index = self.__file_manager.current_file_index
+                group = self.__file_manager.current_group
                 
                 next_file_index = file_index + 1
                 if next_file_index >= group.get_num_of_files():
@@ -420,12 +430,12 @@ class MRIViewerApp:
             self.state.player_loop = False
 
     def update_client_camera(self, group):
-        self.__pipeline.set_camera_to_group_default_view(group)
+        self.__vtk_manager.set_camera_to_group_default_view(group)
         self.ctrl.update()
-        self.__pipeline.set_camera_to_group_current_view(group)
+        self.__vtk_manager.set_camera_to_group_current_view(group)
 
     def toggle_player_ui(self):
-        _, _, group, _ = self.__current_file_info
+        group = self.__file_manager.current_group
         
         if group.get_num_of_files() > 1:
             # Activate the player UI
@@ -439,19 +449,19 @@ class MRIViewerApp:
         current_representation = self.state.current_representation
         
         if player_on or current_representation == const.Representation.Slice:
-            self.__pipeline.hide_picked_point()
-            self.__pipeline.hide_picked_cell()
+            self.__vtk_manager.hide_picked_point()
+            self.__vtk_manager.hide_picked_cell()
 
             self.state.update({
                 "ui_picker_modes_off": True,
-                "picker_info_style": style.HIDDEN,
+                "picker_info_style": HIDDEN,
             })
         else:
             self.state.update({
                 "ui_picker_modes_off": False,
             })
 
-        _, _, group, _ = self.current_file_info
+        group = self.__file_manager.current_group
         self.update_client_camera(group)
 
     def on_previous_file(self):
@@ -463,7 +473,8 @@ class MRIViewerApp:
         # Enable picker modes
         self.toggle_picker_modes_ui()
         
-        _, file_index, group, _ = self.current_file_info
+        file_index = self.__file_manager.current_file_index
+        group = self.__file_manager.current_group
         
         previous_file_index = file_index - 1
         if previous_file_index < 0:
@@ -489,7 +500,8 @@ class MRIViewerApp:
         # Enable picker modes
         self.toggle_picker_modes_ui()
         
-        _, file_index, group, _ = self.current_file_info
+        file_index = self.__file_manager.current_file_index
+        group = self.__file_manager.current_group
         
         next_file_index = file_index + 1
         if next_file_index >= group.get_num_of_files():
@@ -503,19 +515,19 @@ class MRIViewerApp:
     def on_toggle_axes_info(self):
         """Show or hide the axes information with a grid."""
 
-        self.pipeline.axes_info_on = not self.pipeline.axes_info_on
-        self.pipeline.render_axes_info()
+        self.__vtk_manager.axes_info_on = not self.__vtk_manager.axes_info_on
+        self.__vtk_manager.render_axes_info()
         
-        _, _, group, _ = self.current_file_info
+        group = self.__file_manager.current_group
         self.update_client_camera(group)
 
     def on_reset_camera(self):
         """Reset the camera."""
 
-        _, _, group, _ = self.current_file_info
+        group = self.__file_manager.current_group
         group.current_view = group.default_view
 
-        self.pipeline.set_camera_to_group_default_view(group)
+        self.__vtk_manager.set_camera_to_group_default_view(group)
         self.ctrl.push_camera()
 
     def on_change_theme(self):
@@ -529,7 +541,7 @@ class MRIViewerApp:
     def zoom(self, direction):
         """Zoom the camera in a given direction."""
 
-        camera = self.pipeline.camera
+        camera = self.__vtk_manager.camera
         
         if direction == const.Zoom.In:
             for _ in range(self.state.current_zoom_factor):
@@ -538,18 +550,18 @@ class MRIViewerApp:
             for _ in range(self.state.current_zoom_factor):
                 camera.Zoom(1 - 0.1)
         
-        self.pipeline.camera = camera
+        self.__vtk_manager.camera = camera
     
-        self.pipeline.render()
+        self.__vtk_manager.render()
         self.ctrl.push_camera()
 
-        _, _, group, _ = self.current_file_info
-        group.current_view = self.pipeline.get_camera_params()
+        group = self.__file_manager.current_group
+        group.current_view = self.__vtk_manager.get_camera_params()
 
     def translate(self, direction):
         """Translate the camera in a given direction."""
 
-        camera = self.pipeline.camera
+        camera = self.__vtk_manager.camera
         offset_x, offset_y, offset_z = 0.0, 0.0, 0.0
 
         if direction == const.Directions.XAxisPlus:
@@ -573,18 +585,18 @@ class MRIViewerApp:
         camera.SetPosition(*new_camera_position)
         camera.SetFocalPoint(*new_focal_point_position)
         
-        self.pipeline.camera = camera
-        self.pipeline.render()
+        self.__vtk_manager.camera = camera
+        self.__vtk_manager.render()
         self.ctrl.push_camera()
         
-        _, _, group, _ = self.current_file_info
-        group.current_view = self.pipeline.get_camera_params()
+        group = self.__file_manager.current_group
+        group.current_view = self.__vtk_manager.get_camera_params()
 
     def rotate(self, direction):
         """Rotate the camera in a given direction."""
 
-        camera = self.pipeline.camera
-        x, y, z = self.pipeline.get_file_actor_center()
+        camera = self.__vtk_manager.camera
+        x, y, z = self.__vtk_manager.get_file_actor_center()
 
         rotation = vtkTransform()
         rotation.Translate(x, y, z)
@@ -605,13 +617,13 @@ class MRIViewerApp:
         rotation.Translate(-x, -y, -z)
 
         camera.ApplyTransform(rotation)
-        self.pipeline.camera = camera
+        self.__vtk_manager.camera = camera
 
-        self.pipeline.render()
+        self.__vtk_manager.render()
         self.ctrl.push_camera()
         
-        _, _, group, _ = self.current_file_info
-        group.current_view = self.pipeline.get_camera_params()
+        group = self.__file_manager.current_group
+        group.current_view = self.__vtk_manager.get_camera_params()
 
     def close_dialog(self):
         """Close the dialog for uploading files."""
@@ -626,46 +638,46 @@ class MRIViewerApp:
             return
 
         # Hide picker info
-        self.state.picker_info_style = style.HIDDEN
+        self.state.picker_info_style = HIDDEN
 
-        file, _, _, _ = self.current_file_info
+        file = self.__file_manager.current_file
         image_data = file.reader.GetOutput()
 
         position = event["position"]
         x, y = position["x"], position["y"]
         
         if self.state.picker_mode == const.PickerModes.Points:
-            message = self.pipeline.get_picked_point_info(image_data, x, y)
+            message = self.__vtk_manager.get_picked_point_info(image_data, x, y)
 
             if message:
                 self.state.update({
                     "picker_info_title": self.state.language["point_info_title"],
                     "picker_info_message": message,
-                    "picker_info_style": style.PICKER_INFO,
+                    "picker_info_style": PICKER_INFO,
                 })
 
                 point_id = message["Id"]
                 point_position = image_data.GetPoint(point_id)
-                self.pipeline.show_picked_point(point_position)
+                self.__vtk_manager.show_picked_point(point_position)
             else:
-                self.pipeline.hide_picked_point()
+                self.__vtk_manager.hide_picked_point()
         elif self.state.picker_mode == const.PickerModes.Cells:
-            message = self.pipeline.get_picked_cell_info(image_data, x, y)
+            message = self.__vtk_manager.get_picked_cell_info(image_data, x, y)
 
             if message:
                 self.state.update({
                     "picker_info_title": self.state.language["cell_info_title"],
                     "picker_info_message": message,
-                    "picker_info_style": style.PICKER_INFO,
+                    "picker_info_style": PICKER_INFO,
                 })
 
                 cell_id = message["Id"]
                 cell_bounds = image_data.GetCell(cell_id).GetBounds()
-                self.pipeline.show_picked_cell(cell_bounds)
+                self.__vtk_manager.show_picked_cell(cell_bounds)
             else:
-                self.pipeline.hide_picked_cell()
+                self.__vtk_manager.hide_picked_cell()
 
-        _, _, group, _ = self.current_file_info
+        group = self.__file_manager.current_group
         self.update_client_camera(group)
 
     def on_interaction(self, client_camera, **kwargs):
@@ -674,10 +686,10 @@ class MRIViewerApp:
         if self.state.ui_off:
             return
         
-        self.pipeline.set_camera_to_client_view(client_camera)
+        self.__vtk_manager.set_camera_to_client_view(client_camera)
         
-        _, _, group, _ = self.current_file_info
-        group.current_view = self.pipeline.get_camera_params()
+        group = self.__file_manager.current_group
+        group.current_view = self.__vtk_manager.get_camera_params()
 
     @hot_reload
     def build_ui(self, **kwargs):
@@ -687,7 +699,7 @@ class MRIViewerApp:
             # Icon
             with layout.icon as icon:
                 icon.click = None
-                logo()
+                logo(self.asset_manager)
 
             # Title
             with layout.title as title:
@@ -736,7 +748,7 @@ class MRIViewerApp:
             # Content
             with layout.content:
                 with trame.SizeObserver("content_size"):
-                    visualization(self.ctrl, self.pipeline)
+                    visualization(self.ctrl, self.vtk_manager)
                     picker_info()
 
             # Footer

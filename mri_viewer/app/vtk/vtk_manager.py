@@ -1,14 +1,19 @@
 from vtkmodules.vtkCommonDataModel import vtkImageData
 
-from .pipeline_factory import PipelineFactory
+from .vtk_factory import VTKFactory
 
 from mri_viewer.app.files import File, FileGroup
 
 import mri_viewer.app.constants as const
 
-class PipelineManager():
+class VTKManager():
+    def __new__(cls):
+        if not hasattr(cls, "instance"):
+            cls.instance = super().__new__(cls)
+        return cls.instance
+
     def __init__(self):
-        self.__factory = PipelineFactory()
+        self.__factory = VTKFactory()
         
         self.__renderer = self.__factory.create_renderer()
         self.__render_window = self.__factory.create_render_window(self.__renderer)

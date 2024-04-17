@@ -5,7 +5,6 @@ from vtkmodules.vtkFiltersSources import (
     vtkCubeSource,
 )
 from vtkmodules.vtkImagingCore import vtkExtractVOI
-from vtkmodules.vtkInteractionStyle import vtkInteractorStyleTrackballCamera
 from vtkmodules.vtkInteractionWidgets import vtkOrientationMarkerWidget
 from vtkmodules.vtkRenderingAnnotation import (
     vtkAxesActor,
@@ -27,7 +26,7 @@ from mri_viewer.app.files import File
 
 import mri_viewer.app.constants as const
 
-class PipelineFactory:
+class VTKFactory:
     def create_renderer(self):
         renderer = vtkRenderer()
         
@@ -46,7 +45,6 @@ class PipelineFactory:
     def create_render_window_interactor(self, render_window: vtkRenderWindow):
         render_window_interactor = vtkRenderWindowInteractor()
         
-        render_window_interactor.SetInteractorStyle(vtkInteractorStyleTrackballCamera())
         render_window_interactor.SetRenderWindow(render_window)
         
         return render_window_interactor
