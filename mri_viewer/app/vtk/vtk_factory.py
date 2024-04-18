@@ -55,12 +55,15 @@ class VTKFactory:
     def create_picked_point(self, position):
         picked_point = vtkSphereSource()
 
+        self.set_picked_point_properties(picked_point, position)
+
+        return picked_point
+
+    def set_picked_point_properties(self, picked_point: vtkSphereSource, position):
         picked_point.SetCenter(position)
         picked_point.SetRadius(0.25)
         picked_point.SetPhiResolution(100)
         picked_point.SetThetaResolution(100)
-
-        return picked_point
 
     def create_picked_point_mapper(self, picked_point):
         picked_point_mapper = vtkPolyDataMapper()
@@ -81,6 +84,11 @@ class VTKFactory:
     def create_picked_cell(self, bounds):
         picked_cell = vtkCubeSource()
 
+        self.set_picked_cell_properties(picked_cell, bounds)
+
+        return picked_cell
+
+    def set_picked_cell_properties(self, picked_cell: vtkCubeSource, bounds):
         picked_cell.SetBounds(
             bounds[0] - const.PICKED_CELL_OFFSET, bounds[1] + const.PICKED_CELL_OFFSET,
             bounds[2] - const.PICKED_CELL_OFFSET, bounds[3] + const.PICKED_CELL_OFFSET,
@@ -91,8 +99,6 @@ class VTKFactory:
             (bounds[2] + bounds[3]) / 2,
             (bounds[4] + bounds[5]) / 2,
         )
-
-        return picked_cell
 
     def create_picked_cell_mapper(self, picked_cell):
         picked_cell_mapper = vtkPolyDataMapper()

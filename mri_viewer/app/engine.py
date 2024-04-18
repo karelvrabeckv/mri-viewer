@@ -313,6 +313,11 @@ class MRIViewerApp:
         if current_representation is None:
             return
         
+        self.__vtk_manager.hide_picked_point()
+        self.__vtk_manager.hide_picked_cell()
+
+        self.state.picker_info_style = HIDDEN
+
         group = self.__file_manager.current_group
         group.representation = current_representation
         
@@ -327,11 +332,15 @@ class MRIViewerApp:
         if current_slice_orientation is None:
             return
         
+        self.__vtk_manager.hide_picked_point()
+        self.__vtk_manager.hide_picked_cell()
+
         file = self.__file_manager.current_file
         group = self.__file_manager.current_group
         group.slice_orientation = current_slice_orientation
 
         self.state.update({
+            "picker_info_style": HIDDEN,
             "current_slice_position": group.slice_position[group.slice_orientation],
             "current_slice_min": group.deduce_min_slice_position(group.slice_orientation),
             "current_slice_max": group.deduce_max_slice_position(group.slice_orientation),
@@ -345,6 +354,11 @@ class MRIViewerApp:
     def on_current_slice_position_change(self, current_slice_position: int, **kwargs):
         if current_slice_position is None:
             return
+
+        self.__vtk_manager.hide_picked_point()
+        self.__vtk_manager.hide_picked_cell()
+
+        self.state.picker_info_style = HIDDEN
 
         file = self.__file_manager.current_file
         group = self.__file_manager.current_group
@@ -468,10 +482,7 @@ class MRIViewerApp:
             self.state.ui_player_off = True
 
     def toggle_picker_modes_ui(self):
-        player_on = self.state.player_on
-        current_representation = self.state.current_representation
-        
-        if player_on or current_representation == const.Representation.Slice:
+        if self.state.player_on:
             self.__vtk_manager.hide_picked_point()
             self.__vtk_manager.hide_picked_cell()
 
@@ -665,6 +676,10 @@ class MRIViewerApp:
 
         file = self.__file_manager.current_file
         image_data = file.reader.GetOutput()
+
+        if self.state.current_representation == const.Representation.Slice:
+            slice = self.__vtk_manager.get_object(const.Objects.Slice)
+            image_data = slice.GetOutput()
 
         position = event["position"]
         x, y = position["x"], position["y"]

@@ -283,7 +283,7 @@ class VTKManager():
             self.add_actors(picked_point_actor)
         else:
             picked_point = self.get_object(const.Objects.PickedPoint)
-            picked_point.SetCenter(position)
+            self.__factory.set_picked_point_properties(picked_point, position)
 
             picked_point_actor = self.get_object(const.Objects.PickedPointActor)
             self.set_visibility(True, picked_point_actor)
@@ -328,11 +328,7 @@ class VTKManager():
             self.add_actors(picked_cell_actor)
         else:
             picked_cell = self.get_object(const.Objects.PickedCell)
-            picked_cell.SetCenter(
-                (bounds[0] + bounds[1]) / 2,
-                (bounds[2] + bounds[3]) / 2,
-                (bounds[4] + bounds[5]) / 2,
-            )
+            self.__factory.set_picked_cell_properties(picked_cell, bounds)
 
             picked_cell_actor = self.get_object(const.Objects.PickedCellActor)
             self.set_visibility(True, picked_cell_actor)
