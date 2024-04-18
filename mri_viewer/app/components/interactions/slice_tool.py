@@ -41,8 +41,8 @@ def slice_tool():
             with vuetify3.VRow(justify="center", classes="px-2 pb-4"):
                 vuetify3.VSlider(
                     v_model=("current_slice_position", None),
-                    min=("current_min_slice_position", None),
-                    max=("current_max_slice_position", None),
-                    step=1,
+                    min=("current_slice_min", None),
+                    max=("current_slice_max", None),
+                    step=("current_slice_step", None),
                     hide_details=True,
                 )

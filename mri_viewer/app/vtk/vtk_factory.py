@@ -165,9 +165,9 @@ class VTKFactory:
     def create_cube_axes_actor(self, file_actor, renderer):
         cube_axes_actor = vtkCubeAxesActor()
         
-        cube_axes_actor.SetXTitle("X")
-        cube_axes_actor.SetYTitle("Y")
-        cube_axes_actor.SetZTitle("Z")
+        cube_axes_actor.SetXTitle(const.Axis.X)
+        cube_axes_actor.SetYTitle(const.Axis.Y)
+        cube_axes_actor.SetZTitle(const.Axis.Z)
         
         cube_axes_actor.GetXAxesLinesProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
         cube_axes_actor.GetYAxesLinesProperty().SetColor(*const.DEFAULT_TEXT_COLOR)

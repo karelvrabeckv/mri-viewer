@@ -3,12 +3,7 @@ from trame.widgets import html, vuetify3
 
 from mri_viewer.app.components.icons import icon
 
-from mri_viewer.app.constants import (
-    Zoom,
-    MIN_ZOOM_FACTOR,
-    MAX_ZOOM_FACTOR,
-    ZOOM_STEP,
-)
+from mri_viewer.app.constants import Zoom, ZoomParams
 from mri_viewer.app.styles import TOOL_HEADER
 
 @hot_reload
@@ -60,8 +55,8 @@ def zoom_tool(ctrl):
                     disabled=("ui_off",),
                     v_model="current_zoom_factor",
                     show_ticks="always",
-                    min=MIN_ZOOM_FACTOR,
-                    max=MAX_ZOOM_FACTOR,
-                    step=ZOOM_STEP,
+                    min=ZoomParams.Min,
+                    max=ZoomParams.Max,
+                    step=ZoomParams.Step,
                     hide_details=True,
                 )

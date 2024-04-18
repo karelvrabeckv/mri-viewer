@@ -10,6 +10,8 @@ class FileGroup:
         self.__current_view = None
         
         self.__extent = file.extent
+        self.__origin = file.origin
+        self.__spacing = file.spacing
         
         self.__data_array = file.data_array
         self.__data_arrays = file.data_arrays
@@ -50,6 +52,22 @@ class FileGroup:
     @extent.setter
     def extent(self, extent): 
         self.__extent = extent
+
+    @property
+    def origin(self):
+        return self.__origin
+
+    @origin.setter
+    def origin(self, origin): 
+        self.__origin = origin
+
+    @property
+    def spacing(self):
+        return self.__spacing
+
+    @spacing.setter
+    def spacing(self, spacing): 
+        self.__spacing = spacing
 
     @property
     def data_array(self):
@@ -98,20 +116,34 @@ class FileGroup:
 
     def deduce_min_slice_position(self, orientation: const.Planes):
         min_x, _, min_y, _, min_z, _ = self.__extent
+        origin_x, origin_y, origin_z = self.__origin
+        space_x, space_y, space_z = self.__spacing
         
         if orientation == const.Planes.XY:
-            return min_z
+            return space_z * min_z + origin_z
         elif orientation == const.Planes.YZ:
-            return min_x
+            return space_x * min_x + origin_x
         elif orientation == const.Planes.XZ:
-            return min_y
+            return space_y * min_y + origin_y
 
     def deduce_max_slice_position(self, orientation: const.Planes):
         _, max_x, _, max_y, _, max_z = self.__extent
+        origin_x, origin_y, origin_z = self.__origin
+        space_x, space_y, space_z = self.__spacing
         
         if orientation == const.Planes.XY:
-            return max_z
+            return space_z * max_z + origin_z
         elif orientation == const.Planes.YZ:
-            return max_x
+            return space_x * max_x + origin_x
         elif orientation == const.Planes.XZ:
-            return max_y
+            return space_y * max_y + origin_y
+
+    def deduce_slice_step(self, orientation: const.Planes):
+        space_x, space_y, space_z = self.__spacing
+        
+        if orientation == const.Planes.XY:
+            return space_z
+        elif orientation == const.Planes.YZ:
+            return space_x
+        elif orientation == const.Planes.XZ:
+            return space_y

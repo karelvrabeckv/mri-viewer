@@ -33,6 +33,13 @@ HOT_TEMPERATURE_COLOR = (0.706, 0.016, 0.15)
 
 PICKED_CELL_OFFSET = 0.01
 
+ID = "ID"
+
+class Axis:
+    X = "X"
+    Y = "Y"
+    Z = "Z"
+
 class Zoom:
     In = "0"
     Out = "1"
@@ -45,20 +52,28 @@ class Directions:
     ZAxisPlus = "4"
     ZAxisMinus = "5"
 
-ZOOM_STEP = 1
-DEFAULT_ZOOM_FACTOR = 3
-MIN_ZOOM_FACTOR = 1
-MAX_ZOOM_FACTOR = 10
+class ZoomParams:
+    Default = 3
+    Min = 1
+    Max = 10
+    Step = 1
 
-TRANSLATION_STEP = 10
-DEFAULT_TRANSLATION_FACTOR = 50
-MIN_TRANSLATION_FACTOR = 10
-MAX_TRANSLATION_FACTOR = 300
+class TranslationParams:
+    Default = 50
+    Min = 10
+    Max = 300
+    Step = 10
 
-ROTATION_STEP = 10
-DEFAULT_ROTATION_FACTOR = 90
-MIN_ROTATION_FACTOR = 10
-MAX_ROTATION_FACTOR = 180
+class RotationParams:
+    Default = 90
+    Min = 10
+    Max = 180
+    Step = 10
+
+class LoadingOptions:
+    Default = "0"
+    PC = "1"
+    URL = "2"
 
 class Languages:
     Czech = "CZ"

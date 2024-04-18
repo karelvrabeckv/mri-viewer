@@ -207,14 +207,20 @@ class VTKManager():
 
     def set_slice(self, file, slice_orientation, slice_position):
         min_x, max_x, min_y, max_y, min_z, max_z = file.extent
+        origin_x, origin_y, origin_z = file.origin
+        space_x, space_y, space_z = file.spacing
+        
         slice = self.get_object(const.Objects.Slice)
         position = slice_position[slice_orientation]
         
         if slice_orientation == const.Planes.XY:
+            position = int((position - origin_z) / space_z)
             slice.SetVOI(min_x, max_x, min_y, max_y, position, position)
         elif slice_orientation == const.Planes.YZ:
+            position = int((position - origin_x) / space_x)
             slice.SetVOI(position, position, min_y, max_y, min_z, max_z)
         elif slice_orientation == const.Planes.XZ:
+            position = int((position - origin_y) / space_y)
             slice.SetVOI(min_x, max_x, position, position, min_z, max_z)
 
     def set_visibility(self, visibility, *actors):
@@ -251,14 +257,15 @@ class VTKManager():
         
         if point_id != -1:
             point = data.GetPoint(point_id)
-            message = { "Id": point_id, "X": point[0], "Y": point[1], "Z": point[2] }
+            message = { const.ID: point_id, const.Axis.X: point[0], const.Axis.Y: point[1], const.Axis.Z: point[2] }
 
             point_data = data.GetPointData()
             num_of_data_arrays = point_data.GetNumberOfArrays()
         
             for i in range(num_of_data_arrays):
                 data_array = point_data.GetArray(i)
-                message[data_array.GetName()] = data_array.GetValue(point_id)
+                value = data_array.GetValue(point_id)
+                message[data_array.GetName()] = round(value, 5)
 
         return message
     
@@ -299,10 +306,11 @@ class VTKManager():
             cell_data = data.GetCellData()
             num_of_data_arrays = cell_data.GetNumberOfArrays()
             
-            message["Id"] = cell_id
+            message[const.ID] = cell_id
             for i in range(num_of_data_arrays):
                 data_array = cell_data.GetArray(i)
-                message[data_array.GetName()] = data_array.GetValue(cell_id)
+                value = data_array.GetValue(cell_id)
+                message[data_array.GetName()] = round(value, 5)
         
         return message
 

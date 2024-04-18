@@ -1,5 +1,3 @@
-import mri_viewer.app.constants as const
-
 class Language:
     def __init__(
         self,
@@ -10,6 +8,7 @@ class Language:
         load_file_from_url,
         load_file_from_url_error,
         load_file_button_title,
+        back_button_title,
         cancel_button_title,
         user_guide_button_title,
         previous_file_tooltip,
@@ -33,7 +32,6 @@ class Language:
         section_slice_title,
         slice_orientation_select_title,
         slice_position_slider_title,
-        factor_slider_title,
         section_zoom_title,
         section_zoom_tooltip,
         section_zoom_slider_title,
@@ -66,6 +64,7 @@ class Language:
             "load_file_from_url": load_file_from_url,
             "load_file_from_url_error": load_file_from_url_error,
             "load_file_button_title": load_file_button_title,
+            "back_button_title": back_button_title,
             "cancel_button_title": cancel_button_title,
             "user_guide_button_title": user_guide_button_title,
             "previous_file_tooltip": previous_file_tooltip,
@@ -79,34 +78,16 @@ class Language:
             "file_name_select_title": file_name_select_title,
             "data_array_select_title": data_array_select_title,
             "representation_select_title": representation_select_title,
-            "current_representation_items": [
-                {
-                    "title": representation_select_item_points,
-                    "value": const.Representation.Points,
-                },
-                {
-                    "title": representation_select_item_slice,
-                    "value": const.Representation.Slice,
-                },
-                {
-                    "title": representation_select_item_surface,
-                    "value": const.Representation.Surface,
-                },
-                {
-                    "title": representation_select_item_surface_with_edges,
-                    "value": const.Representation.SurfaceWithEdges,
-                },
-                {
-                    "title": representation_select_item_wireframe,
-                    "value": const.Representation.Wireframe,
-                },
-            ],
+            "representation_select_item_points": representation_select_item_points,
+            "representation_select_item_slice": representation_select_item_slice,
+            "representation_select_item_surface": representation_select_item_surface,
+            "representation_select_item_surface_with_edges": representation_select_item_surface_with_edges,
+            "representation_select_item_wireframe": representation_select_item_wireframe,
             "point_info_title": point_info_title,
             "cell_info_title": cell_info_title,
             "section_slice_title": section_slice_title,
             "slice_orientation_select_title": slice_orientation_select_title,
             "slice_position_slider_title": slice_position_slider_title,
-            "factor_slider_title": factor_slider_title,
             "section_zoom_title": section_zoom_title,
             "section_zoom_tooltip": section_zoom_tooltip,
             "section_zoom_slider_title": section_zoom_slider_title,

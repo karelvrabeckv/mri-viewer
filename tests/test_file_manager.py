@@ -18,17 +18,6 @@ def test_are_equal_2():
 
 # ========================================
 
-def same_extent(first_extent, second_extent):
-    return FileManager().same_extent(first_extent, second_extent)
-
-def test_same_extent_0():
-    assert(same_extent([0, 5, 10, 20, -5, 5], [0, 5, 10, 20, -5, 5]) == True)
-
-def test_same_extent_1():
-    assert(same_extent([0, 5, 10, 20, -5, 5], [5, -5, 20, 10, 5, 0]) == False)
-
-# ========================================
-
 def validate_file(file_name, file_content, file_size):
     return FileManager().validate_file(file_name, file_content, file_size)
 

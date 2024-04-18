@@ -2,7 +2,7 @@ from trame.decorators import hot_reload
 from trame.widgets import html, vuetify3
 
 from mri_viewer.app.components.buttons import open_dialog_button
-from mri_viewer.app.constants import IKEM_COLOR
+from mri_viewer.app.constants import IKEM_COLOR, LoadingOptions
 
 @hot_reload
 def load_files_dialog(ctrl):
@@ -15,16 +15,33 @@ def load_files_dialog(ctrl):
         
         # Dialog
         with vuetify3.Template(v_slot_default="{ props }"):
-            with vuetify3.VCard(title=("language.load_files_title",)):
+            with vuetify3.VCard(title=("language.load_files_title",), loading=("trame__busy",)):
                 vuetify3.VDivider()
-                
+
                 with vuetify3.VCardText(classes="py-2"):
                     with vuetify3.VRow(classes="my-4 mx-0"):
                         html.Span("{{ language.load_files_text }}", classes="text-caption")
 
                     vuetify3.VDivider(classes="my-6")
 
-                    with vuetify3.VRow(classes="my-4 mx-0"):
+                    with vuetify3.VRow(v_show=f"loading_option == {LoadingOptions.Default}", justify="center", classes="my-3 mx-0"):
+                        with vuetify3.VBtnGroup(classes="my-1 px-1"):
+                            vuetify3.VBtn(
+                                prepend_icon="mdi-monitor",
+                                text=("language.load_files_from_pc",),
+                                color=IKEM_COLOR,
+                                click=f"loading_option = {LoadingOptions.PC}",
+                            )
+
+                        with vuetify3.VBtnGroup(classes="my-1 px-1"):
+                            vuetify3.VBtn(
+                                prepend_icon="mdi-server",
+                                text=("language.load_file_from_url",),
+                                color=IKEM_COLOR,
+                                click=f"loading_option = {LoadingOptions.URL}",
+                            )
+                    
+                    with vuetify3.VRow(v_show=f"loading_option == {LoadingOptions.PC}", classes="my-4 mx-0"):
                         vuetify3.VFileInput(
                             variant="outlined",
                             prepend_icon="mdi-monitor",
@@ -40,11 +57,9 @@ def load_files_dialog(ctrl):
                             hide_details="auto",
                             error_messages=("files_from_pc_error_message", None),
                             mouseup=ctrl.clear_files_from_pc_error_message,
-                        )
-                        
-                    vuetify3.VDivider(classes="my-6")
+                        )    
                     
-                    with vuetify3.VRow(classes="my-4 mx-0"):
+                    with vuetify3.VRow(v_show=f"loading_option == {LoadingOptions.URL}", classes="my-4 mx-0"):
                         with vuetify3.VCol(cols="10", classes="pa-0 pr-2"):
                             vuetify3.VTextField(
                                 variant="outlined",
@@ -70,6 +85,12 @@ def load_files_dialog(ctrl):
                 with vuetify3.VCardActions(classes="py-2"):
                     vuetify3.VSpacer()
                     
+                    with vuetify3.VBtnGroup(v_show=f"loading_option != {LoadingOptions.Default}", classes="mr-2", border=True):
+                        vuetify3.VBtn(
+                            text=("language.back_button_title",),
+                            click=f"loading_option = {LoadingOptions.Default}",
+                        )
+
                     with vuetify3.VBtnGroup(v_bind="props", border=True):
                         vuetify3.VBtn(
                             text=("language.cancel_button_title",),

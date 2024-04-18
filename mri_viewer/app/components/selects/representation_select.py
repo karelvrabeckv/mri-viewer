@@ -9,7 +9,7 @@ def representation_select():
         variant="outlined",
         label=("language.representation_select_title",),
         v_model=("current_representation", None),
-        items=("language.current_representation_items",),
+        items=("current_representation_items", []),
         density="comfortable",
         disabled=("ui_off",),
         hide_details=True,

@@ -2,12 +2,7 @@ from trame.decorators import hot_reload
 from trame.widgets import html, vuetify3
 
 from mri_viewer.app.components.icons import icon
-from mri_viewer.app.constants import (
-    Directions,
-    MIN_ROTATION_FACTOR,
-    MAX_ROTATION_FACTOR,
-    ROTATION_STEP,
-)
+from mri_viewer.app.constants import Axis, Directions, RotationParams
 from mri_viewer.app.styles import TOOL_HEADER
 
 @hot_reload
@@ -37,7 +32,7 @@ def rotation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.rotate, f"['{Directions.XAxisMinus}']"),
                 )
-                html.Div("X", classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axis.X, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-redo",
                     disabled=("ui_off",),
@@ -54,7 +49,7 @@ def rotation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.rotate, f"['{Directions.YAxisMinus}']"),
                 )
-                html.Div("Y", classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axis.Y, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-redo",
                     disabled=("ui_off",),
@@ -71,7 +66,7 @@ def rotation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.rotate, f"['{Directions.ZAxisMinus}']"),
                 )
-                html.Div("Z", classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axis.Z, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-redo",
                     disabled=("ui_off",),
@@ -92,8 +87,8 @@ def rotation_tool(ctrl):
                     disabled=("ui_off",),
                     v_model="current_rotation_factor",
                     show_ticks="always",
-                    min=MIN_ROTATION_FACTOR,
-                    max=MAX_ROTATION_FACTOR,
-                    step=ROTATION_STEP,
+                    min=RotationParams.Min,
+                    max=RotationParams.Max,
+                    step=RotationParams.Step,
                     hide_details=True,
                 )

@@ -142,7 +142,7 @@ class FileManager:
         if image_data is None:
             raise Exception(const.ErrorCodes.MissingImageData)
 
-        extent = image_data.GetExtent()
+        extent, origin, spacing = image_data.GetExtent(), image_data.GetOrigin(), image_data.GetSpacing()
         point_data, cell_data = image_data.GetPointData(), image_data.GetCellData()
         num_of_point_arrays, num_of_cell_arrays = point_data.GetNumberOfArrays(), cell_data.GetNumberOfArrays()
         
@@ -161,7 +161,7 @@ class FileManager:
         else:
             raise Exception(const.ErrorCodes.MissingPointAndCellData)
         
-        return File(name, reader, extent, data, data_array, data_arrays)
+        return File(name, reader, extent, origin, spacing, data, data_array, data_arrays)
  
     def assign_file_to_group(self, file):
         if self.add_to_matching_group(file) is False:
@@ -172,7 +172,12 @@ class FileManager:
             return False
         
         for index, group in enumerate(self.__groups):
-            if self.are_equal(file.data_arrays, group.data_arrays) and self.same_extent(file.extent, group.extent):
+            are_equal = self.are_equal(file.data_arrays, group.data_arrays)
+            same_extent = file.extent == group.extent
+            same_origin = file.origin == group.origin
+            same_spacing = file.spacing == group.spacing
+
+            if are_equal and same_extent and same_origin and same_spacing:
                 group.add_file(file)
                 self.__file_to_group_mapping[file.name] = index
                 
@@ -193,9 +198,6 @@ class FileManager:
             if file_data_arrays[i] != group_data_arrays[i]:
                 return False
         return True
-
-    def same_extent(self, file_extent, group_extent):
-        return file_extent == group_extent
 
     def add_to_new_group(self, file: File):
         group = FileGroup(file)

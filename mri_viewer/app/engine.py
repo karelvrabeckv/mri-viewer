@@ -73,13 +73,15 @@ class MRIViewerApp:
         self.state.player_loop = False
         self.state.dialog_on = True
         
+        self.state.loading_option = const.LoadingOptions.Default
+        
         self.state.ui_player_off = True
         self.state.ui_picker_modes_off = True
         self.state.ui_off = True
 
-        self.state.current_zoom_factor = const.DEFAULT_ZOOM_FACTOR
-        self.state.current_translation_factor = const.DEFAULT_TRANSLATION_FACTOR
-        self.state.current_rotation_factor = const.DEFAULT_ROTATION_FACTOR
+        self.state.current_zoom_factor = const.ZoomParams.Default
+        self.state.current_translation_factor = const.TranslationParams.Default
+        self.state.current_rotation_factor = const.RotationParams.Default
 
         self.state.picker_info_title = None
         self.state.picker_info_message = {}
@@ -187,6 +189,7 @@ class MRIViewerApp:
         
         self.state.update({
             "dialog_on": False,
+            "loading_option": const.LoadingOptions.Default,
             "files_from_pc": None,
             "files_from_pc_error_message": "",
             "file_from_url": None,
@@ -286,9 +289,10 @@ class MRIViewerApp:
             "current_data_array_items": group.data_arrays,
             "current_representation": group.representation,
             "current_slice_orientation": group.slice_orientation,
-            "current_min_slice_position": group.deduce_min_slice_position(group.slice_orientation),
             "current_slice_position": group.slice_position[group.slice_orientation],
-            "current_max_slice_position": group.deduce_max_slice_position(group.slice_orientation),
+            "current_slice_min": group.deduce_min_slice_position(group.slice_orientation),
+            "current_slice_max": group.deduce_max_slice_position(group.slice_orientation),
+            "current_slice_step": group.deduce_slice_step(group.slice_orientation),
         })
 
     @change("current_data_array")
@@ -328,9 +332,10 @@ class MRIViewerApp:
         group.slice_orientation = current_slice_orientation
 
         self.state.update({
-            "current_min_slice_position": group.deduce_min_slice_position(group.slice_orientation),
             "current_slice_position": group.slice_position[group.slice_orientation],
-            "current_max_slice_position": group.deduce_max_slice_position(group.slice_orientation),
+            "current_slice_min": group.deduce_min_slice_position(group.slice_orientation),
+            "current_slice_max": group.deduce_max_slice_position(group.slice_orientation),
+            "current_slice_step": group.deduce_slice_step(group.slice_orientation),
         })
 
         self.__vtk_manager.set_slice(file, group.slice_orientation, group.slice_position)
@@ -361,11 +366,29 @@ class MRIViewerApp:
         elif self.state.picker_mode == const.PickerModes.Cells:
             self.state.picker_info_title = self.state.language["cell_info_title"]
  
-        if self.state.current_file_name:
-            self.__vtk_manager.render()
-            
-            group = self.__file_manager.current_group
-            self.update_client_camera(group)
+        # Change labels of representations
+        self.state.current_representation_items = [
+            {
+                "title": self.state.language["representation_select_item_points"],
+                "value": const.Representation.Points,
+            },
+            {
+                "title": self.state.language["representation_select_item_slice"],
+                "value": const.Representation.Slice,
+            },
+            {
+                "title": self.state.language["representation_select_item_surface"],
+                "value": const.Representation.Surface,
+            },
+            {
+                "title": self.state.language["representation_select_item_surface_with_edges"],
+                "value": const.Representation.SurfaceWithEdges,
+            },
+            {
+                "title": self.state.language["representation_select_item_wireframe"],
+                "value": const.Representation.Wireframe,
+            },
+        ]
 
     @change("dialog_on")
     def on_dialog_on_change(self, dialog_on, **kwargs):
@@ -656,7 +679,7 @@ class MRIViewerApp:
                     "picker_info_style": PICKER_INFO,
                 })
 
-                point_id = message["Id"]
+                point_id = message[const.ID]
                 point_position = image_data.GetPoint(point_id)
                 self.__vtk_manager.show_picked_point(point_position)
             else:
@@ -671,7 +694,7 @@ class MRIViewerApp:
                     "picker_info_style": PICKER_INFO,
                 })
 
-                cell_id = message["Id"]
+                cell_id = message[const.ID]
                 cell_bounds = image_data.GetCell(cell_id).GetBounds()
                 self.__vtk_manager.show_picked_cell(cell_bounds)
             else:

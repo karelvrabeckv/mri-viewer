@@ -3,12 +3,7 @@ from trame.widgets import html, vuetify3
 
 from mri_viewer.app.components.icons import icon
 
-from mri_viewer.app.constants import (
-    Directions,
-    MIN_TRANSLATION_FACTOR,
-    MAX_TRANSLATION_FACTOR,
-    TRANSLATION_STEP,
-)
+from mri_viewer.app.constants import Axis, Directions, TranslationParams
 from mri_viewer.app.styles import TOOL_HEADER
 
 @hot_reload
@@ -38,7 +33,7 @@ def translation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.translate, f"['{Directions.XAxisMinus}']"),
                 )
-                html.Div("X", classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axis.X, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-arrow-right",
                     disabled=("ui_off",),
@@ -55,7 +50,7 @@ def translation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.translate, f"['{Directions.YAxisMinus}']"),
                 )
-                html.Div("Y", classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axis.Y, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-arrow-right",
                     disabled=("ui_off",),
@@ -72,7 +67,7 @@ def translation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.translate, f"['{Directions.ZAxisMinus}']"),
                 )
-                html.Div("Z", classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axis.Z, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-arrow-right",
                     disabled=("ui_off",),
@@ -93,8 +88,8 @@ def translation_tool(ctrl):
                     disabled=("ui_off",),
                     v_model="current_translation_factor",
                     show_ticks="always",
-                    min=MIN_TRANSLATION_FACTOR,
-                    max=MAX_TRANSLATION_FACTOR,
-                    step=TRANSLATION_STEP,
+                    min=TranslationParams.Min,
+                    max=TranslationParams.Max,
+                    step=TranslationParams.Step,
                     hide_details=True,
                 )
