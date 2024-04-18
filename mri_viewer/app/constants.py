@@ -27,9 +27,16 @@ IKEM_COLOR = "#e2001a"
 DEFAULT_TEXT_COLOR = (0.0, 0.0, 0.0)
 DEFAULT_BACKGROUND_COLOR = "Gainsboro"
 
-COLD_TEMPERATURE_COLOR = (0.230, 0.299, 0.754)
-LUKEWARM_TEMPERATURE_COLOR = (0.865, 0.865, 0.865)
-HOT_TEMPERATURE_COLOR = (0.706, 0.016, 0.15)
+COOL_TO_WARM_COLOR_MAP = {
+    0.0: (0.23137254902, 0.298039215686, 0.752941176471),
+    0.5: (0.865, 0.865, 0.865),
+    1.0: (0.705882352941, 0.0156862745098, 0.149019607843),
+}
+
+GRAYSCALE_COLOR_MAP = {
+    0.0: (0.0, 0.0, 0.0),
+    1.0: (1.0, 1.0, 1.0),
+}
 
 PICKED_CELL_OFFSET = 0.01
 
@@ -89,6 +96,12 @@ class Representation:
     Wireframe = "4"
 
 DEFAULT_REPRESENTATION = Representation.Surface
+
+class ColorMaps:
+    CoolToWarm = "0"
+    Grayscale = "1"
+
+DEFAULT_COLOR_MAP = ColorMaps.CoolToWarm
 
 class Planes:
     XY = "0"

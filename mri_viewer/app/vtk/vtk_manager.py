@@ -23,7 +23,7 @@ class VTKManager():
         self.__axes_widget = self.__factory.create_axes_widget(self.__render_window_interactor)
         
         self.__objects = {}
-        self.__latest_file_name = ""
+        self.__latest_group = ""
         self.__initial_view = self.get_camera_params()
         self.__axes_info_on = True
         
@@ -75,14 +75,14 @@ class VTKManager():
         return self.get_object(const.Objects.SliceActor)
 
     def get_object(self, object_type: const.Objects):
-        if not self.__latest_file_name:
+        if not self.__latest_group:
             return        
-        return self.__objects[self.__latest_file_name][object_type]
+        return self.__objects[self.__latest_group][object_type]
 
     def set_object(self, object_type: const.Objects, object):
-        if not self.__latest_file_name:
+        if not self.__latest_group:
             return        
-        self.__objects[self.__latest_file_name][object_type] = object
+        self.__objects[self.__latest_group][object_type] = object
 
     def get_file_actor_center(self):
         file_actor = self.get_object(const.Objects.FileActor)
@@ -109,17 +109,27 @@ class VTKManager():
         self.render()
 
     def render_file(self, file: File, group: FileGroup):
-        self.__latest_file_name = file.name
+        self.__latest_group = group.id
         file.data.SetActiveScalars(group.data_array)
         
-        if self.__latest_file_name in self.__objects.keys():
+        if self.__latest_group in self.__objects.keys():
+            file_mapper = self.get_object(const.Objects.FileMapper)
+            file_mapper.SetInputConnection(file.reader.GetOutputPort())
+            file_mapper.SetScalarRange(file.data.GetArray(group.data_array).GetRange())
+
+            slice = self.get_object(const.Objects.Slice)
+            slice.SetInputData(file.reader.GetOutput())
+
+            slice_mapper = self.get_object(const.Objects.SliceMapper)
+            slice_mapper.SetScalarRange(file.data.GetArray(group.data_array).GetRange())
+
             file_actor = self.get_object(const.Objects.FileActor)
             cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
             scalar_bar_actor = self.get_object(const.Objects.ScalarBarActor)
             
             self.set_visibility(True, file_actor, scalar_bar_actor)
         else:
-            color_transfer_function = self.__factory.create_color_transfer_function()
+            color_transfer_function = self.__factory.create_color_transfer_function(group)
             lookup_table = self.__factory.create_lookup_table(color_transfer_function)
             
             file_mapper = self.__factory.create_file_mapper(file, group.data_array, lookup_table)
@@ -131,7 +141,7 @@ class VTKManager():
             slice_mapper = self.__factory.create_slice_mapper(file, slice, group.data_array, lookup_table)
             slice_actor = self.__factory.create_slice_actor(slice_mapper)
             
-            self.__objects[self.__latest_file_name] = {
+            self.__objects[self.__latest_group] = {
                 const.Objects.ColorTransferFunction: color_transfer_function,
                 const.Objects.LookupTable: lookup_table,
                 const.Objects.FileMapper: file_mapper,
@@ -201,6 +211,21 @@ class VTKManager():
             actor_property.SetRepresentationToWireframe()
             actor_property.SetPointSize(1)
             actor_property.EdgeVisibilityOff()
+
+        self.reset_camera()
+        self.render()
+
+    def render_color_map(self, new_active_color_map):
+        color_transfer_function = self.get_object(const.Objects.ColorTransferFunction)
+        color_transfer_function.RemoveAllPoints()
+
+        if new_active_color_map == const.ColorMaps.CoolToWarm:
+            self.__factory.set_color_map_cool_to_warm(color_transfer_function)
+        elif new_active_color_map == const.ColorMaps.Grayscale:
+            self.__factory.set_color_map_grayscale(color_transfer_function)
+
+        lookup_table = self.get_object(const.Objects.LookupTable)
+        self.__factory.set_lookup_table_values(color_transfer_function, lookup_table)
 
         self.reset_camera()
         self.render()

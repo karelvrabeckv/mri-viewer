@@ -1,9 +1,12 @@
 from .file import File
 
+from uuid import uuid4
+
 import mri_viewer.app.constants as const
 
 class FileGroup:
     def __init__(self, file: File):
+        self.__id = uuid4()
         self.__files = dict()
         
         self.__default_view = None
@@ -17,6 +20,7 @@ class FileGroup:
         self.__data_arrays = file.data_arrays
         
         self.__representation = const.DEFAULT_REPRESENTATION
+        self.__color_map = const.DEFAULT_COLOR_MAP
         
         self.__slice_orientation = const.DEFAULT_SLICE_ORIENTATION
         self.__slice_position = {
@@ -24,6 +28,10 @@ class FileGroup:
             const.Planes.YZ: self.deduce_min_slice_position(const.Planes.YZ),
             const.Planes.XZ: self.deduce_min_slice_position(const.Planes.XZ),
         }
+
+    @property
+    def id(self):
+        return self.__id
 
     @property
     def files(self):
@@ -92,6 +100,14 @@ class FileGroup:
     @representation.setter
     def representation(self, representation): 
         self.__representation = representation
+
+    @property
+    def color_map(self):
+        return self.__color_map
+    
+    @color_map.setter
+    def color_map(self, color_map): 
+        self.__color_map = color_map
 
     @property
     def slice_orientation(self):

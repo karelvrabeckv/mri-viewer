@@ -30,6 +30,7 @@ from mri_viewer.app.components.selects import (
     data_array_select,
     file_name_select,
     representation_select,
+    color_map_select,
 )
 from mri_viewer.app.components import (
     load_files_dialog,
@@ -238,6 +239,7 @@ class MRIViewerApp:
             "current_data_array": group.data_array,
             "current_data_array_items": group.data_arrays,
             "current_representation": group.representation,
+            "current_color_map": group.color_map,
             "current_slice_orientation": group.slice_orientation,
         })
 
@@ -288,6 +290,7 @@ class MRIViewerApp:
             "current_data_array": group.data_array,
             "current_data_array_items": group.data_arrays,
             "current_representation": group.representation,
+            "current_color_map": group.color_map,
             "current_slice_orientation": group.slice_orientation,
             "current_slice_position": group.slice_position[group.slice_orientation],
             "current_slice_min": group.deduce_min_slice_position(group.slice_orientation),
@@ -324,6 +327,17 @@ class MRIViewerApp:
         self.__vtk_manager.render_representation(group.representation)
         
         self.toggle_picker_modes_ui()
+        self.update_client_camera(group)
+
+    @change("current_color_map")
+    def on_current_color_map_change(self, current_color_map: str, **kwargs):
+        if current_color_map is None:
+            return
+        
+        group = self.__file_manager.current_group
+        group.color_map = current_color_map
+
+        self.__vtk_manager.render_color_map(group.color_map)
 
         self.update_client_camera(group)
 
@@ -402,6 +416,18 @@ class MRIViewerApp:
                 "title": self.state.language["representation_select_item_wireframe"],
                 "value": const.Representation.Wireframe,
             },
+        ]
+
+        # Change labels of color maps
+        self.state.current_color_map_items = [
+            {
+                "title": self.state.language["color_map_select_item_cool_to_warm"],
+                "value": const.ColorMaps.CoolToWarm,
+            },
+            {
+                "title": self.state.language["color_map_select_item_grayscale"],
+                "value": const.ColorMaps.Grayscale,
+            }
         ]
 
     @change("dialog_on")
@@ -775,6 +801,7 @@ class MRIViewerApp:
                 file_name_select()
                 data_array_select()
                 representation_select()
+                color_map_select()
 
                 vuetify3.VDivider()
                 

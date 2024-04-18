@@ -22,7 +22,7 @@ from vtkmodules.vtkRenderingCore import (
     vtkPolyDataMapper,
 )
 
-from mri_viewer.app.files import File
+from mri_viewer.app.files import File, FileGroup
 
 import mri_viewer.app.constants as const
 
@@ -129,16 +129,27 @@ class VTKFactory:
         
         return axes_widget
 
-    def create_color_transfer_function(self):
+    def create_color_transfer_function(self, group: FileGroup):
         color_transfer_function = vtkColorTransferFunction()
         
-        color_transfer_function.SetColorSpaceToDiverging()
-        
-        color_transfer_function.AddRGBPoint(0.0, *const.COLD_TEMPERATURE_COLOR)
-        color_transfer_function.AddRGBPoint(0.5, *const.LUKEWARM_TEMPERATURE_COLOR)
-        color_transfer_function.AddRGBPoint(1.0, *const.HOT_TEMPERATURE_COLOR)
+        if group.color_map == const.ColorMaps.CoolToWarm:
+            self.set_color_map_cool_to_warm(color_transfer_function)
+        elif group.color_map == const.ColorMaps.Grayscale:
+            self.set_color_map_grayscale(color_transfer_function)
         
         return color_transfer_function
+
+    def set_color_map_cool_to_warm(self, color_transfer_function: vtkColorTransferFunction):
+        color_transfer_function.SetColorSpaceToDiverging()
+
+        for point in const.COOL_TO_WARM_COLOR_MAP:
+            color_transfer_function.AddRGBPoint(point, *const.COOL_TO_WARM_COLOR_MAP[point])
+
+    def set_color_map_grayscale(self, color_transfer_function: vtkColorTransferFunction):
+        color_transfer_function.SetColorSpaceToRGB()
+
+        for point in const.GRAYSCALE_COLOR_MAP:
+            color_transfer_function.AddRGBPoint(point, *const.GRAYSCALE_COLOR_MAP[point])
 
     def create_lookup_table(self, color_transfer_function: vtkColorTransferFunction):
         lookup_table = vtkLookupTable()
@@ -146,11 +157,14 @@ class VTKFactory:
         lookup_table.SetNumberOfTableValues(256)
         lookup_table.Build()
         
+        self.set_lookup_table_values(color_transfer_function, lookup_table)
+        
+        return lookup_table
+
+    def set_lookup_table_values(self, color_transfer_function: vtkColorTransferFunction, lookup_table: vtkLookupTable):
         for value in range(256):
             rgba = [*color_transfer_function.GetColor(float(value) / 256), 1.0]
             lookup_table.SetTableValue(value, rgba)
-        
-        return lookup_table
 
     def create_file_mapper(self, file: File, group_active_array, lookup_table):
         file_mapper = vtkDataSetMapper()
