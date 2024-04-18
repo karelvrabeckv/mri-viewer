@@ -5,8 +5,13 @@ CZ_USER_GUIDE_URL = "docs/user_guide_cz.pdf"
 EN_USER_GUIDE_URL = "docs/user_guide_en.pdf"
 
 class Theme:
-    Light = "light"
     Dark = "dark"
+    Light = "light"
+    IKEMColor = "#e2001a"
+    BlackColor = (0.0, 0.0, 0.0)
+    WhiteColor = (1.0, 1.0, 1.0)
+    DarkBackground = (0.322, 0.341, 0.431)
+    LightBackground = (0.863, 0.863, 0.863)
 
 DEFAULT_THEME = Theme.Light
 
@@ -23,14 +28,10 @@ VUETIFY_CONFIG = {
     }
 }
 
-IKEM_COLOR = "#e2001a"
-DEFAULT_TEXT_COLOR = (0.0, 0.0, 0.0)
-DEFAULT_BACKGROUND_COLOR = "Gainsboro"
-
 COOL_TO_WARM_COLOR_MAP = {
-    0.0: (0.23137254902, 0.298039215686, 0.752941176471),
+    0.0: (0.231, 0.298, 0.753),
     0.5: (0.865, 0.865, 0.865),
-    1.0: (0.705882352941, 0.0156862745098, 0.149019607843),
+    1.0: (0.706, 0.016, 0.149),
 }
 
 GRAYSCALE_COLOR_MAP = {
@@ -39,7 +40,6 @@ GRAYSCALE_COLOR_MAP = {
 }
 
 PICKED_CELL_OFFSET = 0.01
-
 ID = "ID"
 
 class Axis:

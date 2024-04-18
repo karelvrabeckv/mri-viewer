@@ -15,7 +15,7 @@ class VTKManager():
     def __init__(self):
         self.__factory = VTKFactory()
         
-        self.__renderer = self.__factory.create_renderer()
+        self.__renderer = self.__factory.create_renderer(self.get_default_theme_background())
         self.__render_window = self.__factory.create_render_window(self.__renderer)
         self.__render_window_interactor = self.__factory.create_render_window_interactor(self.__render_window)
         
@@ -108,7 +108,9 @@ class VTKManager():
         self.reset_camera()
         self.render()
 
-    def render_file(self, file: File, group: FileGroup):
+    def render_file(self, file: File, group: FileGroup, theme: const.Theme):
+        color = self.get_theme_color(theme)
+
         self.__latest_group = group.id
         file.data.SetActiveScalars(group.data_array)
         
@@ -124,8 +126,12 @@ class VTKManager():
             slice_mapper.SetScalarRange(file.data.GetArray(group.data_array).GetRange())
 
             file_actor = self.get_object(const.Objects.FileActor)
+
             cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
+            self.__factory.set_cube_axes_actor_colors(cube_axes_actor, color)
+            
             scalar_bar_actor = self.get_object(const.Objects.ScalarBarActor)
+            self.__factory.set_scalar_bar_actor_colors(scalar_bar_actor, color)
             
             self.set_visibility(True, file_actor, scalar_bar_actor)
         else:
@@ -134,8 +140,8 @@ class VTKManager():
             
             file_mapper = self.__factory.create_file_mapper(file, group.data_array, lookup_table)
             file_actor = self.__factory.create_file_actor(file_mapper)
-            cube_axes_actor = self.__factory.create_cube_axes_actor(file_actor, self.__renderer)
-            scalar_bar_actor = self.__factory.create_scalar_bar_actor(file, lookup_table)
+            cube_axes_actor = self.__factory.create_cube_axes_actor(file_actor, self.__renderer, color)
+            scalar_bar_actor = self.__factory.create_scalar_bar_actor(file, lookup_table, color)
             
             slice = self.__factory.create_slice(file)
             slice_mapper = self.__factory.create_slice_mapper(file, slice, group.data_array, lookup_table)
@@ -252,6 +258,37 @@ class VTKManager():
         for actor in actors:
             actor.SetVisibility(visibility)
     
+    def change_colors(self, theme):
+        background = self.get_theme_background(theme)
+        self.__renderer.SetBackground(background)
+
+        color = self.get_theme_color(theme)
+
+        cube_axes_actor = self.get_object(const.Objects.CubeAxesActor)
+        if cube_axes_actor:
+            self.__factory.set_cube_axes_actor_colors(cube_axes_actor, color)
+
+        scalar_bar_actor = self.get_object(const.Objects.ScalarBarActor)
+        if scalar_bar_actor:
+            self.__factory.set_scalar_bar_actor_colors(scalar_bar_actor, color)
+
+        self.render()
+
+    def get_theme_color(self, theme):
+        if theme == const.Theme.Light:
+            return const.Theme.BlackColor
+        return const.Theme.WhiteColor
+    
+    def get_theme_background(self, theme):
+        if theme == const.Theme.Light:
+            return const.Theme.LightBackground
+        return const.Theme.DarkBackground
+
+    def get_default_theme_background(self):
+        if const.DEFAULT_THEME == const.Theme.Light:
+            return const.Theme.LightBackground
+        return const.Theme.DarkBackground
+
     def add_actors(self, *actors):
         for actor in actors:
             self.__renderer.AddActor(actor)

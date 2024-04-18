@@ -16,5 +16,5 @@ HIDDEN = {
 
 TOOL_HEADER = {
     "color": "white",
-    "background": const.IKEM_COLOR
+    "background": const.Theme.IKEMColor
 }

@@ -224,7 +224,7 @@ class MRIViewerApp:
         file = self.__file_manager.current_file
         group = self.__file_manager.current_group
         
-        self.__vtk_manager.render_file(file, group)
+        self.__vtk_manager.render_file(file, group, self.state.theme)
         
         group.default_view = self.__vtk_manager.get_camera_params()
         group.current_view = self.__vtk_manager.get_camera_params()
@@ -250,7 +250,7 @@ class MRIViewerApp:
         self.__vtk_manager.hide_current_file()
         self.__vtk_manager.set_camera_to_initial_view()
         
-        self.__vtk_manager.render_file(file, group)
+        self.__vtk_manager.render_file(file, group, self.state.theme)
         self.__vtk_manager.render_data_array(file, group.data_array)
         self.__vtk_manager.render_representation(group.representation)
         
@@ -268,7 +268,7 @@ class MRIViewerApp:
         self.__vtk_manager.hide_current_file()
         self.__vtk_manager.set_camera_to_initial_view()
         
-        self.__vtk_manager.render_file(file, group)
+        self.__vtk_manager.render_file(file, group, self.state.theme)
         self.__vtk_manager.render_data_array(file, group.data_array)
         self.__vtk_manager.render_representation(group.representation)
         
@@ -597,6 +597,9 @@ class MRIViewerApp:
             self.state.theme = const.Theme.Dark
         else:
             self.state.theme = const.Theme.Light
+        
+        self.__vtk_manager.change_colors(self.state.theme)
+        self.ctrl.update()
 
     def zoom(self, direction):
         """Zoom the camera in a given direction."""

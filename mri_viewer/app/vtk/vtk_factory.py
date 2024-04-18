@@ -27,10 +27,10 @@ from mri_viewer.app.files import File, FileGroup
 import mri_viewer.app.constants as const
 
 class VTKFactory:
-    def create_renderer(self):
+    def create_renderer(self, background):
         renderer = vtkRenderer()
         
-        renderer.SetBackground(vtkNamedColors().GetColor3d(const.DEFAULT_BACKGROUND_COLOR))
+        renderer.SetBackground(background)
         
         return renderer
          
@@ -182,20 +182,14 @@ class VTKFactory:
         
         return file_actor
         
-    def create_cube_axes_actor(self, file_actor, renderer):
+    def create_cube_axes_actor(self, file_actor, renderer, color):
         cube_axes_actor = vtkCubeAxesActor()
         
         cube_axes_actor.SetXTitle(const.Axis.X)
         cube_axes_actor.SetYTitle(const.Axis.Y)
         cube_axes_actor.SetZTitle(const.Axis.Z)
         
-        cube_axes_actor.GetXAxesLinesProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
-        cube_axes_actor.GetYAxesLinesProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
-        cube_axes_actor.GetZAxesLinesProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
-        
-        for i in range(3):
-            cube_axes_actor.GetTitleTextProperty(i).SetColor(*const.DEFAULT_TEXT_COLOR)
-            cube_axes_actor.GetLabelTextProperty(i).SetColor(*const.DEFAULT_TEXT_COLOR)
+        self.set_cube_axes_actor_colors(cube_axes_actor, color)
         
         cube_axes_actor.SetBounds(file_actor.GetBounds())
         cube_axes_actor.SetCamera(renderer.GetActiveCamera())
@@ -203,16 +197,28 @@ class VTKFactory:
         
         return cube_axes_actor
 
-    def create_scalar_bar_actor(self, file: File, lookup_table):
+    def set_cube_axes_actor_colors(self, cube_axes_actor: vtkCubeAxesActor, color):
+        cube_axes_actor.GetXAxesLinesProperty().SetColor(*color)
+        cube_axes_actor.GetYAxesLinesProperty().SetColor(*color)
+        cube_axes_actor.GetZAxesLinesProperty().SetColor(*color)
+        
+        for i in range(3):
+            cube_axes_actor.GetTitleTextProperty(i).SetColor(*color)
+            cube_axes_actor.GetLabelTextProperty(i).SetColor(*color)
+
+    def create_scalar_bar_actor(self, file: File, lookup_table, color):
         scalar_bar = vtkScalarBarActor()
 
         scalar_bar.SetTitle(file.data_array)
         scalar_bar.SetLookupTable(lookup_table)
 
-        scalar_bar.GetTitleTextProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
-        scalar_bar.GetLabelTextProperty().SetColor(*const.DEFAULT_TEXT_COLOR)
+        self.set_scalar_bar_actor_colors(scalar_bar, color)
 
         return scalar_bar
+
+    def set_scalar_bar_actor_colors(self, scalar_bar: vtkScalarBarActor, color):
+        scalar_bar.GetTitleTextProperty().SetColor(*color)
+        scalar_bar.GetLabelTextProperty().SetColor(*color)
 
     def create_slice(self, file: File):
         slice = vtkExtractVOI()

@@ -2,7 +2,7 @@ from trame.decorators import hot_reload
 from trame.widgets import html, vuetify3
 
 from mri_viewer.app.components.buttons import open_dialog_button
-from mri_viewer.app.constants import IKEM_COLOR, LoadingOptions
+from mri_viewer.app.constants import LoadingOptions, Theme
 
 @hot_reload
 def load_files_dialog(ctrl):
@@ -29,7 +29,7 @@ def load_files_dialog(ctrl):
                             vuetify3.VBtn(
                                 prepend_icon="mdi-monitor",
                                 text=("language.load_files_from_pc",),
-                                color=IKEM_COLOR,
+                                color=Theme.IKEMColor,
                                 click=f"loading_option = {LoadingOptions.PC}",
                             )
 
@@ -37,7 +37,7 @@ def load_files_dialog(ctrl):
                             vuetify3.VBtn(
                                 prepend_icon="mdi-server",
                                 text=("language.load_file_from_url",),
-                                color=IKEM_COLOR,
+                                color=Theme.IKEMColor,
                                 click=f"loading_option = {LoadingOptions.URL}",
                             )
                     
@@ -76,7 +76,7 @@ def load_files_dialog(ctrl):
                             with vuetify3.VBtnGroup():
                                 vuetify3.VBtn(
                                     text=("language.load_file_button_title",),
-                                    color=IKEM_COLOR,
+                                    color=Theme.IKEMColor,
                                     click=ctrl.on_file_from_url_load,
                                 )
                         

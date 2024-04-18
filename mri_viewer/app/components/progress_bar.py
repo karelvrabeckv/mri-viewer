@@ -1,7 +1,7 @@
 from trame.decorators import hot_reload
 from trame.widgets import vuetify3
 
-from mri_viewer.app.constants import IKEM_COLOR
+from mri_viewer.app.constants import Theme
 
 @hot_reload
 def progress_bar():
@@ -12,7 +12,7 @@ def progress_bar():
         indeterminate=True,
         bg_opacity=1,
         bg_color="white",
-        color=IKEM_COLOR,
+        color=Theme.IKEMColor,
         absolute=True,
         location="bottom",
     )
