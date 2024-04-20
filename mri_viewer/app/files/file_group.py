@@ -1,5 +1,6 @@
 from .file import File
 
+from collections import OrderedDict
 from uuid import uuid4
 
 import mri_viewer.app.constants as const
@@ -129,6 +130,10 @@ class FileGroup:
 
     def add_file(self, file: File):
         self.__files[file.name] = file
+        self.__files = OrderedDict(sorted(self.__files.items()))
+
+    def delete_file(self, file_name):
+        del self.__files[file_name]
 
     def deduce_min_slice_position(self, orientation: const.Planes):
         min_x, _, min_y, _, min_z, _ = self.__extent

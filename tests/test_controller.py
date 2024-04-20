@@ -2,13 +2,13 @@ from mri_viewer.app.engine import MRIViewerApp
 
 # ========================================
 
-def close_dialog():
+def close_upload_files_dialog():
     app = MRIViewerApp()
-    app.state.dialog_on = True
+    app.state.upload_files_dialog_on = True
 
-    app.ctrl.close_dialog()
+    app.ctrl.close_upload_files_dialog()
 
-    return app.state.dialog_on
+    return app.state.upload_files_dialog_on
 
-def test_close_dialog():
-    assert(close_dialog() == False)
+def test_close_upload_files_dialog():
+    assert(close_upload_files_dialog() == False)

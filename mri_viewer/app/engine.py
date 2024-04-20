@@ -12,13 +12,14 @@ from mri_viewer.app.components.buttons import (
     language_buttons,
     user_guide_button,
 )
+from mri_viewer.app.components.dialogs import (
+    upload_files_dialog,
+    manage_files_dialog,
+)
 from mri_viewer.app.components.icons.groups import (
     picker_modes_icons,
     player_icons,
     toolbar_icons,
-)
-from mri_viewer.app.components.icons import (
-    logo,
 )
 from mri_viewer.app.components.interactions import (
     rotation_tool,
@@ -33,13 +34,11 @@ from mri_viewer.app.components.selects import (
     color_map_select,
 )
 from mri_viewer.app.components import (
-    load_files_dialog,
     picker_info,
     progress_bar,
     visualization,
 )
 
-from mri_viewer.app.assets import AssetManager
 from mri_viewer.app.files import FileManager
 from mri_viewer.app.localization import LanguageManager
 from mri_viewer.app.vtk import VTKManager
@@ -55,7 +54,6 @@ class MRIViewerApp:
         self.__server = get_server(server)
         self.__server.enable_module({ "serve": { "docs": str(Path(__file__).parent.resolve() / "docs") } })
         
-        self.__asset_manager = AssetManager()
         self.__file_manager = FileManager()
         self.__language_manager = LanguageManager()
         self.__vtk_manager = VTKManager()
@@ -65,16 +63,19 @@ class MRIViewerApp:
         # ========================================
         
         self.state.trame__title = const.APPLICATION_NAME
-        self.state.trame__favicon = self.__asset_manager.assets.logo
         
         self.state.language = self.__language_manager.get_language()
         self.state.user_guide_url = self.__language_manager.get_user_guide_url()
 
         self.state.player_on = False
         self.state.player_loop = False
-        self.state.dialog_on = True
+        self.state.upload_files_dialog_on = True
+        self.state.manage_files_dialog_on = False
         
-        self.state.loading_option = const.LoadingOptions.Default
+        self.state.upload_files_option = const.UploadFilesOptions.Default
+        self.state.manage_files_option = const.ManageFilesOptions.Default
+        self.state.current_file_name_items = []
+        self.state.file_to_delete = None
         
         self.state.ui_player_off = True
         self.state.ui_picker_modes_off = True
@@ -104,9 +105,14 @@ class MRIViewerApp:
         self.ctrl.translate = self.translate
         self.ctrl.rotate = self.rotate
 
-        self.ctrl.close_dialog = self.close_dialog
+        self.ctrl.close_upload_files_dialog = self.close_upload_files_dialog
+        self.ctrl.close_manage_files_dialog = self.close_manage_files_dialog
+
+        self.ctrl.prepare_to_delete_file = self.prepare_to_delete_file
+        self.ctrl.delete_file = self.delete_file
+        
         self.ctrl.clear_files_from_pc_error_message = self.clear_files_from_pc_error_message
-        self.ctrl.on_file_from_url_load = self.on_file_from_url_load
+        self.ctrl.on_file_from_url_upload = self.on_file_from_url_upload
 
         self.ctrl.on_picker = self.on_picker
         self.ctrl.on_interaction = self.on_interaction
@@ -130,10 +136,6 @@ class MRIViewerApp:
     @property
     def ctrl(self):
         return self.__server.controller
-    
-    @property
-    def asset_manager(self):
-        return self.__asset_manager
 
     @property
     def file_manager(self):
@@ -153,16 +155,16 @@ class MRIViewerApp:
 
     @change("files_from_pc")
     def on_files_from_pc_change(self, files_from_pc, **kwargs):
-        """ Load all files from local computer uploaded by user. """
+        """ Upload all files from local computer selected by user. """
 
         if files_from_pc is None:
             return
         
         try:
-            self.__file_manager.load_files_from_pc(files_from_pc)
-            self.post_loading_actions()
+            self.__file_manager.upload_files_from_pc(files_from_pc)
+            self.post_uploading_actions()
         except Exception as e:
-            self.state.files_from_pc_error_message = f"{self.state.language['load_files_from_pc_error']} {str(e)}"
+            self.state.files_from_pc_error_message = f"{self.state.language["upload_files_from_pc_error"]} {str(e)}"
 
     def clear_files_from_pc_error_message(self):
         self.state.files_from_pc = None
@@ -172,25 +174,25 @@ class MRIViewerApp:
     def on_file_from_url_change(self, file_from_url, **kwargs):
         self.state.file_from_url_error_message = ""
     
-    def on_file_from_url_load(self):
-        """ Load file from url typed by user. """
+    def on_file_from_url_upload(self):
+        """ Upload file from url typed by user. """
 
         try:
-            self.__file_manager.load_file_from_url(self.state.file_from_url)
-            self.post_loading_actions()
+            self.__file_manager.upload_file_from_url(self.state.file_from_url)
+            self.post_uploading_actions()
         except Exception as e:
-            self.state.file_from_url_error_message = f"{self.state.language['load_file_from_url_error']} {str(e)}"
+            self.state.file_from_url_error_message = f"{self.state.language["upload_file_from_url_error"]} {str(e)}"
 
-    def post_loading_actions(self):
-        """ Actions to be executed after loading file/s. """
+    def post_uploading_actions(self):
+        """ Actions to be executed after uploading file/s. """
 
         if self.state.current_file_name:
-            # The user is trying to load another files
+            # The user is trying to upload another files
             self.toggle_player_ui()
         
         self.state.update({
-            "dialog_on": False,
-            "loading_option": const.LoadingOptions.Default,
+            "upload_files_dialog_on": False,
+            "upload_files_option": const.UploadFilesOptions.Default,
             "files_from_pc": None,
             "files_from_pc_error_message": "",
             "file_from_url": None,
@@ -204,16 +206,16 @@ class MRIViewerApp:
         if current_file_name is None:
             return
 
-        old_group_index = self.__file_manager.current_group_index
+        old_group_id = self.__file_manager.current_group_id
         self.__file_manager.set_as_current(current_file_name)
-        new_group_index = self.__file_manager.current_group_index
+        new_group_id = self.__file_manager.current_group_id
 
-        if old_group_index is None:
+        if old_group_id is None:
             # There are no files so far
             self.load_file_at_startup()
         else:
             # There are already some files
-            if old_group_index == new_group_index:
+            if old_group_id == new_group_id:
                 # Switching files within same group
                 self.load_file_from_same_group()
             else:
@@ -688,11 +690,29 @@ class MRIViewerApp:
         group = self.__file_manager.current_group
         group.current_view = self.__vtk_manager.get_camera_params()
 
-    def close_dialog(self):
-        """Close the dialog for uploading files."""
+    def close_upload_files_dialog(self):
+        """Close dialog for uploading files."""
 
-        # Hide dialog
-        self.state.dialog_on = False
+        self.state.upload_files_dialog_on = False
+
+    def close_manage_files_dialog(self):
+        """Close dialog for managing files."""
+
+        self.state.manage_files_dialog_on = False
+
+    def prepare_to_delete_file(self, file_name):
+        self.state.file_to_delete = file_name
+        self.state.manage_files_option = const.ManageFilesOptions.Confirm
+
+    def delete_file(self):
+        self.__file_manager.delete_file(self.state.file_to_delete)
+        self.toggle_player_ui()
+
+        self.state.update({
+            "file_to_delete": None,
+            "manage_files_option": const.ManageFilesOptions.Default,
+            "current_file_name_items": self.__file_manager.get_all_file_names(),
+        })
 
     def on_picker(self, event, **kwargs):
         """Pick a point or cell."""
@@ -765,8 +785,8 @@ class MRIViewerApp:
             
             # Icon
             with layout.icon as icon:
+                vuetify3.VIcon("mdi-hospital-building", size="x-large")
                 icon.click = None
-                logo(self.asset_manager)
 
             # Title
             with layout.title as title:
@@ -776,7 +796,8 @@ class MRIViewerApp:
             with layout.toolbar:
                 vuetify3.VDivider(vertical=True)
 
-                load_files_dialog(self.ctrl)
+                upload_files_dialog(self.ctrl)
+                manage_files_dialog(self.ctrl)
                 user_guide_button()
 
                 vuetify3.VDivider(vertical=True)

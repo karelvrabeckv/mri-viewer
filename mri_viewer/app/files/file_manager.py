@@ -23,7 +23,7 @@ class FileManager:
         self.__current_file = None
         self.__current_file_index = None
         self.__current_group = None
-        self.__current_group_index = None
+        self.__current_group_id = None
         
     @property
     def file_to_show(self):
@@ -42,23 +42,28 @@ class FileManager:
         return self.__current_group
 
     @property
-    def current_group_index(self):
-        return self.__current_group_index
+    def current_group_id(self):
+        return self.__current_group_id
 
     def set_as_current(self, file_name):
         if not self.any_group():
             return
 
-        self.__current_group_index = self.__file_to_group_mapping[file_name]
-        self.__current_group = self.__groups[self.__current_group_index]
+        self.__current_group_id = self.__file_to_group_mapping[file_name]
+        self.__current_group = self.get_group(self.__current_group_id)
         self.__current_file_index = self.__current_group.get_all_file_names().index(file_name)
         self.__current_file = self.__current_group.files[file_name]
 
-    def load_files_from_pc(self, files_from_pc):
+    def get_group(self, id):
+        for group in self.__groups:
+            if group.id == id:
+                return group
+
+    def upload_files_from_pc(self, files_from_pc):
         self.validate_file_group(files_from_pc)
 
         for index, file_from_pc in enumerate(files_from_pc):
-            self.load_file_from_pc(index, file_from_pc)
+            self.upload_file_from_pc(index, file_from_pc)
 
     def validate_file_group(self, files_from_pc):
         if len(files_from_pc) == 0:
@@ -66,7 +71,7 @@ class FileManager:
         elif len(files_from_pc) > 10:
             raise Exception(const.ErrorCodes.TooManyFilesToUpload)
 
-    def load_file_from_pc(self, index, file_from_pc):
+    def upload_file_from_pc(self, index, file_from_pc):
         raw_file = ClientFile(file_from_pc)
         self.validate_file(raw_file.name, raw_file.content, raw_file.size)
         
@@ -77,7 +82,7 @@ class FileManager:
         file = self.create_new_file(raw_file.name, reader)
         self.assign_file_to_group(file)
         
-    def load_file_from_url(self, url):
+    def upload_file_from_url(self, url):
         try:
             response = requests.get(url)
         except:
@@ -171,7 +176,7 @@ class FileManager:
         if not self.any_group():
             return False
         
-        for index, group in enumerate(self.__groups):
+        for group in self.__groups:
             are_equal = self.are_equal(file.data_arrays, group.data_arrays)
             same_extent = file.extent == group.extent
             same_origin = file.origin == group.origin
@@ -179,7 +184,7 @@ class FileManager:
 
             if are_equal and same_extent and same_origin and same_spacing:
                 group.add_file(file)
-                self.__file_to_group_mapping[file.name] = index
+                self.__file_to_group_mapping[file.name] = group.id
                 
                 return True
         return False
@@ -191,9 +196,6 @@ class FileManager:
         if len(file_data_arrays) != len(group_data_arrays):
             return False
         
-        file_data_arrays.sort()
-        group_data_arrays.sort()
-        
         for i in range(len(file_data_arrays)):
             if file_data_arrays[i] != group_data_arrays[i]:
                 return False
@@ -203,7 +205,7 @@ class FileManager:
         group = FileGroup(file)
         group.add_file(file)
         
-        self.__file_to_group_mapping[file.name] = len(self.__groups)        
+        self.__file_to_group_mapping[file.name] = group.id
         self.__groups.append(group)
 
     def get_all_file_names(self):
@@ -212,4 +214,12 @@ class FileManager:
             for group in self.__groups:
                 file_names += group.get_all_file_names()
 
-        return file_names
+        return sorted(file_names)
+
+    def delete_file(self, file_name):
+        group_id = self.__file_to_group_mapping[file_name]
+        group = self.get_group(group_id)
+
+        group.delete_file(file_name)
+        if group.get_num_of_files() == 0:
+            self.__groups.remove(group)

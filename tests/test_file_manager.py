@@ -14,7 +14,7 @@ def test_are_equal_1():
     assert(are_equal(["one", "two", "three", "four"], ["five", "three", "two", "one"]) == False)
 
 def test_are_equal_2():
-    assert(are_equal(["one", "two", "three", "four"], ["four", "three", "two", "one"]) == True)
+    assert(are_equal(["one", "two", "three", "four"], ["one", "two", "three", "four"]) == True)
 
 # ========================================
 

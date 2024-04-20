@@ -77,10 +77,14 @@ class RotationParams:
     Max = 180
     Step = 10
 
-class LoadingOptions:
+class UploadFilesOptions:
     Default = "0"
     PC = "1"
     URL = "2"
+
+class ManageFilesOptions:
+    Default = "0"
+    Confirm = "1"
 
 class Languages:
     Czech = "CZ"

@@ -3,7 +3,6 @@ python -m PyInstaller ^
   --icon icon.ico ^
   --onefile ^
   --windowed ^
-  --add-data "../mri_viewer/app/assets/logo.png:mri_viewer/app/assets" ^
   --add-data "../mri_viewer/app/docs/user_guide_cz.pdf:mri_viewer/app/docs" ^
   --add-data "../mri_viewer/app/docs/user_guide_en.pdf:mri_viewer/app/docs" ^
   --hidden-import vtkmodules.vtkCommonMath ^
