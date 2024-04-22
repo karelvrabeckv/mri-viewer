@@ -6,7 +6,7 @@ from mri_viewer.app.constants import DEFAULT_LANGUAGE, Languages
 @hot_reload
 def language_buttons():
     """Buttons for switching between different languages."""
-    
+
     with vuetify3.VBtnToggle(
         v_model=("current_language", DEFAULT_LANGUAGE),
         mandatory=True,

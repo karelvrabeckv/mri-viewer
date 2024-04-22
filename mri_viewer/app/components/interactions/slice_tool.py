@@ -1,14 +1,14 @@
 from trame.decorators import hot_reload
 from trame.widgets import html, vuetify3
 
-from mri_viewer.app.constants import Planes, Representation
+from mri_viewer.app.constants import Planes, Representations
 from mri_viewer.app.styles import TOOL_HEADER
 
 @hot_reload
 def slice_tool():
-    """A tool for slicing data."""
+    """Tool for slicing data."""
 
-    with vuetify3.VCard(v_show=f"current_representation == {Representation.Slice}", border=True, classes="ma-4"): 
+    with vuetify3.VCard(v_show=f"current_representation == {Representations.Slice}", border=True, classes="ma-4"): 
         vuetify3.VCardTitle(
             "{{ language.section_slice_title }}",
             style=TOOL_HEADER,

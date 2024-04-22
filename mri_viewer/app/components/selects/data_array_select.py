@@ -3,7 +3,7 @@ from trame.widgets import vuetify3
 
 @hot_reload
 def data_array_select():
-    """A selector for selecting a particular data array."""
+    """Selector for selecting particular data array."""
 
     vuetify3.VSelect(
         variant="outlined",

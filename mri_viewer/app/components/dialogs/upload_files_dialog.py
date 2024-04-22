@@ -6,7 +6,7 @@ from mri_viewer.app.constants import UploadFilesOptions, Theme
 
 @hot_reload
 def upload_files_dialog(ctrl):
-    """A dialog for uploading files."""
+    """Dialog for uploading files."""
 
     with vuetify3.VDialog(v_model=("upload_files_dialog_on",), width=450):
         # Button

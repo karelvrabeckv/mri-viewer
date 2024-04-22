@@ -4,7 +4,7 @@ from mri_viewer.app.components.icons import icon, toggle_icon
 
 @hot_reload
 def player_icons(ctrl):
-    """Icons for controlling the player."""
+    """Icons for controlling player."""
 
     icon(
         key="mdi-skip-previous",

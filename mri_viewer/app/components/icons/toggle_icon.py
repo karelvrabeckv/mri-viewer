@@ -4,7 +4,7 @@ from mri_viewer.app.components.decorators import tooltip
 
 @tooltip
 def toggle_icon(**kwargs):
-    """A toggle icon with a tooltip for versatile use."""
+    """Toggle icon with tooltip for versatile use."""
 
     with vuetify3.VBtn(
         v_bind="props",

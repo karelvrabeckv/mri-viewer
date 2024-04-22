@@ -4,7 +4,7 @@ from mri_viewer.app.components.decorators import tooltip
 
 @tooltip
 def icon(**kwargs):
-    """An icon with a tooltip for versatile use."""
+    """Icon with tooltip for versatile use."""
 
     with vuetify3.VBtn(
         v_bind="props",

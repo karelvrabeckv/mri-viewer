@@ -2,12 +2,12 @@ from trame.decorators import hot_reload
 from trame.widgets import html, vuetify3
 
 from mri_viewer.app.components.icons import icon
-from mri_viewer.app.constants import Axis, Directions, RotationParams
+from mri_viewer.app.constants import Axes, Directions, RotationParams
 from mri_viewer.app.styles import TOOL_HEADER
 
 @hot_reload
 def rotation_tool(ctrl):
-    """A tool for rotating data."""
+    """Tool for rotating data."""
 
     with vuetify3.VCard(border=True, classes="ma-4"):
         with vuetify3.VCardTitle(
@@ -32,7 +32,7 @@ def rotation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.rotate, f"['{Directions.XAxisMinus}']"),
                 )
-                html.Div(Axis.X, classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axes.X, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-redo",
                     disabled=("ui_off",),
@@ -49,7 +49,7 @@ def rotation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.rotate, f"['{Directions.YAxisMinus}']"),
                 )
-                html.Div(Axis.Y, classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axes.Y, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-redo",
                     disabled=("ui_off",),
@@ -66,7 +66,7 @@ def rotation_tool(ctrl):
                     tooltip_location="bottom",
                     click=(ctrl.rotate, f"['{Directions.ZAxisMinus}']"),
                 )
-                html.Div(Axis.Z, classes="d-flex align-center text-body-1 mx-4")
+                html.Div(Axes.Z, classes="d-flex align-center text-body-1 mx-4")
                 icon(
                     key="mdi-redo",
                     disabled=("ui_off",),

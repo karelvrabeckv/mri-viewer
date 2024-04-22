@@ -3,7 +3,7 @@ from trame.widgets import vtk, vuetify3
 
 @hot_reload
 def visualization(ctrl, vtk_manager):
-    """A view for visualizing the data."""
+    """View for visualizing data."""
 
     with vuetify3.VContainer(fluid=True, classes="pa-0 fill-height"):
         view = vtk.VtkLocalView(

@@ -3,7 +3,7 @@ from trame.widgets import vuetify3
 
 @hot_reload
 def representation_select():
-    """A selector for selecting a particular representation."""
+    """Selector for selecting particular representation."""
 
     vuetify3.VSelect(
         variant="outlined",

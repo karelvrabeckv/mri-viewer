@@ -3,7 +3,7 @@ from trame.widgets import vuetify3
 
 @hot_reload
 def color_map_select():
-    """A selector for selecting a particular color map."""
+    """Selector for selecting particular color map."""
 
     vuetify3.VSelect(
         variant="outlined",

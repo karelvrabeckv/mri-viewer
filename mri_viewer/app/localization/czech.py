@@ -1,6 +1,8 @@
 from .language import Language
 
 class Czech(Language):
+    """Class representing Czech language."""
+
     def __init__(self):
         super().__init__(
             upload_files_title="Nahrát soubory",

@@ -1,8 +1,8 @@
 APPLICATION_NAME = "MRI Viewer"
 DEVELOPER_MODE = False
 
-CZ_USER_GUIDE_URL = "docs/user_guide_cz.pdf"
-EN_USER_GUIDE_URL = "docs/user_guide_en.pdf"
+USER_GUIDE_CZ_URL = "docs/user_guide_cz.pdf"
+USER_GUIDE_EN_URL = "docs/user_guide_en.pdf"
 
 class Theme:
     Dark = "dark"
@@ -28,6 +28,9 @@ VUETIFY_CONFIG = {
     }
 }
 
+PLAYER_INTERVAL = 0.25
+NUM_OF_LOOKUP_TABLE_VALUES = 256
+
 COOL_TO_WARM_COLOR_MAP = {
     0.0: (0.231, 0.298, 0.753),
     0.5: (0.865, 0.865, 0.865),
@@ -39,10 +42,16 @@ GRAYSCALE_COLOR_MAP = {
     1.0: (1.0, 1.0, 1.0),
 }
 
-PICKED_CELL_OFFSET = 0.01
+class PickedParams:
+    PointRadius = 0.25
+    PointResolution = 100
+    CellOffset = 0.01
+    CellLineWidth = 5
+    Precision = 5
+
 ID = "ID"
 
-class Axis:
+class Axes:
     X = "X"
     Y = "Y"
     Z = "Z"
@@ -50,6 +59,7 @@ class Axis:
 class Zoom:
     In = "0"
     Out = "1"
+    Factor = 0.1
 
 class Directions:
     XAxisPlus = "0"
@@ -92,14 +102,14 @@ class Languages:
     
 DEFAULT_LANGUAGE = Languages.English
 
-class Representation:
+class Representations:
     Points = "0"
     Slice = "1"
     Surface = "2"
     SurfaceWithEdges = "3"
     Wireframe = "4"
 
-DEFAULT_REPRESENTATION = Representation.Surface
+DEFAULT_REPRESENTATION = Representations.Surface
 
 class ColorMaps:
     CoolToWarm = "0"
@@ -137,12 +147,6 @@ class Objects:
     Slice = "slice"
     SliceMapper = "slice_mapper"
     SliceActor = "slice_actor"
-    PickedPoint = "picked_point"
-    PickedPointMapper = "picked_point_mapper"
-    PickedPointActor = "picked_point_actor"
-    PickedCell = "picked_cell"
-    PickedCellMapper = "picked_cell_mapper"
-    PickedCellActor = "picked_cell_actor"
 
 class ErrorCodes:
     NoFilesToUpload = "NO-FILES-TO-UPLOAD"

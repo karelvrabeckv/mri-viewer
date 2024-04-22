@@ -2,7 +2,7 @@
 MRI Viewer
 ==========
 
-A web application for visualizing and viewing MRI outputs
+A web application for analyzing and visualizing VTI files.
 
 * Free software: MIT License
 
@@ -13,14 +13,30 @@ Install the application:
 
 .. code-block:: console
 
-    pip install -e .
+    # create virtual environment
+    python -m venv .venv 
+
+    # activate virtual environment
+    source ./.venv/Scripts/activate
+
+    # upgrade pip
+    python -m pip install --upgrade pip
+    
+    # install packages
+    pip install .
 
 Run the application:
 
 .. code-block:: console
 
+    # web
     mri-viewer
+
+    # desktop
     mri-viewer --app
+
+    # jupyter
+    pip install -r ./jupyter/requirements.txt
     jupyter-lab
 
 Features

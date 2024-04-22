@@ -5,6 +5,8 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 def watchdog(self):
+    """Monitor files and update user interface on file save."""
+
     try:
         current_event_loop = get_event_loop()
 
@@ -23,7 +25,7 @@ def watchdog(self):
         )
         observer.start()
         
-        print("WATCHDOG: Starting the auto monitoring")
+        print("WATCHDOG: Starting auto monitoring")
     except:
         print("WATCHDOG: Package not found")
-        print("WATCHDOG: Skipping the auto monitoring")
+        print("WATCHDOG: Skipping auto monitoring")

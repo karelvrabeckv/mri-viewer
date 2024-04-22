@@ -6,7 +6,7 @@ from mri_viewer.app.constants import ManageFilesOptions, Theme
 
 @hot_reload
 def manage_files_dialog(ctrl):
-    """A dialog for managing files."""
+    """Dialog for managing files."""
 
     with vuetify3.VDialog(v_model=("manage_files_dialog_on",), width=450):
         # Button
@@ -82,7 +82,7 @@ def manage_files_dialog(ctrl):
                             click=ctrl.delete_file,
                         )
 
-                    with vuetify3.VBtnGroup(border=True):
+                    with vuetify3.VBtnGroup():
                         vuetify3.VBtn(
                             text=("language.no_button_title",),
                             color=Theme.IKEMColor,

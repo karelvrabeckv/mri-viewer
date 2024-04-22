@@ -1,4 +1,6 @@
 class Language:
+    """Class representing general language."""
+
     def __init__(
         self,
         upload_files_title,

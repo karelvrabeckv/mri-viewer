@@ -5,7 +5,7 @@ from mri_viewer.app.constants import Theme
 
 @hot_reload
 def progress_bar():
-    """A progress bar for indicating the busyness."""
+    """Progress bar for indicating server busyness."""
 
     vuetify3.VProgressLinear(
         active=("trame__busy",),

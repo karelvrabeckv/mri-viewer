@@ -1,6 +1,8 @@
 from .language import Language
 
 class English(Language):
+    """Class representing English language."""
+
     def __init__(self):
         super().__init__(
             upload_files_title="Upload files",

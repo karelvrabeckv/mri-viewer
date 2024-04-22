@@ -1,5 +1,9 @@
 import mri_viewer.app.constants as const
 
+HIDDEN = {
+    "display": "none",
+}
+
 PICKER_INFO = {
     "position": "absolute",
     "bottom": "20px",
@@ -10,11 +14,7 @@ PICKER_INFO = {
     "transform": "translateX(50%)",
 }
 
-HIDDEN = {
-    "display": "none",
-}
-
 TOOL_HEADER = {
     "color": "white",
-    "background": const.Theme.IKEMColor
+    "background": const.Theme.IKEMColor,
 }

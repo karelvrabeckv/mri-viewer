@@ -8,7 +8,7 @@ from mri_viewer.app.styles import TOOL_HEADER
 
 @hot_reload
 def zoom_tool(ctrl):
-    """A tool for zooming data."""
+    """Tool for zooming data."""
 
     with vuetify3.VCard(border=True, classes="ma-4"):
         with vuetify3.VCardTitle(

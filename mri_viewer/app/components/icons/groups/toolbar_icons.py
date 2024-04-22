@@ -4,7 +4,7 @@ from mri_viewer.app.components.icons import icon
 
 @hot_reload
 def toolbar_icons(ctrl):
-    """Icons for the rest of the toolbar tools."""
+    """Icons for rest of toolbar tools."""
 
     icon(
         key="mdi-axis-arrow-info",
