@@ -1,8 +1,4 @@
-from mri_viewer.app.localization import (
-    LanguageManager,
-    Czech,
-    English,
-)
+from mri_viewer.app.localization import LanguageManager, Czech, English
 
 import mri_viewer.app.constants as const
 
@@ -29,7 +25,7 @@ def get_user_guide_url(language):
     return language_manager.get_user_guide_url()
 
 def test_get_user_guide_url_0():
-    assert(get_user_guide_url(const.Languages.Czech) == const.CZ_USER_GUIDE_URL)
+    assert(get_user_guide_url(const.Languages.Czech) == const.USER_GUIDE_CZ_URL)
 
 def test_get_user_guide_url_1():
-    assert(get_user_guide_url(const.Languages.English) == const.EN_USER_GUIDE_URL)
+    assert(get_user_guide_url(const.Languages.English) == const.USER_GUIDE_EN_URL)
