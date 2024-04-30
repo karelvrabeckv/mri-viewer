@@ -14,7 +14,7 @@ Install the application:
 .. code-block:: console
 
     # create virtual environment
-    python -m venv .venv 
+    python -m venv .venv
 
     # activate virtual environment
     source ./.venv/Scripts/activate
@@ -23,7 +23,7 @@ Install the application:
     python -m pip install --upgrade pip
     
     # install packages
-    pip install .
+    pip install -e .
 
 Run the application:
 

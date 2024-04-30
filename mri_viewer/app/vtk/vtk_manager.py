@@ -493,6 +493,8 @@ class VTKManager():
         camera.SetViewUp(view_up)
         camera.SetViewAngle(view_angle)
         
+        self.__renderer.ResetCameraClippingRange()
+        
         self.render()
 
     def set_camera_to_group_default_view(self, group: FileGroup):
