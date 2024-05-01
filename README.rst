@@ -8,6 +8,11 @@ Created for `the Institute for Clinical and Experimental Medicine <https://www.i
 
 Powered by *Trame*, *VTK*, and *Vuetify*.
 
+.. list-table::
+
+   * - .. image:: assets/aorta.png
+     - .. image:: assets/brain.png
+
 Features
 --------
 
