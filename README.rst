@@ -33,7 +33,7 @@ Features
 Docs
 ----
 
-*User documentation* is available `here <https://github.com/karelvrabeckv/mri-viewer/blob/dev/mri_viewer/app/docs/user_guide_en.pdf>`_.
+*User documentation* is available `here <mri_viewer/app/docs/user_guide_en.pdf>`_.
 
 Installing
 ----------
