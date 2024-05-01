@@ -4,45 +4,74 @@ MRI Viewer
 
 A web application for analyzing and visualizing VTI files.
 
-* Free software: MIT License
+Created for `the Institute for Clinical and Experimental Medicine <https://www.ikem.cz/en/>`_ in Prague, Czech Republic.
 
-Installing
-----------
-
-Install the application:
-
-.. code-block:: console
-
-    # create virtual environment
-    python -m venv .venv
-
-    # activate virtual environment
-    source ./.venv/Scripts/activate
-
-    # upgrade pip
-    python -m pip install --upgrade pip
-    
-    # install packages
-    pip install -e .
-
-Run the application:
-
-.. code-block:: console
-
-    # web
-    mri-viewer
-
-    # desktop
-    mri-viewer --app
-
-    # jupyter
-    pip install -r ./jupyter/requirements.txt
-    jupyter-lab
+Powered by *Trame*, *VTK*, and *Vuetify*.
 
 Features
 --------
 
-* TBA
+* **Upload**, **manage**, and **render** *.vti* files
+* **Slice** data in different orientations and positions
+* **Pick** points and cells to see the values of data arrays in them
+* **Zoom**, **translate**, and **rotate** data
+* **Play** sequences of *.vti* files
+* Switch between **files**
+* Switch between **data arrays**
+* Switch between **representations** (*points*, *slice*, *surface*, *surface with edges*, and *wireframe*)
+* Switch between **color maps** (*cool to warm* and *grayscale*)
+* Switch between **languages** (Czech and English only)
+* Switch between **dark and light themes**
+* Read the **user guide** directly in the web application
+* and more...
+
+Docs
+----
+
+*User documentation* is available `here <https://github.com/karelvrabeckv/mri-viewer/blob/dev/mri_viewer/app/docs/user_guide_en.pdf>`_.
+
+Installing
+----------
+
+1. Create a virtual environment:
+
+.. code-block:: console
+
+    python -m venv .venv
+
+2. Activate the virtual environment:
+
+.. code-block:: console
+
+    source ./.venv/Scripts/activate
+
+3. Install packages:
+
+.. code-block:: console
+
+    pip install -e .
+
+Running
+-------
+
+1. Run as a web application:
+
+.. code-block:: console
+
+    mri-viewer
+
+2. Run as a desktop application:
+
+.. code-block:: console
+
+    mri-viewer --app
+
+3. Run in JupyterLab:
+
+.. code-block:: console
+
+    pip install -r ./jupyter/requirements.txt
+    jupyter-lab
 
 Docker
 ------
@@ -63,4 +92,4 @@ Instead of creating a named volume with ``-v mri-viewer-deploy:/deploy``, you
 can mount the ``./docker`` directory from the git repository to ``/deploy`` in
 the container using ``-v ./docker:/deploy``.
 
-3. Open the application in your web browser: http://localhost:8080
+3. Open the web application in your browser: http://localhost:8080
