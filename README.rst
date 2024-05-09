@@ -35,6 +35,8 @@ Docs
 
 *User documentation* is available `here <mri_viewer/app/docs/user_guide_en.pdf>`_.
 
+*Technical documentation* is available `here <thesis.pdf>`_.
+
 Installing
 ----------
 
