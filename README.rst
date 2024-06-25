@@ -93,10 +93,11 @@ Docker
 
 .. code-block:: console
 
-    docker run -it --rm -p 8080:80 -v mri-viewer-deploy:/deploy mri-viewer
+    docker run -it --rm -p 8080:80 mri-viewer
 
-Instead of creating a named volume with ``-v mri-viewer-deploy:/deploy``, you
-can mount the ``./docker`` directory from the git repository to ``/deploy`` in
-the container using ``-v ./docker:/deploy``.
+This will use the ``/deploy`` directory populated during the container image
+build. For development you can mount the ``./docker`` directory from the git
+repository on the host to ``/deploy`` in the container using
+``-v ./docker:/deploy``.
 
 3. Open the web application in your browser: http://localhost:8080
