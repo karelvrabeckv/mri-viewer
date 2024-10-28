@@ -4,7 +4,7 @@ MRI Viewer
 
 A web application for analyzing and visualizing VTI files.
 
-Created for `the Institute for Clinical and Experimental Medicine <https://www.ikem.cz/en/>`_ in Prague, Czech Republic.
+Created for `the Institute for Clinical and Experimental Medicine <https://www.ikem.cz/en/>`_ in Prague, Czechia.
 
 Powered by *Trame*, *VTK*, and *Vuetify*.
 
